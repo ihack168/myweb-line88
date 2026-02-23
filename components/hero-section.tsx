@@ -18,7 +18,7 @@ export function HeroSection() {
         LOCKHEAD HEX
       </p>
       <p className="mt-2 text-sm text-muted-foreground text-center max-w-md leading-relaxed">
-        專業網路服務團隊，提供社群媒體行銷、投票服務及 AI 客服串接等多元解決方案。
+        特殊網路服務中心 買票、灌票、Line網路投票 Facebook網路投票 Google網路投票 Facebook、IG、Threads大量按讚、大量追蹤。
       </p>
     </section>
   )
