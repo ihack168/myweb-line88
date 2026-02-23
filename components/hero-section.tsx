@@ -18,7 +18,7 @@ export function HeroSection() {
         LOCKHEAD HEX
       </p>
       <p className="mt-2 text-sm text-muted-foreground text-center max-w-md leading-relaxed">
-        特殊網路服務中心 買票、灌票、Line網路投票 Facebook網路投票 Google網路投票 Facebook、IG、Threads大量按讚、大量追蹤。
+        特殊網路服務中心
       </p>
     </section>
   )
