@@ -7,8 +7,8 @@ const _notoSansTC = Noto_Sans_TC({ subsets: ['latin'], weight: ['400', '500', '7
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'aaaaaaaa洛克希德黑克斯 | Lockhead Hex',
-  description: '洛克希德黑克斯 - 專業網路服務，社群媒體行銷、投票服務、AI客服串接',
+  title: '洛克希德黑克斯 | Lockhead Hex 特殊網路服務中心',
+  description: '特殊網路服務中心 買票、灌票、Line網路投票 Facebook網路投票 Google網路投票 Facebook、IG、Threads大量按讚、大量追蹤',
   icons: {
     icon: '/images/logo.png',
   },
