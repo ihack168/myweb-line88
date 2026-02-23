@@ -7,7 +7,7 @@ import { useState } from "react"
 const navLinks = [
   { label: "首頁", href: "#hero" },
   { label: "服務介紹", href: "#services" },
-  { label: "Blog", href: "#blog" },
+  { label: "Blog", href: "blog.line88.tw/" },
   { label: "聯絡我們", href: "#contact" },
 ]
 
