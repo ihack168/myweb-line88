@@ -12,8 +12,8 @@ export default function BlogPage() {
     const targetUrl = "https://www.line88.tw/feeds/posts/default?alt=json&max-results=10";
     
     // 改用 allorigins 的 https 直接轉發，並增加一個隨機參數防止被 cached
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
-
+    const proxyUrl = "/api/blog";
+    
     const fetchData = async () => {
       try {
         const response = await fetch(proxyUrl);
