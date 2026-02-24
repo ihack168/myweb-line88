@@ -4,17 +4,22 @@ export async function GET() {
   const targetUrl = "https://www.line88.tw/feeds/posts/default?alt=json&max-results=10";
   
   try {
+    // 伺服器端請求，不受瀏覽器 CORS 限制
     const response = await fetch(targetUrl, {
-      // 伺服器端抓取可以設定快取，效能更好
-      next: { revalidate: 3600 } 
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      next: { revalidate: 60 } // 每分鐘更新一次快取
     });
-    
-    if (!response.ok) throw new Error('Blogger response was not ok');
-    
+
+    if (!response.ok) {
+      return NextResponse.json({ error: 'Blogger API 無法回應' }, { status: response.status });
+    }
+
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error('API Route Error:', error);
-    return NextResponse.json({ error: 'Failed to fetch blogger data' }, { status: 500 });
+    console.error('Fetch error:', error);
+    return NextResponse.json({ error: '伺服器內部錯誤' }, { status: 500 });
   }
 }
