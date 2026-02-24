@@ -9,7 +9,6 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 抓取 Blogger 的 JSON feed
     const targetUrl = "https://www.line88.tw/feeds/posts/default?alt=json&max-results=10";
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
@@ -23,22 +22,27 @@ export default function BlogPage() {
         const entry = blogData.feed.entry || [];
         
         const formattedPosts = entry.map((item: any) => {
-          // 抓取原始內容
           let rawContent = item.summary?.$t || item.content?.$t || "";
 
-          // 進階清理邏輯：過濾 CSS, JSON-LD, Script 與 HTML 標籤
+          // --- 超級清理邏輯開始 ---
           let cleanSummary = rawContent
-            .replace(/<style([\s\S]*?)<\/style>/gi, "") // 移除內嵌 CSS
-            .replace(/<script([\s\S]*?)<\/script>/gi, "") // 移除內嵌 JS
-            .replace(/\{[\s\S]*?\}/g, "") // 移除 JSON 結構資料 { ... }
-            .replace(/<[^>]*>/g, "") // 移除所有 HTML 標籤
-            .replace(/&nbsp;/g, " ") // 修正空格
-            .replace(/\s+/g, " ") // 合併多餘空白
+            .replace(/<style([\s\S]*?)<\/style>/gi, "") // 移除 <style> 標籤
+            .replace(/\.[\w-]+\s*\{[\s\S]*?\}/g, "")   // 移除類似 .className { ... } 的 CSS
+            .replace(/\{[\s\S]*?\}/g, "")               // 移除所有大括號內容 (JSON-LD)
+            .replace(/<script([\s\S]*?)<\/script>/gi, "") // 移除 <script>
+            .replace(/<[^>]*>/g, "")                    // 移除所有 HTML 標籤
+            .replace(/&nbsp;/g, " ")                    // 修正空格
+            .replace(/&amp;/g, "&")
+            .replace(/\s+/g, " ")                       // 移除多餘空白
             .trim();
 
-          // 截取前 100 字作為摘要
-          const finalSummary = cleanSummary.length > 100 
-            ? cleanSummary.substring(0, 100) + "..." 
+          // 如果清理完變太短，補救措施
+          if (cleanSummary.length < 5) {
+            cleanSummary = "點擊下方連結閱讀完整文章內容。";
+          }
+
+          const finalSummary = cleanSummary.length > 120 
+            ? cleanSummary.substring(0, 120) + "..." 
             : cleanSummary;
 
           return {
@@ -59,30 +63,55 @@ export default function BlogPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       <main className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
-          {/* 標題區塊 */}
+          {/* 標題 */}
           <div className="mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center text-white">
-              <BookOpen className="mr-4 text-primary w-10 h-10" /> 最新文章
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center">
+              <BookOpen className="mr-4 text-[#00ff00] w-10 h-10" /> 最新文章
             </h1>
-            <div className="h-1 w-20 bg-primary mb-6"></div>
-            <p className="text-gray-400 text-lg">掌握最新的 LINE 行銷趨勢、AI 客服與自動化實戰技巧。</p>
+            <div className="h-1 w-20 bg-[#00ff00]"></div>
           </div>
 
-          {/* 內容區塊 */}
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
-              <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-500 animate-pulse">正在從伺服器安全抓取內容...</p>
+              <div className="w-12 h-12 border-4 border-[#00ff00]/20 border-t-[#00ff00] rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-500">同步部落格內容中...</p>
             </div>
-          ) : posts.length > 0 ? (
-            <div className="grid gap-10">
+          ) : (
+            <div className="grid gap-8">
               {posts.map((post, i) => (
                 <div 
                   key={i} 
-                  className="group relative p-8 bg-[#161616] border border-white/10 rounded-3xl shadow-2xl hover:border-primary/50 transition-all duration-300"
+                  className="group p-8 bg-[#1a1a1a] border border-white/5 rounded-2xl shadow-xl hover:border-[#00ff00]/50 transition-all duration-300"
                 >
-                  <div className="flex items-center text-sm
+                  <div className="flex items-center text-sm text-gray-500 mb-4">
+                    <Calendar className="w-4 h-4 mr-2 text-[#00ff00]" />
+                    {post.date}
+                  </div>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-gray-100 group-hover:text-[#00ff00] transition-colors">
+                    {post.title}
+                  </h2>
+                  <p className="text-gray-400 mb-6 leading-relaxed text-base">
+                    {post.summary}
+                  </p>
+                  <a 
+                    href={post.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center font-bold text-[#00ff00] hover:text-white transition-all"
+                  >
+                    閱讀全文 <ArrowRight className="w-5 h-5 ml-1" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+}
