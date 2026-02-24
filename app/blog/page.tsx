@@ -155,7 +155,7 @@ export default function BlogPage() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center font-bold text-[#ff4500] hover:text-[#ff8c00] transition-all text-sm tracking-wider uppercase"
                           >
-                            Read Full Article <ArrowRight className="ml-2 w-4 h-4" />
+                            閱讀完整文章<ArrowRight className="ml-2 w-4 h-4" />
                           </a>
                         </div>
                       </div>
