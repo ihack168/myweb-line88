@@ -24,22 +24,31 @@ export default function BlogPage() {
         setTotalPages(result.pagination?.totalPages || 1);
         
         const formattedPosts = entry.map((item: any) => {
-          // 取得原始 HTML 內容
           const rawContent = item.summary?.$t || item.content?.$t || "";
           
           // 1. 提取 YouTube ID
           const youtubeMatch = rawContent.match(/youtube\.com\/embed\/([^"?\s]+)/);
           const videoId = youtubeMatch ? youtubeMatch[1] : null;
+
+          // 2. 提取第一張圖片 (如果沒有影片時使用)
+          const imageMatch = rawContent.match(/<img[^>]+src="([^">]+)"/);
+          const firstImgUrl = imageMatch ? imageMatch[1] : null;
           
-          // 2. 超強力內容清理：依序移除 Script, Style, JSON 大括號內容, 最後才是 HTML 標籤
+          // 3. 超強力內容清理
           let cleanSummary = rawContent
-            .replace(/<script([\s\S]*?)<\/script>/gi, "") // 移除 <script>...</script>
-            .replace(/<style([\s\S]*?)<\/style>/gi, "")   // 移除 <style>...</style>
-            .replace(/\{[\s\S]*?\}/g, "")                 // 移除所有 { JSON 內容 }
-            .replace(/<[^>]*>/g, "")                      // 移除所有 HTML 標籤
-            .replace(/&nbsp;/g, " ")                      // 轉義空白
-            .replace(/\s+/g, " ")                         // 壓縮多餘空白
+            .replace(/<script([\s\S]*?)<\/script>/gi, "") 
+            .replace(/<style([\s\S]*?)<\/style>/gi, "")   
+            .replace(/\{[\s\S]*?\}/g, "")                 
+            .replace(/<[^>]*>/g, "")                      
+            .replace(/&nbsp;/g, " ")                      
+            .replace(/\s+/g, " ")                         
             .trim();
+
+          // 決定最終顯示的縮圖路徑
+          // 優先序：YouTube 縮圖 > 文章內第一張圖 > null
+          const finalThumbnail = videoId 
+            ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
+            : firstImgUrl;
 
           return {
             id: item.id.$t,
@@ -48,7 +57,7 @@ export default function BlogPage() {
             date: new Date(item.published.$t).toLocaleDateString(),
             summary: cleanSummary.substring(0, 110),
             videoId: videoId,
-            thumbnailUrl: videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null
+            thumbnailUrl: finalThumbnail
           };
         });
         
@@ -63,7 +72,6 @@ export default function BlogPage() {
     fetchData();
   }, [currentPage]);
 
-  // 渲染頁碼按鈕
   const renderPageNumbers = () => {
     const pages = [];
     for (let i = 1; i <= totalPages; i++) {
@@ -90,16 +98,13 @@ export default function BlogPage() {
       <main className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
           
-          {/* 標題區 */}
           <div className="mb-16 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center md:justify-start">
               <BookOpen className="mr-4 text-[#ff4500] w-10 h-10" /> 
               最新文章
             </h1>
             <div className="h-1.5 w-24 bg-[#ff4500] mx-auto md:mx-0 rounded-full"></div>
-            <p className="mt-6 text-gray-400 text-lg">
-              掌握我們最新資訊
-            </p>
+            <p className="mt-6 text-gray-400 text-lg">掌握我們最新資訊</p>
           </div>
 
           {loading ? (
@@ -109,17 +114,16 @@ export default function BlogPage() {
             </div>
           ) : (
             <>
-              {/* 文章列表 */}
               <div className="grid gap-12">
                 {posts.length > 0 ? (
                   posts.map((post: any) => (
                     <article key={post.id} className="group bg-[#111] border border-white/5 rounded-3xl overflow-hidden hover:border-[#ff4500]/40 transition-all duration-500 shadow-2xl">
                       <div className="flex flex-col md:flex-row">
                         
-                        {/* 影片區域 */}
-                        {post.videoId && (
+                        {/* 圖片/影片 顯示區域 */}
+                        {post.thumbnailUrl && (
                           <div className="relative w-full md:w-2/5 aspect-video bg-black shrink-0">
-                            {playingId === post.id ? (
+                            {post.videoId && playingId === post.id ? (
                               <iframe 
                                 src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`} 
                                 className="w-full h-full border-0" 
@@ -127,11 +131,18 @@ export default function BlogPage() {
                                 allowFullScreen
                               ></iframe>
                             ) : (
-                              <div className="relative w-full h-full cursor-pointer group/thumb" onClick={() => setPlayingId(post.id)}>
-                                <img src={post.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover/thumb:opacity-100 transition-all duration-500" alt={post.title} />
-                                <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:bg-transparent transition-all">
-                                  <PlayCircle className="w-16 h-16 text-[#ff4500] drop-shadow-2xl transform group-hover/thumb:scale-110 transition-transform duration-300" />
-                                </div>
+                              <div 
+                                className={`relative w-full h-full transition-all duration-500 ${post.videoId ? 'cursor-pointer group/thumb' : ''}`} 
+                                onClick={() => post.videoId && setPlayingId(post.id)}
+                              >
+                                <img src={post.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-500" alt={post.title} />
+                                
+                                {/* 只有當它是影片時才顯示播放按鈕 */}
+                                {post.videoId && (
+                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:bg-transparent transition-all">
+                                    <PlayCircle className="w-16 h-16 text-[#ff4500] drop-shadow-2xl transform group-hover/thumb:scale-110 transition-transform duration-300" />
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
@@ -166,7 +177,6 @@ export default function BlogPage() {
                 )}
               </div>
 
-              {/* 分頁控制 */}
               <div className="mt-20 flex flex-col items-center gap-6">
                 <div className="flex items-center justify-center space-x-3">
                   <button
