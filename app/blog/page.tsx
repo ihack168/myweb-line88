@@ -94,7 +94,7 @@ export default function BlogPage() {
           <div className="mb-16 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center md:justify-start">
               <BookOpen className="mr-4 text-[#ff4500] w-10 h-10" /> 
-              最新技術文章
+              最新文章
             </h1>
             <div className="h-1.5 w-24 bg-[#ff4500] mx-auto md:mx-0 rounded-full"></div>
             <p className="mt-6 text-gray-400 text-lg">
