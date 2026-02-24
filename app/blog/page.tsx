@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { Calendar, ArrowRight, BookOpen, PlayCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ArrowRight, BookOpen, PlayCircle, ChevronLeft, ChevronRight, Tag } from "lucide-react";
 
 export default function BlogPage() {
   const [posts, setPosts] = useState([]);
@@ -30,11 +30,14 @@ export default function BlogPage() {
           const youtubeMatch = rawContent.match(/youtube\.com\/embed\/([^"?\s]+)/);
           const videoId = youtubeMatch ? youtubeMatch[1] : null;
 
-          // 2. 提取第一張圖片 (如果沒有影片時使用)
+          // 2. 提取第一張圖片 (作為備用縮圖)
           const imageMatch = rawContent.match(/<img[^>]+src="([^">]+)"/);
           const firstImgUrl = imageMatch ? imageMatch[1] : null;
+
+          // 3. 提取標籤 (Blogger Tags)
+          const categories = item.category ? item.category.map((cat: any) => cat.term) : [];
           
-          // 3. 超強力內容清理
+          // 4. 超強力內容清理
           let cleanSummary = rawContent
             .replace(/<script([\s\S]*?)<\/script>/gi, "") 
             .replace(/<style([\s\S]*?)<\/style>/gi, "")   
@@ -44,8 +47,6 @@ export default function BlogPage() {
             .replace(/\s+/g, " ")                         
             .trim();
 
-          // 決定最終顯示的縮圖路徑
-          // 優先序：YouTube 縮圖 > 文章內第一張圖 > null
           const finalThumbnail = videoId 
             ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
             : firstImgUrl;
@@ -57,7 +58,8 @@ export default function BlogPage() {
             date: new Date(item.published.$t).toLocaleDateString(),
             summary: cleanSummary.substring(0, 110),
             videoId: videoId,
-            thumbnailUrl: finalThumbnail
+            thumbnailUrl: finalThumbnail,
+            tags: categories.slice(0, 3) // 每個文章顯示前 3 個標籤
           };
         });
         
@@ -98,6 +100,7 @@ export default function BlogPage() {
       <main className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
           
+          {/* 標題區 */}
           <div className="mb-16 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center md:justify-start">
               <BookOpen className="mr-4 text-[#ff4500] w-10 h-10" /> 
@@ -114,6 +117,7 @@ export default function BlogPage() {
             </div>
           ) : (
             <>
+              {/* 文章列表 */}
               <div className="grid gap-12">
                 {posts.length > 0 ? (
                   posts.map((post: any) => (
@@ -122,7 +126,7 @@ export default function BlogPage() {
                         
                         {/* 圖片/影片 顯示區域 */}
                         {post.thumbnailUrl && (
-                          <div className="relative w-full md:w-2/5 aspect-video bg-black shrink-0">
+                          <div className="relative w-full md:w-2/5 aspect-video bg-black shrink-0 overflow-hidden">
                             {post.videoId && playingId === post.id ? (
                               <iframe 
                                 src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`} 
@@ -135,9 +139,8 @@ export default function BlogPage() {
                                 className={`relative w-full h-full transition-all duration-500 ${post.videoId ? 'cursor-pointer group/thumb' : ''}`} 
                                 onClick={() => post.videoId && setPlayingId(post.id)}
                               >
-                                <img src={post.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-500" alt={post.title} />
+                                <img src={post.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" alt={post.title} />
                                 
-                                {/* 只有當它是影片時才顯示播放按鈕 */}
                                 {post.videoId && (
                                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:bg-transparent transition-all">
                                     <PlayCircle className="w-16 h-16 text-[#ff4500] drop-shadow-2xl transform group-hover/thumb:scale-110 transition-transform duration-300" />
@@ -150,16 +153,29 @@ export default function BlogPage() {
 
                         {/* 文字區域 */}
                         <div className="p-8 flex-1 flex flex-col justify-center">
+                          {/* 標籤顯示區 ✨ */}
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {post.tags.map((tag: string) => (
+                              <span key={tag} className="flex items-center px-2.5 py-1 text-[10px] font-bold border border-[#ff4500]/30 text-[#ff4500] rounded-md bg-[#ff4500]/5 tracking-widest uppercase transition-colors hover:bg-[#ff4500] hover:text-white cursor-default">
+                                <Tag className="w-3 h-3 mr-1" />
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+
                           <div className="flex items-center text-xs text-gray-500 mb-3 font-mono">
                             <Calendar className="w-3.5 h-3.5 mr-2 text-[#ff4500]" />
                             {post.date}
                           </div>
+
                           <h2 className="text-2xl font-bold mb-4 group-hover:text-[#ff4500] transition-colors duration-300 line-clamp-2 leading-tight">
                             {post.title}
                           </h2>
+
                           <p className="text-gray-400 text-sm mb-6 leading-relaxed line-clamp-3 font-light">
                             {post.summary}...
                           </p>
+
                           <a 
                             href={post.link} 
                             target="_blank" 
@@ -177,6 +193,7 @@ export default function BlogPage() {
                 )}
               </div>
 
+              {/* 分頁控制 */}
               <div className="mt-20 flex flex-col items-center gap-6">
                 <div className="flex items-center justify-center space-x-3">
                   <button
