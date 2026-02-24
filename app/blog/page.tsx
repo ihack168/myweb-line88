@@ -98,7 +98,7 @@ export default function BlogPage() {
             </h1>
             <div className="h-1.5 w-24 bg-[#ff4500] mx-auto md:mx-0 rounded-full"></div>
             <p className="mt-6 text-gray-400 text-lg">
-              掌握網路投票、數據優化與自動化行銷的最新技術
+              掌握我們最新資訊
             </p>
           </div>
 
