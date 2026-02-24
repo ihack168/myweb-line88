@@ -9,31 +9,45 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. 定義原始網址
+    // 抓取 Blogger 的 JSON feed
     const targetUrl = "https://www.line88.tw/feeds/posts/default?alt=json&max-results=10";
-    
-    // 2. 使用 AllOrigins 代理伺服器來繞過 CORS 限制
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
     fetch(proxyUrl)
       .then((res) => {
         if (res.ok) return res.json();
-        throw new Error('代理伺服器回應異常');
+        throw new Error('Network response was not ok.');
       })
       .then((data) => {
-        // 3. 因為經過代理，資料會被包在 data.contents 裡面，且是字串格式
         const blogData = JSON.parse(data.contents);
         const entry = blogData.feed.entry || [];
         
-        const formattedPosts = entry.map((item: any) => ({
-          title: item.title.$t,
-          link: item.link.find((l: any) => l.rel === "alternate").href,
-          date: new Date(item.published.$t).toLocaleDateString(),
-          // 抓取內容並去除 HTML 標籤作為摘要
-          summary: item.content?.$t 
-            ? item.content.$t.replace(/<[^>]*>/g, "").substring(0, 100) + "..." 
-            : item.summary?.$t.replace(/<[^>]*>/g, "").substring(0, 100) + "..." || ""
-        }));
+        const formattedPosts = entry.map((item: any) => {
+          // 抓取原始內容
+          let rawContent = item.summary?.$t || item.content?.$t || "";
+
+          // 進階清理邏輯：過濾 CSS, JSON-LD, Script 與 HTML 標籤
+          let cleanSummary = rawContent
+            .replace(/<style([\s\S]*?)<\/style>/gi, "") // 移除內嵌 CSS
+            .replace(/<script([\s\S]*?)<\/script>/gi, "") // 移除內嵌 JS
+            .replace(/\{[\s\S]*?\}/g, "") // 移除 JSON 結構資料 { ... }
+            .replace(/<[^>]*>/g, "") // 移除所有 HTML 標籤
+            .replace(/&nbsp;/g, " ") // 修正空格
+            .replace(/\s+/g, " ") // 合併多餘空白
+            .trim();
+
+          // 截取前 100 字作為摘要
+          const finalSummary = cleanSummary.length > 100 
+            ? cleanSummary.substring(0, 100) + "..." 
+            : cleanSummary;
+
+          return {
+            title: item.title.$t,
+            link: item.link.find((l: any) => l.rel === "alternate").href,
+            date: new Date(item.published.$t).toLocaleDateString(),
+            summary: finalSummary
+          };
+        });
         
         setPosts(formattedPosts);
         setLoading(false);
@@ -45,50 +59,30 @@ export default function BlogPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[#0a0a0a] text-foreground">
       <Navbar />
-      <main className="container mx-auto px-4 py-20">
+      <main className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4 flex items-center">
-            <BookOpen className="mr-3 text-blue-600" /> 最新文章
-          </h1>
-          <p className="text-muted-foreground mb-12">掌握最新的 LINE 行銷趨勢與實戰技巧</p>
+          {/* 標題區塊 */}
+          <div className="mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center text-white">
+              <BookOpen className="mr-4 text-primary w-10 h-10" /> 最新文章
+            </h1>
+            <div className="h-1 w-20 bg-primary mb-6"></div>
+            <p className="text-gray-400 text-lg">掌握最新的 LINE 行銷趨勢、AI 客服與自動化實戰技巧。</p>
+          </div>
 
+          {/* 內容區塊 */}
           {loading ? (
-            <div className="text-center py-20 text-gray-400">
-              <div className="animate-pulse">正在為您加載精彩內容...</div>
+            <div className="flex flex-col items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+              <p className="text-gray-500 animate-pulse">正在從伺服器安全抓取內容...</p>
             </div>
           ) : posts.length > 0 ? (
-            <div className="grid gap-8">
+            <div className="grid gap-10">
               {posts.map((post, i) => (
-                <div key={i} className="group p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all">
-                  <div className="flex items-center text-sm text-gray-500 mb-2">
-                    <Calendar className="w-4 h-4 mr-2" />
-                    {post.date}
-                  </div>
-                  <h2 className="text-2xl font-bold mb-3 group-hover:text-blue-600 transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-gray-600 mb-4 leading-relaxed">
-                    {post.summary}
-                  </p>
-                  <a 
-                    href={post.link} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center font-semibold text-blue-600 hover:text-blue-700"
-                  >
-                    閱讀全文 <ArrowRight className="w-4 h-4 ml-1" />
-                  </a>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 text-gray-400">目前尚無文章。</div>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
+                <div 
+                  key={i} 
+                  className="group relative p-8 bg-[#161616] border border-white/10 rounded-3xl shadow-2xl hover:border-primary/50 transition-all duration-300"
+                >
+                  <div className="flex items-center text-sm
