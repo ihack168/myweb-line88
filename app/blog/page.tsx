@@ -160,4 +160,4 @@ export default function BlogPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="p-3 bg-[#111] border border-white
+                  className="p-3 bg-[#111] border border-white/10 rounded-full hover:border-[#ff4500] disabled:opacity-20 transition-all"
