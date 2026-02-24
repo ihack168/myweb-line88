@@ -5,10 +5,11 @@ import Link from "next/link"
 import { useState } from "react"
 
 const navLinks = [
-  { label: "首頁", href: "#hero" },
-  { label: "服務介紹", href: "#services" },
+  { label: "首頁", href: "/" }, // 改為 / 確保從 blog 頁面也能回首頁
+  { label: "服務介紹", href: "/#services" },
+  { label: "最新文章", href: "/blog" },
   { label: "Blog", href: "https://blog.line88.tw/" },
-  { label: "聯絡我們", href: "#contact" },
+  { label: "聯絡我們", href: "/#contact" }, // 加上斜線確保跨頁跳轉
 ]
 
 export function Navbar() {
@@ -16,7 +17,8 @@ export function Navbar() {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-3 bg-[#0a0a0a]/95 backdrop-blur-sm border-b border-border">
-      <Link href="#hero" className="flex items-center gap-2">
+      {/* 修正：Logo 的 Link 也改為 / 回首頁 */}
+      <Link href="/" className="flex items-center gap-2">
         <Image
           src="/images/logo.png"
           alt="洛克希德黑克斯 Logo"
@@ -33,6 +35,9 @@ export function Navbar() {
           <a
             key={link.href}
             href={link.href}
+            // 💡 密技：如果是 http 開頭，自動用新分頁開啟，保護官網不被關閉
+            target={link.href.startsWith("http") ? "_blank" : "_self"}
+            rel={link.href.startsWith("http") ? "noopener noreferrer" : ""}
             className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
           >
             {link.label}
@@ -58,6 +63,7 @@ export function Navbar() {
             <a
               key={link.href}
               href={link.href}
+              target={link.href.startsWith("http") ? "_blank" : "_self"}
               onClick={() => setMobileOpen(false)}
               className="px-6 py-2 text-sm font-medium text-muted-foreground hover:text-primary hover:bg-secondary transition-colors"
             >
