@@ -9,24 +9,23 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const targetUrl = "https://www.line88.tw/feeds/posts/default?alt=json&max-results=10";
-    
-    // 改用 allorigins 的 https 直接轉發，並增加一個隨機參數防止被 cached
+    // 指向我們自定義的 API Route，徹底解決 CORS 問題
     const proxyUrl = "/api/blog";
     
     const fetchData = async () => {
       try {
         const response = await fetch(proxyUrl);
-        if (!response.ok) throw new Error("代理連線失敗");
+        if (!response.ok) throw new Error("API 路徑連線失敗");
         
         const data = await response.json();
-        // 有些代理會把內容包在 contents 裡，有些是字串有些是物件，這裡做相容性處理
-        const rawJson = typeof data.contents === 'string' ? JSON.parse(data.contents) : data.contents;
-        const entry = rawJson.feed.entry || [];
+        
+        // 來自 API Route 的資料直接就是 JSON 物件，不需再判斷 data.contents
+        const entry = data.feed?.entry || [];
         
         const formattedPosts = entry.map((item: any) => {
           const rawContent = item.summary?.$t || item.content?.$t || "";
           
+          // 強力清理摘要，移除 CSS 和 HTML 標籤
           let cleanSummary = rawContent
             .replace(/<style([\s\S]*?)<\/style>/gi, "") 
             .replace(/\.[\w-]+\s*\{[\s\S]*?\}/g, "")   
@@ -38,7 +37,7 @@ export default function BlogPage() {
 
           return {
             title: item.title.$t,
-            link: item.link.find((l: any) => l.rel === "alternate").href,
+            link: item.link.find((l: any) => l.rel === "alternate")?.href || "#",
             date: new Date(item.published.$t).toLocaleDateString(),
             summary: cleanSummary.substring(0, 110) + "..."
           };
@@ -46,14 +45,7 @@ export default function BlogPage() {
         
         setPosts(formattedPosts);
       } catch (err) {
-        console.error("Blogger feed error:", err);
-        // 如果連代理都掛了，最後一招：嘗試使用另一個公共代理
-        try {
-            const backupUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
-            const backupRes = await fetch(backupUrl);
-            const backupData = await backupRes.json();
-            // ... 這裡可以補上處理邏輯，但通常第一個沒過，這個機率也低
-        } catch (e) {}
+        console.error("Blogger API Error:", err);
       } finally {
         setLoading(false);
       }
@@ -67,6 +59,7 @@ export default function BlogPage() {
       <Navbar />
       <main className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
+          {/* 標題裝飾 - 螢光橘風格 */}
           <div className="mb-16 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center md:justify-start text-white">
               <BookOpen className="mr-4 text-[#ff4500] w-10 h-10" /> 
@@ -79,7 +72,7 @@ export default function BlogPage() {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="w-10 h-10 border-4 border-[#ff4500]/20 border-t-[#ff4500] rounded-full animate-spin mb-4"></div>
-              <p className="text-gray-500 animate-pulse font-mono text-sm">BYPASSING CORS RESTRICTIONS...</p>
+              <p className="text-gray-500 animate-pulse font-mono text-sm uppercase tracking-widest">Synchronizing Data...</p>
             </div>
           ) : posts.length > 0 ? (
             <div className="grid gap-8">
@@ -113,8 +106,8 @@ export default function BlogPage() {
             </div>
           ) : (
             <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl bg-[#111]">
-              <p className="text-[#ff4500] mb-2 font-bold">ERROR: 數據傳輸中斷</p>
-              <p className="text-gray-500">目前無法連線至數據中心，請檢查您的網路狀態或稍後再試。</p>
+              <p className="text-[#ff4500] mb-2 font-bold uppercase tracking-tighter">Connection Error</p>
+              <p className="text-gray-500">目前無法與 Blogger 中心建立連線，請稍後再試。</p>
             </div>
           )}
         </div>
