@@ -47,6 +47,9 @@ export default function BlogPage() {
             .replace(/\s+/g, " ")                         
             .trim();
 
+          const blogUrlMatch = item.link.find((l: any) => l.rel === "alternate")?.href || "";
+          const blogBaseUrl = blogUrlMatch.split('.com/')[0] + '.com';
+
           const finalThumbnail = videoId 
             ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
             : firstImgUrl;
@@ -54,12 +57,13 @@ export default function BlogPage() {
           return {
             id: item.id.$t,
             title: item.title.$t,
-            link: item.link.find((l: any) => l.rel === "alternate")?.href || "#",
+            link: blogUrlMatch,
+            blogBaseUrl: blogBaseUrl,
             date: new Date(item.published.$t).toLocaleDateString(),
             summary: cleanSummary.substring(0, 110),
             videoId: videoId,
             thumbnailUrl: finalThumbnail,
-            tags: categories.slice(0, 3) // 每個文章顯示前 3 個標籤
+            tags: categories.slice(0, 3) 
           };
         });
         
@@ -100,31 +104,28 @@ export default function BlogPage() {
       <main className="container mx-auto px-4 py-24">
         <div className="max-w-4xl mx-auto">
           
-          {/* 標題區 */}
           <div className="mb-16 text-center md:text-left">
             <h1 className="text-4xl md:text-5xl font-bold mb-4 flex items-center justify-center md:justify-start">
               <BookOpen className="mr-4 text-[#ff4500] w-10 h-10" /> 
               最新文章
             </h1>
             <div className="h-1.5 w-24 bg-[#ff4500] mx-auto md:mx-0 rounded-full"></div>
-            <p className="mt-6 text-gray-400 text-lg">掌握我們最新資訊</p>
+            <p className="mt-6 text-gray-400 text-lg">掌握我們最新資訊，強化數據影響力</p>
           </div>
 
           {loading ? (
             <div className="flex flex-col items-center justify-center py-40">
               <div className="w-12 h-12 border-4 border-[#ff4500]/20 border-t-[#ff4500] rounded-full animate-spin"></div>
-              <p className="mt-4 text-gray-500 font-mono tracking-widest uppercase text-xs">Loading Data...</p>
+              <p className="mt-4 text-gray-500 font-mono tracking-widest uppercase text-xs">Loading...</p>
             </div>
           ) : (
             <>
-              {/* 文章列表 */}
               <div className="grid gap-12">
                 {posts.length > 0 ? (
                   posts.map((post: any) => (
                     <article key={post.id} className="group bg-[#111] border border-white/5 rounded-3xl overflow-hidden hover:border-[#ff4500]/40 transition-all duration-500 shadow-2xl">
                       <div className="flex flex-col md:flex-row">
                         
-                        {/* 圖片/影片 顯示區域 */}
                         {post.thumbnailUrl && (
                           <div className="relative w-full md:w-2/5 aspect-video bg-black shrink-0 overflow-hidden">
                             {post.videoId && playingId === post.id ? (
@@ -140,7 +141,6 @@ export default function BlogPage() {
                                 onClick={() => post.videoId && setPlayingId(post.id)}
                               >
                                 <img src={post.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" alt={post.title} />
-                                
                                 {post.videoId && (
                                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:bg-transparent transition-all">
                                     <PlayCircle className="w-16 h-16 text-[#ff4500] drop-shadow-2xl transform group-hover/thumb:scale-110 transition-transform duration-300" />
@@ -151,15 +151,20 @@ export default function BlogPage() {
                           </div>
                         )}
 
-                        {/* 文字區域 */}
                         <div className="p-8 flex-1 flex flex-col justify-center">
-                          {/* 標籤顯示區 ✨ */}
+                          {/* 帶連結的標籤區 🚀 */}
                           <div className="flex flex-wrap gap-2 mb-4">
                             {post.tags.map((tag: string) => (
-                              <span key={tag} className="flex items-center px-2.5 py-1 text-[10px] font-bold border border-[#ff4500]/30 text-[#ff4500] rounded-md bg-[#ff4500]/5 tracking-widest uppercase transition-colors hover:bg-[#ff4500] hover:text-white cursor-default">
+                              <a 
+                                key={tag} 
+                                href={`${post.blogBaseUrl}/search/label/${encodeURIComponent(tag)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center px-2.5 py-1 text-[10px] font-bold border border-[#ff4500]/30 text-[#ff4500] rounded-md bg-[#ff4500]/5 tracking-widest uppercase transition-all hover:bg-[#ff4500] hover:text-white hover:border-[#ff4500] hover:shadow-[0_0_10px_rgba(255,69,0,0.3)]"
+                              >
                                 <Tag className="w-3 h-3 mr-1" />
                                 {tag}
-                              </span>
+                              </a>
                             ))}
                           </div>
 
@@ -193,7 +198,6 @@ export default function BlogPage() {
                 )}
               </div>
 
-              {/* 分頁控制 */}
               <div className="mt-20 flex flex-col items-center gap-6">
                 <div className="flex items-center justify-center space-x-3">
                   <button
