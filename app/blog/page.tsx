@@ -48,7 +48,9 @@ export default function BlogPage() {
             .trim();
 
           const blogUrlMatch = item.link.find((l: any) => l.rel === "alternate")?.href || "";
-          const blogBaseUrl = blogUrlMatch.split('.com/')[0] + '.com';
+          
+          // ✨ 修正點：強制使用你的官方網域，確保標籤連結正確
+          const blogBaseUrl = "https://www.line88.tw";
 
           const finalThumbnail = videoId 
             ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
@@ -157,6 +159,7 @@ export default function BlogPage() {
                             {post.tags.map((tag: string) => (
                               <a 
                                 key={tag} 
+                                // 生成路徑：https://www.line88.tw/search/label/標籤名
                                 href={`${post.blogBaseUrl}/search/label/${encodeURIComponent(tag)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
