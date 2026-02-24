@@ -14,10 +14,17 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
 });
 
-// 這是你剛剛寫好的 SEO Metadata
 export const metadata: Metadata = {
   title: '洛克希德黑克斯 | 全台最強網路投票支援、買票灌票、流量數據增長中心',
   description: '專業處理各類網路投票支援：LINE 投票、FB 臉書投票、Google 表單、網站投票買票灌票。提供 100% 擬真流量與不重複 IP 隱蔽技術。同步提供 FB、IG、Threads、TikTok 大量按讚追蹤，穩定提升社群曝光量，技術領先，業界首選。',
+  
+  // ✨ 這是新增的圖標設定段落
+  icons: {
+    icon: '/images/logo.png',
+    shortcut: '/images/logo.png',
+    apple: '/images/logo.png',
+  },
+
   keywords: [
     '網路投票買票', '網路投票灌票', 'LINE投票買票', 'FB投票灌票', 
     'Google表單投票', '網站投票破解', '增加投票數', 'Threads增粉', 
@@ -41,7 +48,6 @@ export const metadata: Metadata = {
   },
 }
 
-// ⚠️ 這是你漏掉的最重要部分：必須 export default 一個函式
 export default function RootLayout({
   children,
 }: Readonly<{
