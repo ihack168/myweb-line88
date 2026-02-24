@@ -10,7 +10,7 @@ export default function BlogPage() {
 
   useEffect(() => {
     // 抓取 Blogger 的 JSON feed，設定為 10 篇文章
-    fetch("https://blog.line88.tw/feeds/posts/default?alt=json&max-results=10")
+    fetch("https://www.line88.tw/feeds/posts/default?alt=json&max-results=10")
       .then((res) => res.json())
       .then((data) => {
         const entry = data.feed.entry || [];
