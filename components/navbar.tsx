@@ -14,7 +14,6 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
-  // 監測滾動：頂部透明，滾動後變深色毛玻璃
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener("scroll", handleScroll)
@@ -36,11 +35,10 @@ export function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between relative">
         
-        {/* Logo 區塊：已將發光與陰影改為螢光橘 */}
+        {/* Logo 區塊：靜態螢光橘 */}
         <Link href="/" className="flex items-center gap-3 z-[10000] group">
           <div className="relative">
-            {/* 螢光橘呼吸燈效果 */}
-            <div className="absolute -inset-1 bg-[#ff8800]/30 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
+            <div className="absolute -inset-1 bg-[#ff8800]/20 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
             <img 
               src="/images/logo.png" 
               alt="Logo" 
@@ -48,19 +46,20 @@ export function Navbar() {
               style={{ minWidth: '40px', minHeight: '40px' }}
             />
           </div>
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
+          {/* 左上角文字：靜態螢光橘 + 質感發光 */}
+          <span className="text-xl font-black italic tracking-tighter text-[#ff8800] drop-shadow-[0_0_10px_rgba(255,136,0,0.5)] transition-all duration-500">
             洛克希德黑克斯
           </span>
         </Link>
 
-        {/* Desktop Nav：懸停顏色與底部線條改為螢光橘 */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop Nav：字體加大 + 靜態顯示 */}
+        <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
               key={link.href}
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : "_self"}
-              className="text-sm font-medium text-gray-300 hover:text-[#ff8800] transition-colors relative group"
+              className="text-base lg:text-lg font-bold tracking-wide text-gray-300 hover:text-[#ff8800] transition-colors relative group"
             >
               {link.label}
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ff8800] transition-all group-hover:w-full"></span>
@@ -68,7 +67,7 @@ export function Navbar() {
           ))}
         </div>
 
-        {/* Mobile Burger：按鈕顏色改為螢光橘 */}
+        {/* Mobile Burger */}
         <button 
           className="md:hidden relative w-12 h-12 flex items-center justify-center z-[10000] focus:outline-none" 
           onClick={toggleMenu}
@@ -82,7 +81,7 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Dropdown：點擊與懸停效果改為螢光橘 */}
+      {/* Mobile Dropdown */}
       {mobileOpen && (
         <div 
           className="fixed inset-0 top-20 bg-[#0a0a0a]/95 backdrop-blur-xl z-[9998] flex flex-col pt-4 md:hidden animate-in fade-in slide-in-from-top-4 duration-300"

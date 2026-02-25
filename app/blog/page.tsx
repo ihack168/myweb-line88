@@ -17,7 +17,7 @@ export default function BlogPage() {
         const result = await res.json();
         setData(result);
       } catch (err) { 
-        console.error("前端抓取失敗:", err); 
+        console.error("抓取文章失敗:", err); 
       } finally { 
         setLoading(false); 
       }
@@ -37,6 +37,9 @@ export default function BlogPage() {
       .trim()
       .substring(0, 80);
   };
+
+  // 取得總頁數，預設至少 1 頁
+  const totalPages = data?.pagination?.totalPages || 1;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
@@ -106,12 +109,12 @@ export default function BlogPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 text-gray-500">
+              <div className="text-center py-20 text-gray-500 text-xl font-bold">
                 暫時沒有相關文章。
               </div>
             )}
 
-            {/* 1-10 數字分頁 */}
+            {/* 動態分頁器：根據文章數量自動增減按鈕 */}
             <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
               <button 
                 onClick={() => setPage(p => Math.max(1, p - 1))} 
@@ -121,7 +124,8 @@ export default function BlogPage() {
                 PREV
               </button>
 
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+              {/* 根據 API 算出的 totalPages 生成按鈕 */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
                 <button
                   key={num}
                   onClick={() => setPage(num)}
@@ -136,8 +140,8 @@ export default function BlogPage() {
               ))}
 
               <button 
-                onClick={() => setPage(p => Math.min(10, p + 1))} 
-                disabled={page === 10} 
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                disabled={page >= totalPages} 
                 className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
               >
                 NEXT
