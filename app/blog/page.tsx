@@ -1,85 +1,83 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { useState } from "react"
+import { Navbar } from "@/components/navbar"
+import { ServicesSection } from "@/components/services-section"
+import { ContactSection } from "@/components/contact-section"
+import { Footer } from "@/components/footer"
 
-const navLinks = [
-  { label: "首頁", href: "/" },
-  { label: "服務介紹", href: "/#services" },
-  { label: "最新文章", href: "/blog" },
-  { label: "Blog", href: "https://blog.line88.tw/" },
-  { label: "聯絡我們", href: "/#contact" },
-]
-
-export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false)
+export default function Home() {
+  // JSON-LD 結構化資料：專門給 Google 爬蟲看的技術清單 (SEO 強化)
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": "洛克希德黑克斯 - 特殊網路技術支援中心",
+    "description": "提供全台最專業的網路投票買票、灌票服務，支援 LINE 投票、FB 投票、Google 表單與各類網站投票優化。",
+    "provider": {
+      "@type": "Organization",
+      "name": "洛克希德黑克斯 (Lockhead Hex)"
+    },
+    "serviceType": [
+      "網路投票買票灌票",
+      "LINE 投票支援",
+      "社群媒體流量增長",
+      "Facebook IG Threads 大量按讚追蹤"
+    ],
+    "areaServed": "TW",
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "特殊網路服務",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "LINE 投票買票灌票 - 獨家分散式 IP 技術"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "社群增長 - FB IG Threads 大量追蹤按讚"
+          }
+        }
+      ]
+    }
+  };
 
   return (
-    // 改回滿版式的 fixed，這樣最穩定，絕對不會消失
-    <nav className="fixed top-0 left-0 right-0 z-[100] bg-[#0a0a0a]/90 backdrop-blur-md border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* 注入 JSON-LD 腳本 (搜尋引擎優化，肉眼不可見) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      {/* 1. 導覽列 (Navbar) - 確保它是 fixed top-0 */}
+      <Navbar />
+
+      {/* 2. 主內容區塊 - pt-20 到 pt-24 是最適合 Navbar 下方的距離 */}
+      <main className="pt-20 md:pt-24">
         
-        {/* Logo 區塊：直接給定寬高，確保不被壓縮 */}
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 relative flex-shrink-0">
-            <Image
-              src="/images/logo.png"
-              alt="Logo"
-              width={40}
-              height={40}
-              priority
-              className="rounded-full"
-            />
-          </div>
-          <span className="text-xl font-bold text-white tracking-tight">
-            洛克希德黑克斯
-          </span>
-        </Link>
+        {/* 服務區塊：現在是頁面的首要視覺焦點 */}
+        <ServicesSection />
+        
+        {/* SEO 強化區塊：利用 sr-only 隱藏，僅供 Google 爬蟲抓取關鍵字 */}
+        <section className="sr-only">
+          <h2>全台最穩定的網路投票買票與灌票服務</h2>
+          <p>
+            我們提供專業的 LINE 投票買票、FB 臉書投票灌票、Google 表單數據優化、
+            各式網站投票破解與數據提升服務。針對 Threads、IG、Facebook 提供大量按讚與追蹤數，
+            確保您的社群數據領先競爭對手。
+          </p>
+        </section>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              target={link.href.startsWith("http") ? "_blank" : "_self"}
-              rel={link.href.startsWith("http") ? "noopener noreferrer" : ""}
-              className="text-sm font-medium text-gray-300 hover:text-primary transition-colors"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
+        {/* 聯絡區塊 */}
+        <ContactSection />
+      </main>
 
-        {/* Mobile Burger */}
-        <button
-          className="md:hidden p-2 text-white"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          <div className="w-6 flex flex-col gap-1.5">
-            <span className={`h-0.5 bg-current transition-all ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`h-0.5 bg-current transition-all ${mobileOpen ? "opacity-0" : ""}`} />
-            <span className={`h-0.5 bg-current transition-all ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
-          </div>
-        </button>
-      </div>
-
-      {/* Mobile Dropdown */}
-      {mobileOpen && (
-        <div className="absolute top-20 left-0 right-0 bg-[#0a0a0a] border-b border-white/10 flex flex-col py-4 md:hidden">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="px-8 py-4 text-gray-300 hover:text-primary"
-            >
-              {link.label}
-            </a>
-          ))}
-        </div>
-      )}
-    </nav>
+      {/* 3. 頁尾 */}
+      <Footer />
+    </div>
   )
 }
