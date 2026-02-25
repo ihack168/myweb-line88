@@ -39,11 +39,12 @@ export default function BlogPage() {
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-20">
         <h1 className="text-4xl font-black mb-12 italic text-[#ff8800]">
-          TECH BLOG <span className="text-white/20 text-sm not-italic ml-2 tracking-widest">LATEST POSTS</span>
+          最新文章
         </h1>
 
         {loading ? (
           <div className="flex justify-center py-20">
+            {/* 載入動畫橘色化 */}
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#ff8800]"></div>
           </div>
         ) : (
@@ -68,8 +69,8 @@ export default function BlogPage() {
                       />
                       {post.videoId && (
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="w-14 h-14 bg-[#ff8800] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,136,0,0.4)] group-hover:scale-110 transition-transform">
-                            <div className="border-l-[16px] border-l-black border-y-[10px] border-y-transparent ml-1"></div>
+                          <div className="w-16 h-11 bg-[#FF0000] rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                            <div className="border-l-[18px] border-l-white border-y-[11px] border-y-transparent ml-1"></div>
                           </div>
                         </div>
                       )}
@@ -111,6 +112,7 @@ export default function BlogPage() {
           </div>
         )}
 
+        {/* 下方分頁控制橘色化 */}
         <div className="mt-16 flex justify-center items-center gap-8">
           <button 
             onClick={() => setPage(p => Math.max(1, p - 1))} 
