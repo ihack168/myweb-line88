@@ -55,7 +55,6 @@ export default function Home() {
       <Navbar />
       <main>
         {/* 1. 英雄區塊：主打「速度」與「隱蔽性」 */}
-        <HeroSection />
         
         {/* 2. 服務區塊：針對投票業務調整關鍵字 */}
         <ServicesSection />
