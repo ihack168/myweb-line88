@@ -7,7 +7,6 @@ import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
-  // JSON-LD 結構化資料：專門給 Google 爬蟲看的技術清單 (SEO 強化)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -47,43 +46,35 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground selection:bg-primary/30">
-      {/* 注入 JSON-LD 腳本 (SEO 關鍵) */}
+    <div className="min-h-screen bg-[#0a0a0a] text-foreground selection:bg-[#00ff00]/30">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* 1. 導覽列：確保 z-index 足夠高 */}
       <Navbar />
 
       <main>
-        {/* 2. 英雄區塊：這裡現在只包含大 Logo 與品牌名，刪除了原本的描述文字 */}
-        {/* pt-32 確保內容在漂浮 Navbar 下方 */}
-        <div className="pt-24 md:pt-32">
+        {/* 這裡稍微增加一點 pt，讓大 Logo 更有呼吸感 */}
+        <div className="pt-24 md:pt-40 pb-10">
           <HeroSection />
         </div>
 
-        {/* 3. 服務區塊：現在會緊接在品牌名稱下方，解決空一塊的問題 */}
         <ServicesSection />
         
-        {/* 4. SEO 隱藏強化區塊：肉眼看不見，但能幫你吃下搜尋關鍵字 */}
         <section className="sr-only">
           <h2>全台最穩定的網路投票買票與灌票服務</h2>
           <p>
             我們提供專業的 LINE 投票買票、FB 臉書投票灌票、Google 表單數據優化、
-            各式網站投票破解與數據提升服務。針對 Threads、IG、Facebook 提供大量按讚與追蹤數，
-            確保您的社群數據領先競爭對手。
+            各式網站投票破解與數據提升服務。針對 Threads、IG、Facebook 提供大量按讚與追蹤數。
           </p>
         </section>
 
-        {/* 5. 聯絡區塊 */}
         <div id="contact">
           <ContactSection />
         </div>
       </main>
 
-      {/* 6. 頁尾 */}
       <Footer />
     </div>
   )
