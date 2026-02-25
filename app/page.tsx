@@ -1,5 +1,6 @@
+"use client";
+
 import { Navbar } from "@/components/navbar"
-import { HeroSection } from "@/components/hero-section"
 import { ServicesSection } from "@/components/services-section"
 import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
@@ -46,20 +47,22 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* 注入 JSON-LD 腳本 (這不會顯示在網頁畫面上，但 SEO 極強) */}
+      {/* 注入 JSON-LD 腳本 (SEO 強化) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* 漂浮式導覽列 */}
       <Navbar />
-      <main>
-        {/* 1. 英雄區塊：主打「速度」與「隱蔽性」 */}
+
+      {/* 主內容區塊：pt-32 確保內容不會被漂浮 Navbar 遮住 */}
+      <main className="pt-32 md:pt-40">
         
-        {/* 2. 服務區塊：針對投票業務調整關鍵字 */}
+        {/* 1. 服務區塊：直接頂上來作為首頁視覺焦點 */}
         <ServicesSection />
         
-        {/* 3. SEO 強化區塊：隱藏或半隱藏的文字區塊，專門捕捉關鍵字 */}
+        {/* 2. SEO 強化區塊：肉眼看不見，但 Google 搜尋極其看重 */}
         <section className="sr-only">
           <h2>全台最穩定的網路投票買票與灌票服務</h2>
           <p>
@@ -69,8 +72,11 @@ export default function Home() {
           </p>
         </section>
 
+        {/* 3. 聯絡區塊 */}
         <ContactSection />
       </main>
+
+      {/* 頁尾 */}
       <Footer />
     </div>
   )
