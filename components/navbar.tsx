@@ -16,23 +16,24 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[92%] max-w-6xl transition-all duration-300">
-      {/* 💡 容器優化：改為漂浮式的玻璃質感卡片，讓 Logo 不再只是死板地貼在最上方 */}
-      <div className="flex items-center justify-between px-6 py-3 bg-[#0a0a0a]/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+    // 重點 1：加上 z-[9999] 確保它永遠在最上層
+    <nav className="fixed top-4 left-0 right-0 z-[9999] flex justify-center px-4 pointer-events-none">
+      {/* 重點 2：內層容器開啟 pointer-events-auto 讓按鈕可以點擊 */}
+      <div className="w-full max-w-6xl flex items-center justify-between px-6 py-3 bg-[#0a0a0a]/90 backdrop-blur-md border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.8)] pointer-events-auto">
         
-        {/* Logo 區域：加上 Hover 輕微發光與放大效果 */}
+        {/* Logo 區域 */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative w-9 h-9">
+            <div className="absolute inset-0 bg-primary/30 blur-lg rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <Image
               src="/images/logo.png"
               alt="洛克希德黑克斯 Logo"
-              width={38}
-              height={38}
-              className="rounded-full relative z-10 transition-transform duration-500 group-hover:rotate-[10deg] group-hover:scale-110"
+              fill
+              sizes="36px"
+              className="rounded-full relative z-10 transition-transform duration-500 group-hover:rotate-[12deg] group-hover:scale-110 object-cover"
             />
           </div>
-          <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400 group-hover:to-primary transition-all duration-300">
+          <span className="text-lg font-bold text-white group-hover:text-primary transition-colors">
             洛克希德黑克斯
           </span>
         </Link>
@@ -45,7 +46,7 @@ export function Navbar() {
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : "_self"}
               rel={link.href.startsWith("http") ? "noopener noreferrer" : ""}
-              className="text-sm font-medium text-gray-400 hover:text-primary transition-all duration-300 hover:-translate-y-0.5"
+              className="text-sm font-medium text-gray-300 hover:text-primary transition-all duration-300"
             >
               {link.label}
             </a>
@@ -58,15 +59,15 @@ export function Navbar() {
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
-          <span className={`block w-6 h-0.5 bg-foreground transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
-          <span className={`block w-6 h-0.5 bg-foreground transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
-          <span className={`block w-6 h-0.5 bg-foreground transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
+          <span className={`block w-6 h-0.5 bg-white transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
       </div>
 
-      {/* Mobile dropdown：同樣加上圓角與玻璃質感 */}
+      {/* Mobile dropdown */}
       {mobileOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-lg border border-white/10 rounded-2xl md:hidden flex flex-col py-4 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="absolute top-full left-4 right-4 mt-2 bg-[#0a0a0a]/98 backdrop-blur-xl border border-white/10 rounded-2xl md:hidden flex flex-col py-4 shadow-2xl pointer-events-auto overflow-hidden">
           {navLinks.map((link) => (
             <a
               key={link.href}
