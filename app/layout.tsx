@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   // 核心 SEO 標題
-  title: '洛克希德黑克斯 | 全台最強網路投票支援、買票灌票、流量數據增長中心',
+  title: '洛克希德黑克斯 | 全台最強網路投票支援、買票灌票、社群流量數據增長中心',
   description: '專業處理各類網路投票支援：LINE 投票、FB 臉書投票、Google 表單、網站投票買票灌票。提供 100% 擬真流量與不重複 IP 隱蔽技術。同步提供 FB、IG、Threads、TikTok 大量按讚追蹤，穩定提升社群曝光量，技術領先，業界首選。',
   
   // 網站圖標
