@@ -17,9 +17,6 @@ export function HeroSection() {
       <p className="text-base text-primary font-medium tracking-widest">
         LOCKHEAD HEX
       </p>
-      <p className="mt-2 text-sm text-muted-foreground text-center max-w-md leading-relaxed">
-        特殊網路服務中心
-      </p>
     </section>
   )
 }
