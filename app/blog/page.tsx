@@ -103,7 +103,7 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-[#ff4500]/30">
       <Navbar />
-      <main className="container mx-auto px-4 py-24">
+      <main className="container mx-auto px-4 pt-32 pb-24">
         <div className="max-w-4xl mx-auto">
           
           <div className="mb-16 text-center md:text-left">
