@@ -6,47 +6,40 @@ export async function GET(request: NextRequest) {
   const maxResults = 10;
   const startIndex = (page - 1) * maxResults + 1;
 
-  // 使用你指定的 Blogger Feed URL
+  // 使用 www.line88.tw 抓取後台資料
   const targetUrl = `https://www.line88.tw/feeds/posts/default?alt=json&max-results=${maxResults}&start-index=${startIndex}`;
   
   try {
     const response = await fetch(targetUrl, { next: { revalidate: 60 } });
     const data = await response.json();
-    
-    const totalResults = parseInt(data.feed?.openSearch$totalResults?.$t || '0');
     const entries = data.feed?.entry || [];
+    const totalResults = parseInt(data.feed?.openSearch$totalResults?.$t || '0');
 
-    // 處理每一篇文章的縮圖與內容
     const posts = entries.map((entry: any) => {
-      const content = entry.content?.$t || entry.summary?.$t || "";
+      const content = entry.content?.$t || "";
       
-      // 1. 優先抓取 YouTube 影片 ID
+      // 1. 抓取 YouTube ID
       const ytMatch = content.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
       const videoId = ytMatch ? ytMatch[1] : null;
       
-      // 2. 抓取文章內的第一張圖片 (如果沒有 YT)
+      // 2. 抓取第一張圖
       const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
       const firstImage = imgMatch ? imgMatch[1] : null;
 
-      // 決定最終縮圖 (優先順序: YT > 文章圖 > 預設圖)
-      let finalThumbnail = "/blog-placeholder.jpg";
-      if (videoId) {
-        finalThumbnail = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-      } else if (firstImage) {
-        finalThumbnail = firstImage;
-      }
+      // 3. 修正導向網址至 blog.line88.tw
+      let originalLink = entry.link?.find((l: any) => l.rel === 'alternate')?.href || "";
+      const correctLink = originalLink.replace("www.line88.tw", "blog.line88.tw");
 
       return {
         id: entry.id?.$t,
         title: entry.title?.$t,
         content: content,
-        published: entry.published?.$t,
-        updated: entry.updated?.$t,
-        link: entry.link?.find((l: any) => l.rel === 'alternate')?.href,
-        author: entry.author?.[0]?.name?.$t,
-        thumbnail: finalThumbnail,
-        isVideo: !!videoId, // 標記是否為影片文章
-        category: entry.category?.map((c: any) => c.term) || []
+        link: correctLink,
+        thumbnail: videoId 
+          ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
+          : (firstImage || "/blog-placeholder.jpg"),
+        videoId: videoId,
+        tags: entry.category?.map((c: any) => c.term) || []
       };
     });
     
@@ -59,7 +52,6 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Fetch Error:", error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
