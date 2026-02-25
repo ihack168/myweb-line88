@@ -32,7 +32,9 @@ export function Navbar() {
   const toggleMenu = () => {
     const nextState = !mobileOpen
     setMobileOpen(nextState)
-    document.body.style.overflow = nextState ? "hidden" : "unset"
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = nextState ? "hidden" : "unset"
+    }
   }
 
   return (
@@ -56,7 +58,7 @@ export function Navbar() {
             </span>
           </Link>
 
-          {/* 電腦版選單 - 字體加大 */}
+          {/* 電腦版選單 */}
           <div className="hidden md:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link 
@@ -70,22 +72,34 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* 漢堡按鈕 */}
+          {/* 漢堡按鈕 (開啟用) */}
           <button 
             onClick={toggleMenu} 
             className="md:hidden w-12 h-12 flex flex-col items-center justify-center gap-1.5 z-[60]"
           >
-            <span className={`h-0.5 w-7 bg-[#ff8800] shadow-[0_0_5px_rgba(255,136,0,0.5)] transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-2" : ""}`} />
-            <span className={`h-0.5 w-7 bg-[#ff8800] shadow-[0_0_5px_rgba(255,136,0,0.5)] transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
-            <span className={`h-0.5 w-7 bg-[#ff8800] shadow-[0_0_5px_rgba(255,136,0,0.5)] transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-2" : ""}`} />
+            <span className="h-0.5 w-7 bg-[#ff8800] shadow-[0_0_5px_rgba(255,136,0,0.5)]" />
+            <span className="h-0.5 w-7 bg-[#ff8800] shadow-[0_0_5px_rgba(255,136,0,0.5)]" />
+            <span className="h-0.5 w-7 bg-[#ff8800] shadow-[0_0_5px_rgba(255,136,0,0.5)]" />
           </button>
         </div>
       </nav>
 
-      {/* 手機全螢幕選單 - 字體超級加大版 */}
+      {/* 手機全螢幕選單 */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-[#0a0a0a] z-[100] md:hidden flex flex-col pt-36 px-12 animate-in fade-in zoom-in-95 duration-300">
-          <div className="flex flex-col w-full gap-4">
+        <div className="fixed inset-0 bg-[#0a0a0a] z-[100] md:hidden flex flex-col pt-24 px-12 animate-in fade-in zoom-in-95 duration-300">
+          
+          {/* 右上角關閉按鈕 (X) */}
+          <button 
+            onClick={toggleMenu}
+            className="absolute top-7 right-8 w-12 h-12 flex items-center justify-center z-[110]"
+          >
+            <div className="relative w-7 h-7">
+              <span className="absolute top-1/2 left-0 w-full h-0.5 bg-[#ff8800] rotate-45 shadow-[0_0_5px_rgba(255,136,0,0.5)]"></span>
+              <span className="absolute top-1/2 left-0 w-full h-0.5 bg-[#ff8800] -rotate-45 shadow-[0_0_5px_rgba(255,136,0,0.5)]"></span>
+            </div>
+          </button>
+
+          <div className="flex flex-col w-full gap-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -94,13 +108,15 @@ export function Navbar() {
                   setMobileOpen(false)
                   document.body.style.overflow = "unset"
                 }}
-                className="py-6 text-2xl font-black italic tracking-wider text-gray-100 border-b border-white/5 active:text-[#ff8800] flex justify-between items-center group"
+                className="py-5 text-2xl font-black italic tracking-wider text-gray-100 border-b border-white/5 active:text-[#ff8800] flex justify-between items-center group"
               >
                 {link.label}
                 <span className="text-[#ff8800] opacity-0 group-active:opacity-100">→</span>
               </Link>
             ))}
           </div>
+          
+          {/* 點擊選單下方空白處也能關閉 */}
           <div className="flex-grow" onClick={toggleMenu}></div>
         </div>
       )}
