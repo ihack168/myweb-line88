@@ -16,23 +16,9 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: '洛克希德黑克斯 | 全台最強網路投票支援、買票灌票、社群流量數據增長中心',
-  description: '專業處理各類網路投票支援：LINE 投票、FB 臉書投票、Google 表單、買票灌票。同步提供 FB、IG、Threads 大量按讚追蹤，穩定提升社群曝光量。',
+  description: '專業處理各類網路投票支援：LINE 投票、FB 臉書投票、Google 表單。技術領先，業界首選。',
   icons: {
     icon: '/images/logo.png',
-    shortcut: '/images/logo.png',
-    apple: '/images/logo.png',
-  },
-  openGraph: {
-    title: '洛克希德黑克斯 - 網路投票數據支援與社群增長',
-    description: '安全、快速、高效的網路投票解決方案。',
-    url: 'https://www.line88.tw/',
-    siteName: '洛克希德黑克斯',
-    images: [{ url: '/images/og-image.jpg', width: 1200, height: 630 }],
-    locale: 'zh_TW',
-    type: 'website',
-  },
-  alternates: {
-    canonical: 'https://www.line88.tw/',
   },
 }
 
@@ -43,8 +29,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-Hant" className={`${notoSansTC.variable} ${geistMono.variable}`}>
-      <body className="font-sans antialiased bg-[#0a0a0a]">
-        {/* Google Analytics (GA4) - 已徹底修正空格與 ID 問題 */}
+      <body className="font-sans antialiased bg-[#0a0a0a] text-white">
+        {/* GA4 修正版 */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-2X29DPN458"
           strategy="afterInteractive"
