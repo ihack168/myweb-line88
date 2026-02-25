@@ -26,16 +26,17 @@ export function Navbar() {
   }
 
   return (
-    <nav 
-      className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 h-20 ${
-        scrolled 
-          ? "bg-[#0a0a0a]/80 backdrop-blur-md border-b border-white/10 shadow-lg" 
-          : "bg-[#0a0a0a] border-b border-white/5"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between relative">
-        
-        {/* Logo 區塊：靜態螢光橘 */}
+    <nav className="fixed top-0 left-0 right-0 z-[9999] flex justify-center pt-0 md:pt-4 pointer-events-none">
+      <div 
+        className={`
+          flex items-center justify-between px-6 transition-all duration-500 ease-in-out pointer-events-auto
+          ${scrolled 
+            ? "w-[95%] md:w-[85%] max-w-6xl h-16 bg-[#0a0a0a] border border-white/20 rounded-full shadow-[0_0_25px_rgba(255,136,0,0.15)]" 
+            : "w-full h-20 bg-[#0a0a0a] border-b border-white/5 rounded-none"
+          }
+        `}
+      >
+        {/* Logo 區塊 */}
         <Link href="/" className="flex items-center gap-3 z-[10000] group">
           <div className="relative">
             <div className="absolute -inset-1 bg-[#ff8800]/20 rounded-full blur opacity-0 group-hover:opacity-100 transition duration-500"></div>
@@ -46,13 +47,12 @@ export function Navbar() {
               style={{ minWidth: '40px', minHeight: '40px' }}
             />
           </div>
-          {/* 左上角文字：靜態螢光橘 + 質感發光 */}
-          <span className="text-xl font-black italic tracking-tighter text-[#ff8800] drop-shadow-[0_0_10px_rgba(255,136,0,0.5)] transition-all duration-500">
+          <span className="text-xl font-black italic tracking-tighter text-[#ff8800] drop-shadow-[0_0_10px_rgba(255,136,0,0.5)]">
             洛克希德黑克斯
           </span>
         </Link>
 
-        {/* Desktop Nav：字體加大 + 靜態顯示 */}
+        {/* Desktop Nav */}
         <div className="hidden md:flex items-center gap-10">
           {navLinks.map((link) => (
             <a
@@ -81,10 +81,10 @@ export function Navbar() {
         </button>
       </div>
 
-      {/* Mobile Dropdown */}
+      {/* Mobile Dropdown - 修改重點：完全不透明背景 bg-[#0a0a0a] */}
       {mobileOpen && (
         <div 
-          className="fixed inset-0 top-20 bg-[#0a0a0a]/95 backdrop-blur-xl z-[9998] flex flex-col pt-4 md:hidden animate-in fade-in slide-in-from-top-4 duration-300"
+          className="fixed inset-0 top-0 bg-[#0a0a0a] z-[9998] flex flex-col pt-24 md:hidden animate-in fade-in duration-300"
         >
           {navLinks.map((link) => (
             <a
@@ -92,12 +92,12 @@ export function Navbar() {
               href={link.href}
               target={link.href.startsWith("http") ? "_blank" : "_self"}
               onClick={() => setMobileOpen(false)}
-              className="px-8 py-6 text-xl font-bold text-gray-200 border-b border-white/5 active:bg-[#ff8800]/10 hover:text-[#ff8800] transition-colors"
+              className="px-10 py-6 text-2xl font-black italic text-gray-200 border-b border-white/5 active:text-[#ff8800] hover:text-[#ff8800] transition-colors"
             >
               {link.label}
             </a>
           ))}
-          <div className="flex-grow" onClick={() => setMobileOpen(false)}></div>
+          <div className="flex-grow bg-[#0a0a0a]" onClick={() => setMobileOpen(false)}></div>
         </div>
       )}
     </nav>
