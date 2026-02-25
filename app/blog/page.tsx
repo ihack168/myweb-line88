@@ -30,7 +30,7 @@ export default function BlogPage() {
           const youtubeMatch = rawContent.match(/youtube\.com\/embed\/([^"?\s]+)/);
           const videoId = youtubeMatch ? youtubeMatch[1] : null;
 
-          // 2. 提取第一張圖片 (作為備用縮圖)
+          // 2. 提取第一張圖片
           const imageMatch = rawContent.match(/<img[^>]+src="([^">]+)"/);
           const firstImgUrl = imageMatch ? imageMatch[1] : null;
 
@@ -47,10 +47,12 @@ export default function BlogPage() {
             .replace(/\s+/g, " ")                         
             .trim();
 
-          const blogUrlMatch = item.link.find((l: any) => l.rel === "alternate")?.href || "";
-          
-          // ✨ 修正點：強制使用你的官方網域，確保標籤連結正確
-          const blogBaseUrl = "https://www.line88.tw";
+          // ✨ 網域邏輯修正
+          const originalLink = item.link.find((l: any) => l.rel === "alternate")?.href || "";
+          // 強制將文章連結導向新子網域 blog.line88.tw
+          const finalLink = originalLink.replace("www.line88.tw", "blog.line88.tw");
+          // 標籤連結的基礎網域
+          const blogBaseUrl = "https://blog.line88.tw";
 
           const finalThumbnail = videoId 
             ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` 
@@ -59,7 +61,7 @@ export default function BlogPage() {
           return {
             id: item.id.$t,
             title: item.title.$t,
-            link: blogUrlMatch,
+            link: finalLink,
             blogBaseUrl: blogBaseUrl,
             date: new Date(item.published.$t).toLocaleDateString(),
             summary: cleanSummary.substring(0, 110),
@@ -118,7 +120,7 @@ export default function BlogPage() {
           {loading ? (
             <div className="flex flex-col items-center justify-center py-40">
               <div className="w-12 h-12 border-4 border-[#ff4500]/20 border-t-[#ff4500] rounded-full animate-spin"></div>
-              <p className="mt-4 text-gray-500 font-mono tracking-widest uppercase text-xs">Loading...</p>
+              <p className="mt-4 text-gray-500 font-mono tracking-widest uppercase text-xs">Loading Data...</p>
             </div>
           ) : (
             <>
@@ -128,111 +130,6 @@ export default function BlogPage() {
                     <article key={post.id} className="group bg-[#111] border border-white/5 rounded-3xl overflow-hidden hover:border-[#ff4500]/40 transition-all duration-500 shadow-2xl">
                       <div className="flex flex-col md:flex-row">
                         
+                        {/* 圖片/影片 區域 */}
                         {post.thumbnailUrl && (
-                          <div className="relative w-full md:w-2/5 aspect-video bg-black shrink-0 overflow-hidden">
-                            {post.videoId && playingId === post.id ? (
-                              <iframe 
-                                src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`} 
-                                className="w-full h-full border-0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                              ></iframe>
-                            ) : (
-                              <div 
-                                className={`relative w-full h-full transition-all duration-500 ${post.videoId ? 'cursor-pointer group/thumb' : ''}`} 
-                                onClick={() => post.videoId && setPlayingId(post.id)}
-                              >
-                                <img src={post.thumbnailUrl} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" alt={post.title} />
-                                {post.videoId && (
-                                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 group-hover/thumb:bg-transparent transition-all">
-                                    <PlayCircle className="w-16 h-16 text-[#ff4500] drop-shadow-2xl transform group-hover/thumb:scale-110 transition-transform duration-300" />
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="p-8 flex-1 flex flex-col justify-center">
-                          {/* 帶連結的標籤區 🚀 */}
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {post.tags.map((tag: string) => (
-                              <a 
-                                key={tag} 
-                                // 生成路徑：https://www.line88.tw/search/label/標籤名
-                                href={`${post.blogBaseUrl}/search/label/${encodeURIComponent(tag)}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center px-2.5 py-1 text-[10px] font-bold border border-[#ff4500]/30 text-[#ff4500] rounded-md bg-[#ff4500]/5 tracking-widest uppercase transition-all hover:bg-[#ff4500] hover:text-white hover:border-[#ff4500] hover:shadow-[0_0_10px_rgba(255,69,0,0.3)]"
-                              >
-                                <Tag className="w-3 h-3 mr-1" />
-                                {tag}
-                              </a>
-                            ))}
-                          </div>
-
-                          <div className="flex items-center text-xs text-gray-500 mb-3 font-mono">
-                            <Calendar className="w-3.5 h-3.5 mr-2 text-[#ff4500]" />
-                            {post.date}
-                          </div>
-
-                          <h2 className="text-2xl font-bold mb-4 group-hover:text-[#ff4500] transition-colors duration-300 line-clamp-2 leading-tight">
-                            {post.title}
-                          </h2>
-
-                          <p className="text-gray-400 text-sm mb-6 leading-relaxed line-clamp-3 font-light">
-                            {post.summary}...
-                          </p>
-
-                          <a 
-                            href={post.link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center font-bold text-[#ff4500] hover:text-[#ff8c00] transition-all text-sm tracking-wider uppercase"
-                          >
-                            閱讀完整文章<ArrowRight className="ml-2 w-4 h-4" />
-                          </a>
-                        </div>
-                      </div>
-                    </article>
-                  ))
-                ) : (
-                  <div className="text-center py-20 text-gray-500">暫無文章數據</div>
-                )}
-              </div>
-
-              <div className="mt-20 flex flex-col items-center gap-6">
-                <div className="flex items-center justify-center space-x-3">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="p-3 bg-[#111] border border-white/10 rounded-full hover:border-[#ff4500] disabled:opacity-20 transition-all active:scale-95"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-
-                  <div className="flex items-center space-x-2">
-                    {renderPageNumbers()}
-                  </div>
-
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                    className="p-3 bg-[#111] border border-white/10 rounded-full hover:border-[#ff4500] disabled:opacity-20 transition-all active:scale-95"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-                
-                <div className="text-gray-600 text-[10px] font-mono tracking-[0.2em] uppercase">
-                  Page {currentPage} of {totalPages}
-                </div>
-              </div>
-            </>
-          )}
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
+                          <div className="relative w-full md:w-
