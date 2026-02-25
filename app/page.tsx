@@ -18,9 +18,9 @@ export default function Home() {
     },
     "serviceType": [
       "網路投票買票灌票",
-      "LINE 投票支援",
+      "LINE Facebook Google 投票買票灌票",
       "社群媒體流量增長",
-      "Facebook IG Threads 大量按讚追蹤"
+      "Facebook IG 社團 Threads 大量按讚追蹤增粉"
     ],
     "areaServed": "TW",
     "hasOfferCatalog": {
@@ -31,14 +31,14 @@ export default function Home() {
           "@type": "Offer",
           "itemOffered": {
             "@type": "Service",
-            "name": "LINE 投票買票灌票 - 獨家分散式 IP 技術"
+            "name": "LINE Facebook Google 投票買票灌票 獨家技術"
           }
         },
         {
           "@type": "Offer",
           "itemOffered": {
             "@type": "Service",
-            "name": "社群增長 - FB IG Threads 大量追蹤按讚"
+            "name": "Facebook IG 社團 Threads 大量按讚追蹤增粉"
           }
         }
       ]
@@ -63,10 +63,10 @@ export default function Home() {
         <ServicesSection />
         
         <section className="sr-only">
-          <h2>全台最穩定的網路投票買票與灌票服務</h2>
+          <h2>全台最強的網路投票買票與灌票服務</h2>
           <p>
-            我們提供專業的 LINE 投票買票、FB 臉書投票灌票、Google 表單數據優化、
-            各式網站投票破解與數據提升服務。針對 Threads、IG、Facebook 提供大量按讚與追蹤數。
+            我們提供專業的 LINE 投票買票、FB 臉書投票灌票、Google 投票表單數據優化、
+            各式網站投票破解與數據提升服務。針對 Threads、IG、Facebook 提供大量按讚與追蹤數增粉。
           </p>
         </section>
 
