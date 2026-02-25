@@ -6,27 +6,32 @@ export async function GET(request: NextRequest) {
   const maxResults = 6;
   const startIndex = (page - 1) * maxResults + 1;
 
-  // 使用 www.line88.tw 抓取後台資料
-  const targetUrl = `https://www.line88.tw/feeds/posts/default?alt=json&max-results=${maxResults}&start-index=${startIndex}`;
+  // 加上 timestamp 防止快取導致抓不到資料
+  const targetUrl = `https://www.line88.tw/feeds/posts/default?alt=json&max-results=${maxResults}&start-index=${startIndex}&t=${Date.now()}`;
   
   try {
-    const response = await fetch(targetUrl, { next: { revalidate: 60 } });
+    // 這裡改用 cache: 'no-store' 確保資料即時抓取，不被舊的 10 篇資料快取擋住
+    const response = await fetch(targetUrl, { cache: 'no-store' });
+    
+    if (!response.ok) {
+      throw new Error('Blogger API response was not ok');
+    }
+
     const data = await response.json();
+    
+    // 檢查是否有文章，如果沒有 entry 則給予空陣列避免 map 噴錯
     const entries = data.feed?.entry || [];
     const totalResults = parseInt(data.feed?.openSearch$totalResults?.$t || '0');
 
     const posts = entries.map((entry: any) => {
       const content = entry.content?.$t || "";
       
-      // 1. 抓取 YouTube ID
       const ytMatch = content.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
       const videoId = ytMatch ? ytMatch[1] : null;
       
-      // 2. 抓取第一張圖
       const imgMatch = content.match(/<img[^>]+src="([^">]+)"/);
       const firstImage = imgMatch ? imgMatch[1] : null;
 
-      // 3. 修正導向網址至 blog.line88.tw
       let originalLink = entry.link?.find((l: any) => l.rel === 'alternate')?.href || "";
       const correctLink = originalLink.replace("www.line88.tw", "blog.line88.tw");
 
@@ -52,6 +57,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Fetch Error:", error);
+    return NextResponse.json({ posts: [], error: 'Internal Server Error' }, { status: 500 });
   }
 }
