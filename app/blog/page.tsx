@@ -38,7 +38,6 @@ export default function BlogPage() {
       .substring(0, 80);
   };
 
-  // 取得總頁數，預設至少 1 頁
   const totalPages = data?.pagination?.totalPages || 1;
 
   return (
@@ -86,13 +85,21 @@ export default function BlogPage() {
                     </div>
 
                     <div className="p-6 flex-grow flex flex-col">
+                      {/* 補回連結功能的標籤區塊 */}
                       <div className="flex flex-wrap gap-2 mb-4">
                         {post.tags.map((tag: string) => (
-                          <span key={tag} className="text-[10px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-1 rounded">
+                          <a 
+                            key={tag} 
+                            href={`https://blog.line88.tw/search/label/${encodeURIComponent(tag)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[16px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-1 rounded hover:bg-[#ff8800] hover:text-black transition-all cursor-pointer"
+                          >
                             #{tag}
-                          </span>
+                          </a>
                         ))}
                       </div>
+
                       <h2 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-[#ff8800] transition-colors">
                         {post.title}
                       </h2>
@@ -100,7 +107,7 @@ export default function BlogPage() {
                         {cleanContent(post.content)}...
                       </p>
                       <div className="mt-auto pt-4 border-t border-white/5">
-                        <a href={post.link} target="_blank" className="inline-flex items-center gap-2 text-[#ff8800] text-sm font-bold group/link">
+                        <a href={post.link} target="_blank" className="inline-flex items-center gap-2 text-[#ff8800] text-xl font-bold group/link">
                           閱讀全文內容 <span className="group-hover/link:translate-x-2 transition-transform">→</span>
                         </a>
                       </div>
@@ -114,7 +121,6 @@ export default function BlogPage() {
               </div>
             )}
 
-            {/* 動態分頁器：根據文章數量自動增減按鈕 */}
             <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
               <button 
                 onClick={() => setPage(p => Math.max(1, p - 1))} 
@@ -124,7 +130,6 @@ export default function BlogPage() {
                 PREV
               </button>
 
-              {/* 根據 API 算出的 totalPages 生成按鈕 */}
               {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
                 <button
                   key={num}
