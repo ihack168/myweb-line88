@@ -3,7 +3,7 @@ import { NextResponse, NextRequest } from 'next/server';
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1');
-  const maxResults = 10;
+  const maxResults = 6;
   const startIndex = (page - 1) * maxResults + 1;
 
   // 使用 www.line88.tw 抓取後台資料

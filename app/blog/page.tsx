@@ -44,7 +44,6 @@ export default function BlogPage() {
 
         {loading ? (
           <div className="flex justify-center py-20">
-            {/* 載入動畫橘色化 */}
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#ff8800]"></div>
           </div>
         ) : (
@@ -112,22 +111,37 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* 下方分頁控制橘色化 */}
-        <div className="mt-16 flex justify-center items-center gap-8">
+        {/* 修正：1-10 數字分頁按鈕區塊 */}
+        <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
+          {/* PREV 按鈕 */}
           <button 
             onClick={() => setPage(p => Math.max(1, p - 1))} 
             disabled={page === 1} 
-            className="text-sm font-bold tracking-widest border border-white/20 px-6 py-2 rounded-full hover:bg-white/5 disabled:opacity-20 transition-all"
+            className="mr-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
           >
             PREV
           </button>
-          <div className="text-[#ff8800] font-mono text-lg">
-            {String(page).padStart(2, '0')} <span className="text-white/20 px-2">/</span> {String(data?.pagination?.totalPages || 1).padStart(2, '0')}
-          </div>
+
+          {/* 1-10 數字按鈕 */}
+          {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+            <button
+              key={num}
+              onClick={() => setPage(num)}
+              className={`w-10 h-10 rounded-lg font-mono font-bold transition-all duration-300 border ${
+                page === num 
+                  ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.6)] scale-110" 
+                  : "bg-transparent text-gray-400 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
+              }`}
+            >
+              {num}
+            </button>
+          ))}
+
+          {/* NEXT 按鈕 */}
           <button 
-            onClick={() => setPage(p => p + 1)} 
-            disabled={page >= (data?.pagination?.totalPages || 1)} 
-            className="text-sm font-bold tracking-widest bg-[#ff8800] text-black px-6 py-2 rounded-full hover:shadow-[0_0_20px_rgba(255,136,0,0.6)] disabled:opacity-20 transition-all"
+            onClick={() => setPage(p => Math.min(10, p + 1))} 
+            disabled={page === 10} 
+            className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
           >
             NEXT
           </button>
