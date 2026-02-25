@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const startIndex = (page - 1) * maxResults + 1;
 
   // 加上 timestamp 防止快取導致抓不到資料
-  const targetUrl = `https://www.line88.tw/feeds/posts/default?alt=json&max-results=${maxResults}&start-index=${startIndex}&t=${Date.now()}`;
+  const targetUrl = `https://blog.line88.tw/feeds/posts/default?alt=json&max-results=${maxResults}&start-index=${startIndex}&t=${Date.now()}`;
   
   try {
     // 這裡改用 cache: 'no-store' 確保資料即時抓取，不被舊的 10 篇資料快取擋住
