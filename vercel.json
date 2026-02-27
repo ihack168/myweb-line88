@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.line88.tw"
+        }
+      ],
+      "destination": "https://blog.line88.tw/:path*",
+      "permanent": true
+    }
+  ]
+}
