@@ -56,6 +56,7 @@ const services: ServiceItem[] = [
   {
     title: "Threads@ 灌水服務",
     description: "Threads 大量按愛心、追蹤、留言推文",
+    link: "/content/threads-services",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19.25 17C18.84 18.61 17.33 19.5 15.5 19.5C12.5 19.5 10 17.5 10 14.5C10 11.5 12.5 9.5 15.5 9.5C17.33 9.5 18.84 10.39 19.25 12"/><path d="M15.5 13.5C14.5 13.5 13.5 14 13.5 15C13.5 16 14.5 16.5 15.5 16.5C16.5 16.5 17.5 16 17.5 15C17.5 14 16.5 13.5 15.5 13.5Z"/><path d="M7 10C7 6.5 10 3.5 14.5 3.5C19 3.5 22 6.5 22 10V14C22 18.5 18.5 22 14 22C10.5 22 7.5 19.5 7.5 15.5"/></svg>
     ),
