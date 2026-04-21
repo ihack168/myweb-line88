@@ -1,6 +1,14 @@
 import React from 'react';
+import Link from 'next/link';
 
-const services = [
+interface ServiceItem {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  link?: string;
+}
+
+const services: ServiceItem[] = [
   {
     title: "Line 帳號投票服務",
     description: "Line 帳號大量投票、買票、灌票",
@@ -82,24 +90,39 @@ export function ServicesSection() {
           <span className="text-primary">|</span> 服務項目
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {services.map((service) => (
-            <div
-              key={service.title}
-              className="flex items-start gap-4 rounded-2xl border border-border bg-card p-6 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300"
-            >
-              <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
-                {service.icon}
+          {services.map((service) => {
+            // 封裝卡片的內容
+            const CardContent = (
+              <div className={`flex items-start gap-4 rounded-2xl border border-border bg-card p-6 transition-all duration-300 h-full ${service.link ? 'hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 cursor-pointer' : ''}`}>
+                <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary">
+                  {service.icon}
+                </div>
+                <div className="flex flex-col justify-center">
+                  <h3 className="text-base font-bold text-card-foreground leading-snug">
+                    {service.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+                    {service.description}
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col justify-center">
-                <h3 className="text-base font-bold text-card-foreground leading-snug">
-                  {service.title}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
-                  {service.description}
-                </p>
+            );
+
+            // 如果有 link，就用 Link 組件包裹；否則直接輸出 div
+            if (service.link) {
+              return (
+                <Link href={service.link} key={service.title} className="block group">
+                  {CardContent}
+                </Link>
+              );
+            }
+
+            return (
+              <div key={service.title}>
+                {CardContent}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
