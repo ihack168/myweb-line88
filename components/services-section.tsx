@@ -70,7 +70,7 @@ const services: ServiceItem[] = [
     ),
   },
   {
-    title: "Line@官方帳號AI客服系統串接建置",
+    title: "Line@官方帳號AI客服串接建置",
     description: "Line@官方帳號串接 AI (Gemini、ChatGPT)",
     link: "/content/line-ai-services",
     icon: (
