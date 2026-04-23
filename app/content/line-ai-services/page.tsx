@@ -67,8 +67,8 @@ export default function LineAiAutomationPage() {
         {/* Hero Section */}
         <div className="text-center mb-20">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-            企業級 Line AI 自動化 <br/> 
-            <span className="text-[#00ff00]">打造 24/7 不間斷的智慧商機</span>
+            企業級 Line AI 串接自動化 <br/> 
+            <span className="text-[#00ff00]">打造24小時全天候不間斷的AI商機</span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto">
             還在擔心 Line 官方帳號訊息太多回不完？我們協助企業串接 ChatGPT 與 Gemini，結合 RAG 技術建立私有知識庫，讓 AI 成為最懂你產品的「超級客服」。
