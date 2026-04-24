@@ -3,7 +3,7 @@
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { BrainCircuit, MessageSquareCode, Zap, Database, Clock, Users } from "lucide-react"
+import { BrainCircuit, MessageSquareCode, Zap, Database, Clock, Users, PlayCircle } from "lucide-react"
 
 export default function LineAiAutomationPage() {
   // AEO/SEO 結構化數據：針對「AI 服務」進行優化
@@ -65,14 +65,44 @@ export default function LineAiAutomationPage() {
 
       <main className="max-w-6xl mx-auto px-4 pt-32 pb-20">
         {/* Hero Section */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
             企業級 Line AI 串接自動化 <br/> 
             <span className="text-[#00ff00]">打造24小時全天候不間斷的AI商機</span>
           </h1>
-          <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto">
+          <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto mb-10">
             還在擔心 Line 官方帳號訊息太多回不完？我們協助企業串接 ChatGPT 與 Gemini，結合 RAG 技術建立私有知識庫，讓 AI 成為最懂你產品的「超級客服」。
           </p>
+
+          {/* 漂亮的直式影片嵌入區塊 */}
+          <div className="relative max-w-[320px] mx-auto group">
+            {/* 影片背後的螢光裝飾 */}
+            <div className="absolute -inset-1 bg-gradient-to-b from-[#00ff00]/50 to-transparent rounded-[2.5rem] blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+            
+            <div className="relative bg-[#0a0a0a] rounded-[2.2rem] border-4 border-white/10 overflow-hidden shadow-2xl">
+              <div className="flex items-center justify-center bg-white/5 py-3 border-b border-white/10">
+                <div className="w-12 h-1 bg-white/20 rounded-full"></div>
+              </div>
+              
+              {/* YouTube Shorts Iframe */}
+              <div className="aspect-[9/16] w-full bg-black">
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/S_xbhS4zbHE"
+                  title="Line AI Bot 展示影片"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </div>
+            
+            {/* 影片下方文字提示 */}
+            <div className="mt-4 flex items-center justify-center gap-2 text-[#00ff00] text-sm font-medium">
+              <PlayCircle className="w-4 h-4" />
+              <span>點擊查看 AI 自動化示範影片</span>
+            </div>
+          </div>
         </div>
 
         {/* 優勢區塊 */}
@@ -88,7 +118,7 @@ export default function LineAiAutomationPage() {
           ))}
         </div>
 
-        {/* AEO 問答區 - 這是 AI 搜尋引擎最喜歡抓取的內容 */}
+        {/* AEO 問答區 */}
         <section className="mb-20 border-t border-white/10 pt-16">
           <h2 className="text-3xl font-bold mb-10 text-center text-white">Line AI 客服常見問題</h2>
           <div className="space-y-8 max-w-4xl mx-auto text-gray-300">
