@@ -32,9 +32,15 @@ async function getPost(slug: string) {
   const query = `
     *[_type == "post" && slug.current == $slug][0]{
       title,
-      body,
       "slug": slug.current,
-      "author": author->name
+      "author": author->name,
+      body[]{
+        ...,
+        _type == "image" => {
+          ...,
+          asset->
+        }
+      }
     }
   `;
   return client.fetch(query, { slug });
