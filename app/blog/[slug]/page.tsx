@@ -21,6 +21,7 @@ const components = {
   types: {
     image: ({ value }: any) => {
       if (!value?.asset) return null;
+
       return (
         <img
           src={urlFor(value)}
@@ -30,34 +31,54 @@ const components = {
       );
     },
   },
+
   block: {
     h1: ({ children }: any) => (
-      <h1 className="text-3xl font-bold text-white mt-8 mb-4">{children}</h1>
+      <h1 className="text-3xl font-bold text-white mt-8 mb-4">
+        {children}
+      </h1>
     ),
+
     h2: ({ children }: any) => (
-      <h2 className="text-2xl font-bold text-white mt-8 mb-4">{children}</h2>
+      <h2 className="text-2xl font-bold text-white mt-8 mb-4">
+        {children}
+      </h2>
     ),
+
     h3: ({ children }: any) => (
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">{children}</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">
+        {children}
+      </h3>
     ),
+
     normal: ({ children }: any) => (
-      <p className="text-gray-300 leading-8 mb-4">{children}</p>
+      <p className="text-gray-300 leading-8 mb-4">
+        {children}
+      </p>
     ),
+
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-[#00ff00] pl-4 my-4 text-gray-400 italic">
         {children}
       </blockquote>
     ),
   },
+
   marks: {
     strong: ({ children }: any) => (
-      <strong className="text-white font-bold">{children}</strong>
+      <strong className="text-white font-bold">
+        {children}
+      </strong>
     ),
+
     em: ({ children }: any) => (
-      <em className="text-[#00ff00]">{children}</em>
+      <em className="text-[#00ff00]">
+        {children}
+      </em>
     ),
+
     link: ({ value, children }: any) => (
-      
+      <a
         href={value?.href}
         target="_blank"
         rel="noopener noreferrer"
@@ -85,16 +106,16 @@ async function getPost(slug: string) {
       }
     }
   `;
+
   return client.fetch(query, { slug });
 }
 
 export default async function BlogPostPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params;
-  const post = await getPost(slug);
+  const post = await getPost(params.slug);
 
   if (!post) {
     return notFound();
@@ -113,43 +134,54 @@ export default async function BlogPostPage({
       {/* 頂部導航 */}
       <div className="border-b border-[#00ff00]/20 px-6 py-4">
         <Link
-          href="/"
+          href="/blog"
           className="text-[#00ff00] hover:text-white transition-colors text-sm flex items-center gap-2"
         >
-          ← 返回首頁
+          ← 返回文章列表
         </Link>
       </div>
 
       <main className="max-w-3xl mx-auto px-6 py-16">
-        {/* 文章標題區 */}
+        {/* 文章標題 */}
         <div className="mb-10 border-b border-[#00ff00]/20 pb-8">
           <h1 className="text-3xl md:text-4xl font-black text-white leading-tight mb-4">
             {post.title}
           </h1>
+
           <div className="flex items-center gap-4 text-sm text-gray-500">
             {post.author && (
-              <span className="text-[#00ff00]">✍ {post.author}</span>
+              <span className="text-[#00ff00]">
+                ✍ {post.author}
+              </span>
             )}
-            {publishedDate && <span>{publishedDate}</span>}
+
+            {publishedDate && (
+              <span>{publishedDate}</span>
+            )}
           </div>
         </div>
 
         {/* 文章內容 */}
-        <article className="prose-invert">
+        <article className="prose prose-invert max-w-none">
           {post.body ? (
-            <PortableText value={post.body} components={components} />
+            <PortableText
+              value={post.body}
+              components={components}
+            />
           ) : (
-            <p className="text-gray-500">No content</p>
+            <p className="text-gray-500">
+              No content
+            </p>
           )}
         </article>
 
         {/* 底部返回 */}
         <div className="mt-16 pt-8 border-t border-[#00ff00]/20">
           <Link
-            href="/"
+            href="/blog"
             className="inline-flex items-center gap-2 bg-[#00ff00]/10 hover:bg-[#00ff00]/20 text-[#00ff00] px-6 py-3 rounded-lg transition-colors text-sm font-medium"
           >
-            ← 返回首頁
+            ← 返回文章列表
           </Link>
         </div>
       </main>
