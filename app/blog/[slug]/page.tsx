@@ -8,13 +8,18 @@ import { notFound } from "next/navigation";
 // 修正圖片 Builder 棄用問題
 const builder = createImageUrlBuilder(client);
 function urlFor(source: any) {
+  if (!source) return { url: () => "" };
   return builder.image(source);
 }
 
-export default async function PostPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+// 關鍵修正：params 在新版 Next.js 是 Promise，類型需定義為 Promise
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+  
+  // 1. 必須先 await 才能拿到真正的 slug
+  const resolvedParams = await params;
+  const slug = resolvedParams.slug;
 
-  // 1. 執行查詢：務必傳入第二個參數 { slug }
+  // 2. 執行查詢：確保傳入的變數名稱與 GROQ 語法中的 $slug 對應
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
       title,
@@ -25,10 +30,10 @@ export default async function PostPage({ params }: { params: { slug: string } })
       "authorName": author->name,
       "tags": categories[]->title
     }`,
-    { slug } // <--- 這行是修正 Vercel 錯誤的關鍵！
+    { slug: slug } // <--- 這裡傳入剛才 await 拿到的 slug
   );
 
-  // 2. 如果找不到文章，直接回傳 404 頁面
+  // 3. 如果找不到文章，回傳 404
   if (!post) {
     notFound();
   }
@@ -51,9 +56,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
           {post.title}
         </h1>
         <div className="flex items-center gap-4 text-gray-400 mb-12">
-          <span>{post.authorName}</span>
+          <span>{post.authorName || "管理員"}</span>
           <span>•</span>
-          <span>{new Date(post.publishedAt).toLocaleDateString("zh-TW")}</span>
+          <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("zh-TW") : ""}</span>
         </div>
 
         {/* 主圖 */}
@@ -67,9 +72,9 @@ export default async function PostPage({ params }: { params: { slug: string } })
           </div>
         )}
 
-        {/* 文章內容 (使用 PortableText 渲染 Sanity 的區塊內容) */}
+        {/* 文章內容 */}
         <div className="prose prose-invert prose-orange max-w-none prose-lg">
-          <PortableText value={post.body} />
+          {post.body && <PortableText value={post.body} />}
         </div>
       </main>
       <Footer />
@@ -77,10 +82,13 @@ export default async function PostPage({ params }: { params: { slug: string } })
   );
 }
 
-// 3. 靜態路由生成：這能讓 Vercel 提前知道有哪些 slug，避免編譯錯誤
+// 4. 靜態路由生成
 export async function generateStaticParams() {
+  // 注意：這裡不需要 params，單純抓取所有 slug
   const query = `*[_type == "post"]{ "slug": slug.current }`;
   const posts = await client.fetch(query);
+
+  if (!posts) return [];
 
   return posts.map((post: any) => ({
     slug: post.slug,
