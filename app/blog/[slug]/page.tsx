@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@sanity/client";
+import imageUrlBuilder from "@sanity/image-url";
+import { PortableText } from "@portabletext/react";
 
 const client = createClient({
   projectId: "t0di9pwy",
@@ -7,6 +9,24 @@ const client = createClient({
   apiVersion: "2024-01-01",
   useCdn: true,
 });
+
+const builder = imageUrlBuilder(client);
+
+function urlFor(source: any) {
+  return builder.image(source).url();
+}
+
+const components = {
+  types: {
+    image: ({ value }: any) => (
+      <img
+        src={urlFor(value)}
+        alt={value.alt || ""}
+        style={{ maxWidth: "100%", marginTop: 16, marginBottom: 16 }}
+      />
+    ),
+  },
+};
 
 async function getPost(slug: string) {
   const query = `
@@ -38,13 +58,7 @@ export default async function BlogPostPage({
       <p style={{ color: "#666" }}>Author: {post.author}</p>
       <article style={{ marginTop: 20 }}>
         {post.body ? (
-          post.body.map((block: any, index: number) => {
-            if (block._type !== "block") return null;
-            const text = block.children
-              ?.map((child: any) => child.text)
-              .join("") ?? "";
-            return <p key={index}>{text}</p>;
-          })
+          <PortableText value={post.body} components={components} />
         ) : (
           <p>No content</p>
         )}
