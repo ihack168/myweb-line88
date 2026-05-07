@@ -18,13 +18,16 @@ function urlFor(source: any) {
 
 const components = {
   types: {
-    image: ({ value }: any) => (
-      <img
-        src={urlFor(value)}
-        alt={value.alt || ""}
-        style={{ maxWidth: "100%", marginTop: 16, marginBottom: 16 }}
-      />
-    ),
+    image: ({ value }: any) => {
+      if (!value?.asset) return null;
+      return (
+        <img
+          src={urlFor(value)}
+          alt={value.alt || ""}
+          style={{ maxWidth: "100%", marginTop: 16, marginBottom: 16 }}
+        />
+      );
+    },
   },
 };
 
