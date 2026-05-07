@@ -1,21 +1,5 @@
 {
   "compilerOptions": {
-<<<<<<< HEAD
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "module": "Preserve",
-    "moduleDetection": "force",
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true
-  },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
-=======
     "lib": [
       "dom",
       "dom.iterable",
@@ -54,5 +38,4 @@
   "exclude": [
     "node_modules"
   ]
->>>>>>> bb3af59e0775098738f01c47906613ceb2bd4137
 }
