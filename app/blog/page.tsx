@@ -3,8 +3,19 @@ import { useState, useEffect } from "react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 
+// 定義文章類型，增加程式碼可讀性
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  thumbnail: string;
+  videoId?: string;
+  tags: string[];
+  link: string;
+}
+
 export default function BlogPage() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{ posts: Post[]; pagination: { totalPages: number } } | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
@@ -13,17 +24,22 @@ export default function BlogPage() {
     async function fetchPosts() {
       setLoading(true);
       try {
+        // 這裡會去呼叫你的 API Route
         const res = await fetch(`/api/blog?page=${page}`);
+        if (!res.ok) throw new Error("網路請求失敗");
         const result = await res.json();
         setData(result);
-      } catch (err) { 
-        console.error("抓取文章失敗:", err); 
-      } finally { 
-        setLoading(false); 
+      } catch (err) {
+        console.error("抓取文章失敗:", err);
+      } finally {
+        setLoading(false);
       }
     }
     fetchPosts();
-    window.scrollTo(0, 0);
+    // 只有在瀏覽器環境下執行 scrollTo
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }, [page]);
 
   const cleanContent = (content: string) => {
@@ -54,15 +70,15 @@ export default function BlogPage() {
           </div>
         ) : (
           <>
-            {data?.posts?.length > 0 ? (
+            {data?.posts && data.posts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {data.posts.map((post: any) => (
+                {data.posts.map((post) => (
                   <article key={post.id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-[#ff8800]/30 transition-all shadow-2xl">
                     <div className="relative h-52 w-full bg-black overflow-hidden">
                       {activeVideo === post.id && post.videoId ? (
                         <iframe
                           src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`}
-                          className="w-full h-full"
+                          className="w-full h-full border-none"
                           allow="autoplay; encrypted-media"
                           allowFullScreen
                         ></iframe>
@@ -70,7 +86,7 @@ export default function BlogPage() {
                         <div className="relative h-full w-full cursor-pointer" onClick={() => post.videoId && setActiveVideo(post.id)}>
                           <img 
                             src={post.thumbnail} 
-                            alt="" 
+                            alt={post.title} 
                             className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
                           />
                           {post.videoId && (
@@ -85,15 +101,14 @@ export default function BlogPage() {
                     </div>
 
                     <div className="p-6 flex-grow flex flex-col">
-                      {/* 補回連結功能的標籤區塊 */}
                       <div className="flex flex-wrap gap-2 mb-4">
-                        {post.tags.map((tag: string) => (
+                        {(post.tags || []).map((tag) => (
                           <a 
                             key={tag} 
                             href={`https://blog.line88.tw/search/label/${encodeURIComponent(tag)}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[16px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-1 rounded hover:bg-[#ff8800] hover:text-black transition-all cursor-pointer"
+                            className="text-[14px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-1 rounded hover:bg-[#ff8800] hover:text-black transition-all"
                           >
                             #{tag}
                           </a>
@@ -107,7 +122,7 @@ export default function BlogPage() {
                         {cleanContent(post.content)}...
                       </p>
                       <div className="mt-auto pt-4 border-t border-white/5">
-                        <a href={post.link} target="_blank" className="inline-flex items-center gap-2 text-[#ff8800] text-xl font-bold group/link">
+                        <a href={post.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#ff8800] text-xl font-bold group/link">
                           閱讀全文內容 <span className="group-hover/link:translate-x-2 transition-transform">→</span>
                         </a>
                       </div>
@@ -121,37 +136,40 @@ export default function BlogPage() {
               </div>
             )}
 
-            <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
-              <button 
-                onClick={() => setPage(p => Math.max(1, p - 1))} 
-                disabled={page === 1} 
-                className="mr-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
-              >
-                PREV
-              </button>
-
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
-                <button
-                  key={num}
-                  onClick={() => setPage(num)}
-                  className={`w-10 h-10 rounded-lg font-mono font-bold transition-all duration-300 border ${
-                    page === num 
-                      ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.6)] scale-110" 
-                      : "bg-transparent text-gray-400 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
-                  }`}
+            {/* 分頁控制 */}
+            {totalPages > 1 && (
+              <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
+                <button 
+                  onClick={() => setPage(p => Math.max(1, p - 1))} 
+                  disabled={page === 1} 
+                  className="mr-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
                 >
-                  {num}
+                  PREV
                 </button>
-              ))}
 
-              <button 
-                onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
-                disabled={page >= totalPages} 
-                className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
-              >
-                NEXT
-              </button>
-            </div>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => setPage(num)}
+                    className={`w-10 h-10 rounded-lg font-mono font-bold transition-all duration-300 border ${
+                      page === num 
+                        ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.6)] scale-110" 
+                        : "bg-transparent text-gray-400 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+
+                <button 
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                  disabled={page >= totalPages} 
+                  className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
+                >
+                  NEXT
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>
