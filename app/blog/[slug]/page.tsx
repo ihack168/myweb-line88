@@ -5,21 +5,22 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { notFound } from "next/navigation";
 
-// 修正圖片 Builder 棄用問題
+// --- 關鍵：強制每次請求都重新抓取資料，不使用舊快取 ---
+export const revalidate = 0; 
+export const dynamic = 'force-dynamic';
+
 const builder = createImageUrlBuilder(client);
 function urlFor(source: any) {
   if (!source) return { url: () => "" };
   return builder.image(source);
 }
 
-// 關鍵修正：params 在新版 Next.js 是 Promise，類型需定義為 Promise
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   
-  // 1. 必須先 await 才能拿到真正的 slug
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
 
-  // 2. 執行查詢：確保傳入的變數名稱與 GROQ 語法中的 $slug 對應
+  // 使用 fetch 的時候加上 cache: 'no-store' 確保資料最新
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
       title,
@@ -30,10 +31,10 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       "authorName": author->name,
       "tags": categories[]->title
     }`,
-    { slug: slug } // <--- 這裡傳入剛才 await 拿到的 slug
+    { slug: slug },
+    { cache: 'no-store' } 
   );
 
-  // 3. 如果找不到文章，回傳 404
   if (!post) {
     notFound();
   }
@@ -52,18 +53,18 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         </div>
 
         {/* 標題與發布日期 */}
-        <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight">
+        <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight text-[#ff8800]">
           {post.title}
         </h1>
         <div className="flex items-center gap-4 text-gray-400 mb-12">
-          <span>{post.authorName || "管理員"}</span>
+          <span className="font-bold text-gray-200">{post.authorName || "管理員"}</span>
           <span>•</span>
           <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("zh-TW") : ""}</span>
         </div>
 
         {/* 主圖 */}
         {post.mainImage && (
-          <div className="relative w-full h-[400px] mb-12 rounded-2xl overflow-hidden border border-white/10">
+          <div className="relative w-full h-[400px] mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
             <img
               src={urlFor(post.mainImage).url()}
               alt={post.title}
@@ -73,8 +74,20 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         )}
 
         {/* 文章內容 */}
-        <div className="prose prose-invert prose-orange max-w-none prose-lg">
-          {post.body && <PortableText value={post.body} />}
+        <div className="prose prose-invert prose-orange max-w-none prose-lg 
+                        prose-h2:text-[#ff8800] prose-h2:italic prose-h2:border-l-4 prose-h2:border-[#ff8800] prose-h2:pl-4
+                        prose-strong:text-[#ff8800] 
+                        prose-table:border prose-table:border-white/20 prose-th:bg-white/5">
+          {/* 
+              注意：如果你 AI 產出的 HTML 存放在 body 欄位且是字串格式，
+              請將下方 PortableText 換成：
+              <div dangerouslySetInnerHTML={{ __html: post.body }} />
+          */}
+          {post.body && (
+            typeof post.body === 'string' 
+              ? <div dangerouslySetInnerHTML={{ __html: post.body }} />
+              : <PortableText value={post.body} />
+          )}
         </div>
       </main>
       <Footer />
@@ -82,9 +95,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   );
 }
 
-// 4. 靜態路由生成
+// 靜態路由生成 (保留用於加速已知頁面，但因上方 revalidate=0，所以會動態更新)
 export async function generateStaticParams() {
-  // 注意：這裡不需要 params，單純抓取所有 slug
   const query = `*[_type == "post"]{ "slug": slug.current }`;
   const posts = await client.fetch(query);
 

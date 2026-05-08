@@ -1,5 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
-
+export const dynamic = 'force-dynamic'; // 強制每次請求都要重新執行，不准緩存
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get('page') || '1');

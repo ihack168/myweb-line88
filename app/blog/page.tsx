@@ -25,7 +25,7 @@ export default function BlogPage() {
       setLoading(true);
       try {
         // 這裡會去呼叫你的 API Route
-        const res = await fetch(`/api/blog?page=${page}`);
+        const res = await fetch(`/api/blog?page=${page}&t=${new Date().getTime()}`);
         if (!res.ok) throw new Error("網路請求失敗");
         const result = await res.json();
         setData(result);
