@@ -46,8 +46,15 @@ export default defineType({
     }),
     defineField({
       name: 'body',
-      title: 'Body',
+      title: 'Body (Standard Editor)',
       type: 'blockContent',
+    }),
+    // --- 新增：HTML 專用欄位，用於接收 Excel/按鍵精靈產出的內容 ---
+    defineField({
+      name: 'htmlContent',
+      title: 'HTML Content (Excel Auto-post)',
+      type: 'text',
+      description: '這裡是存放按鍵精靈產出的原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
     }),
   ],
 
