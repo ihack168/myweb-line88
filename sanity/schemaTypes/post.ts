@@ -62,7 +62,7 @@ export default defineType({
       name: 'htmlContent',
       title: 'HTML Content (Excel Auto-post)',
       type: 'text',
-      description: '這裡是存放按鍵精靈產出的原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
+      description: '這裡是存放原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
     }),
     // --- 新增：YouTube 影片 ID 欄位 (配合你 page.tsx 的功能) ---
     defineField({
