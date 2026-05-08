@@ -1,107 +1,79 @@
 "use client";
 import { useState, useEffect } from "react";
-import { client } from "@/lib/sanity";
-import { createImageUrlBuilder } from "@sanity/image-url";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import Link from "next/link";
 
-// --- Sanity 圖片工具 ---
-const builder = createImageUrlBuilder(client);
-function urlFor(source: any) {
-  if (!source) return "";
-  return builder.image(source).url();
-}
-
-// --- 定義類型 ---
+// 定義文章類型，增加程式碼可讀性
 interface Post {
   id: string;
   title: string;
-  slug: string;
-  description: string; // 用於摘要
+  content: string;
   thumbnail: string;
   videoId?: string;
   tags: string[];
-  publishedAt: string;
+  link: string;
 }
 
 export default function BlogPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [totalPosts, setTotalPosts] = useState(0);
+  const [data, setData] = useState<{ posts: Post[]; pagination: { totalPages: number } } | null>(null);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
-  const postsPerPage = 9; // 每頁顯示 9 篇文章
-
   useEffect(() => {
-    async function fetchSanityPosts() {
+    async function fetchPosts() {
       setLoading(true);
       try {
-        // 計算分頁範圍
-        const start = (page - 1) * postsPerPage;
-        const end = start + postsPerPage;
-
-        // 1. 抓取文章總數
-        const count = await client.fetch(`count(*[_type == "post"])`);
-        setTotalPosts(count);
-
-        // 2. 抓取文章內容
-        const result = await client.fetch(
-          `*[_type == "post"] | order(publishedAt desc) [$start...$end] {
-            "id": _id,
-            title,
-            "slug": slug.current,
-            "description": select(
-                defined(description) => description,
-                "點擊閱讀全文內容..."
-            ),
-            "thumbnail": mainImage,
-            "videoId": youtubeVideoId, // 假設你在 Sanity 欄位叫這個
-            "tags": categories[]->title,
-            publishedAt
-          }`,
-          { start, end }
-        );
-        setPosts(result);
+        // 這裡會去呼叫你的 API Route
+        const res = await fetch(`/api/blog?page=${page}&t=${new Date().getTime()}`);
+        if (!res.ok) throw new Error("網路請求失敗");
+        const result = await res.json();
+        setData(result);
       } catch (err) {
-        console.error("Sanity 抓取失敗:", err);
+        console.error("抓取文章失敗:", err);
       } finally {
         setLoading(false);
       }
     }
-
-    fetchSanityPosts();
+    fetchPosts();
+    // 只有在瀏覽器環境下執行 scrollTo
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   }, [page]);
 
-  const totalPages = Math.ceil(totalPosts / postsPerPage) || 1;
+  const cleanContent = (content: string) => {
+    if (!content) return "無內容摘要";
+    return content
+      .replace(/<script\b[^<]*>([\s\S]*?)<\/script>/gim, "")
+      .replace(/<style\b[^<]*>([\s\S]*?)<\/style>/gim, "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .substring(0, 80);
+  };
+
+  const totalPages = data?.pagination?.totalPages || 1;
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-20">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
-          <h1 className="text-4xl md:text-6xl font-black italic text-[#ff8800] tracking-tighter">
-            LATEST ARTICLES
-          </h1>
-          <p className="text-gray-500 font-mono text-sm">TOTAL_POSTS: {totalPosts}</p>
-        </div>
+        <h1 className="text-4xl font-black mb-12 italic text-[#ff8800]">
+          最新文章
+        </h1>
 
         {loading ? (
-          <div className="flex justify-center py-40">
+          <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#ff8800]"></div>
           </div>
         ) : (
           <>
-            {posts.length > 0 ? (
+            {data?.posts && data.posts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {posts.map((post) => (
+                {data.posts.map((post) => (
                   <article key={post.id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-[#ff8800]/30 transition-all shadow-2xl">
-                    
-                    {/* 圖片/影片區 */}
                     <div className="relative h-52 w-full bg-black overflow-hidden">
                       {activeVideo === post.id && post.videoId ? (
                         <iframe
@@ -113,7 +85,7 @@ export default function BlogPage() {
                       ) : (
                         <div className="relative h-full w-full cursor-pointer" onClick={() => post.videoId && setActiveVideo(post.id)}>
                           <img 
-                            src={urlFor(post.thumbnail)} 
+                            src={post.thumbnail} 
                             alt={post.title} 
                             className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
                           />
@@ -128,31 +100,31 @@ export default function BlogPage() {
                       )}
                     </div>
 
-                    {/* 內容區 */}
                     <div className="p-6 flex-grow flex flex-col">
                       <div className="flex flex-wrap gap-2 mb-4">
                         {(post.tags || []).map((tag) => (
-                          <span 
+                          <a 
                             key={tag} 
-                            className="text-[12px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-0.5 rounded border border-[#ff8800]/20"
+                            href={`https://blog.line88.tw/search/label/${encodeURIComponent(tag)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[14px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-1 rounded hover:bg-[#ff8800] hover:text-black transition-all"
                           >
                             #{tag}
-                          </span>
+                          </a>
                         ))}
                       </div>
 
                       <h2 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-[#ff8800] transition-colors">
                         {post.title}
                       </h2>
-                      
-                      <p className="text-gray-400 text-sm line-clamp-3 mb-6 font-light leading-relaxed">
-                        {post.description}
+                      <p className="text-gray-400 text-sm line-clamp-3 mb-6">
+                        {cleanContent(post.content)}...
                       </p>
-
                       <div className="mt-auto pt-4 border-t border-white/5">
-                        <Link href={`/blog/${post.slug}`} className="inline-flex items-center gap-2 text-[#ff8800] text-lg font-black group/link">
-                          READ ARTICLE <span className="group-hover/link:translate-x-2 transition-transform">→</span>
-                        </Link>
+                        <a href={post.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#ff8800] text-xl font-bold group/link">
+                          閱讀全文內容 <span className="group-hover/link:translate-x-2 transition-transform">→</span>
+                        </a>
                       </div>
                     </div>
                   </article>
