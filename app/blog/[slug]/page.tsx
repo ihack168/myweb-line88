@@ -63,48 +63,67 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        <div className="flex gap-2 mb-6">
+        {/* 標籤區 */}
+        <div className="flex flex-wrap gap-2 mb-6">
           {post.tags?.map((tag: string) => (
-            <span key={tag} className="text-[#ff8800] bg-[#ff8800]/10 px-3 py-1 rounded-full text-sm font-bold">
+            <span key={tag} className="text-[#ff8800] bg-[#ff8800]/10 border border-[#ff8800]/20 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
               #{tag}
             </span>
           ))}
         </div>
 
-        <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight text-[#ff8800]">
+        {/* 標題區 */}
+        <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight text-[#ff8800] drop-shadow-sm">
           {post.title}
         </h1>
-        <div className="flex items-center gap-4 text-gray-400 mb-12">
-          <span className="font-bold text-gray-200">{post.authorName || "管理員"}</span>
-          <span>•</span>
+        
+        <div className="flex items-center gap-4 text-gray-400 mb-12 text-sm">
+          <span className="font-bold text-gray-200">By {post.authorName || "Lockhead Hex Admin"}</span>
+          <span className="text-white/20">|</span>
           <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("zh-TW") : ""}</span>
         </div>
 
+        {/* 主圖 */}
         {post.mainImage && (
-          <div className="relative w-full h-[400px] mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+          <div className="relative w-full h-[300px] md:h-[450px] mb-16 rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(255,136,0,0.1)]">
             <img
               src={urlFor(post.mainImage).url()}
               alt={post.title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover shadow-inner"
             />
           </div>
         )}
 
-        {/* 內容渲染區 */}
-        <div className="prose prose-invert prose-orange max-w-none prose-lg 
-                        prose-h2:text-[#ff8800] prose-h2:italic prose-h2:border-l-4 prose-h2:border-[#ff8800] prose-h2:pl-4
-                        prose-strong:text-[#ff8800] 
-                        prose-table:border prose-table:border-white/20 prose-th:bg-white/5
-                        prose-img:rounded-xl">
+        {/* 內容渲染區 - 針對 HTML 與 AEO 強化 */}
+        <article className="prose prose-invert prose-orange max-w-none 
+                        /* 文字與標題優化 */
+                        prose-lg md:prose-xl
+                        prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
+                        prose-headings:text-[#ff8800] prose-headings:font-black prose-headings:italic
+                        prose-h2:text-3xl prose-h2:border-l-8 prose-h2:border-[#ff8800] prose-h2:pl-6 prose-h2:mt-12 prose-h2:mb-6
+                        prose-h3:text-2xl prose-h3:mt-8
+                        prose-strong:text-[#ff8800] prose-strong:font-bold
+                        
+                        /* 列表優化 (AEO 喜好結構) */
+                        prose-ul:bg-white/5 prose-ul:p-8 prose-ul:rounded-2xl prose-ul:border prose-ul:border-white/10
+                        prose-li:marker:text-[#ff8800] prose-li:text-gray-300
+                        
+                        /* 表格優化 (數據提取關鍵) */
+                        prose-table:border-collapse prose-table:my-10
+                        prose-thead:bg-[#ff8800]/10 prose-th:text-[#ff8800] prose-th:p-4 prose-th:border prose-th:border-white/10
+                        prose-td:p-4 prose-td:border prose-td:border-white/10 prose-td:text-gray-300
+                        
+                        /* 圖片與區塊 */
+                        prose-img:rounded-2xl prose-img:border prose-img:border-white/10
+                        prose-blockquote:border-l-[#ff8800] prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:italic">
           
-          {/* 優先顯示 HTML 欄位（適合你的 Excel 大量灌單），如果沒有才顯示標準 Body */}
           {post.htmlContent ? (
-            <div dangerouslySetInnerHTML={{ __html: post.htmlContent }} />
+            <div className="auto-html-container" dangerouslySetInnerHTML={{ __html: post.htmlContent }} />
           ) : (
             post.body && <PortableText value={post.body} components={ptComponents} />
           )}
 
-        </div>
+        </article>
       </main>
       <Footer />
     </div>
