@@ -11,10 +11,11 @@ interface Post {
   title: string;
   slug: string;
   description: string; 
-  thumbnail: string; // 這裡現在會是純網址字串
+  thumbnail: string;
   videoId?: string;
   tags: string[];
   publishedAt: string;
+  htmlContent?: string; // 增加此欄位以利提取圖片
 }
 
 export default function BlogPage() {
@@ -33,22 +34,18 @@ export default function BlogPage() {
         const start = (page - 1) * postsPerPage;
         const end = start + postsPerPage;
 
-        // 1. 抓取文章總數 (增加 cache: 'no-store' 確保資料即時)
         const count = await client.fetch(`count(*[_type == "post"])`, {}, { cache: 'no-store' });
         setTotalPosts(count);
 
-        // 2. 抓取文章內容
-        // 重點：thumbnail 部分會優先抓取你的外部網址欄位 (假設叫 imageUrl)
         const result = await client.fetch(
           `*[_type == "post"] | order(_createdAt desc) [$start...$end] {
             "id": _id,
             title,
             "slug": slug.current,
-            "description": coalesce(
-                description, 
-                "點擊閱讀詳情..."
-            ),
-            "thumbnail": coalesce(imageUrl, mainImage, ""), 
+            "description": coalesce(description, "點擊閱讀詳情..."),
+            "imageUrl": imageUrl,
+            "mainImage": mainImage.asset->url,
+            "htmlContent": htmlContent,
             "videoId": youtubeVideoId, 
             "tags": categories[]->title,
             "publishedAt": coalesce(publishedAt, _createdAt)
@@ -56,8 +53,29 @@ export default function BlogPage() {
           { start, end },
           { cache: 'no-store' }
         );
+
+        // --- 自動抓取 HTML 第一張圖的邏輯 ---
+        const processedPosts = result.map((post: any) => {
+          let extractedImg = "";
+
+          // 1. 嘗試從 HTML 內容提取第一張圖
+          if (post.htmlContent) {
+            const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch && imgMatch[1]) {
+              extractedImg = imgMatch[1];
+            }
+          }
+
+          // 2. 決定最終使用的縮圖網址 (優先序: HTML > 外部網址 > Sanity 上傳)
+          const finalThumbnail = extractedImg || post.imageUrl || post.mainImage || "";
+
+          return {
+            ...post,
+            thumbnail: finalThumbnail
+          };
+        });
         
-        setPosts(result);
+        setPosts(processedPosts);
       } catch (err) {
         console.error("Sanity 抓取失敗:", err);
       } finally {
@@ -95,7 +113,6 @@ export default function BlogPage() {
                 {posts.map((post) => (
                   <article key={post.id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-[#ff8800]/30 transition-all shadow-2xl">
                     
-                    {/* 圖片/影片區 */}
                     <div className="relative h-52 w-full bg-black overflow-hidden">
                       {activeVideo === post.id && post.videoId ? (
                         <iframe
@@ -111,13 +128,12 @@ export default function BlogPage() {
                               src={post.thumbnail} 
                               alt={post.title} 
                               className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
-                              // 如果圖片網址失效的處理
                               onError={(e) => {
                                 (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x225?text=No+Image";
                               }}
                             />
                           ) : (
-                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic">NO IMAGE</div>
+                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic text-sm">NO IMAGE FOUND</div>
                           )}
                           
                           {post.videoId && (
@@ -131,7 +147,6 @@ export default function BlogPage() {
                       )}
                     </div>
 
-                    {/* 內容區 */}
                     <div className="p-6 flex-grow flex flex-col">
                       <div className="flex flex-wrap gap-2 mb-4">
                         {(post.tags || []).map((tag) => (
@@ -168,7 +183,6 @@ export default function BlogPage() {
               </div>
             )}
 
-            {/* 分頁控制 */}
             {totalPages > 1 && (
               <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
                 <button 
