@@ -15,7 +15,7 @@ interface Post {
   videoId?: string;
   tags: string[];
   publishedAt: string;
-  htmlContent?: string; // 增加此欄位以利提取圖片
+  htmlContent?: string;
 }
 
 export default function BlogPage() {
@@ -42,7 +42,7 @@ export default function BlogPage() {
             "id": _id,
             title,
             "slug": slug.current,
-            "description": coalesce(description, "點擊閱讀詳情..."),
+            "description": description, 
             "imageUrl": imageUrl,
             "mainImage": mainImage.asset->url,
             "htmlContent": htmlContent,
@@ -54,24 +54,33 @@ export default function BlogPage() {
           { cache: 'no-store' }
         );
 
-        // --- 自動抓取 HTML 第一張圖的邏輯 ---
+        // --- 自動提取圖片與摘要邏輯 ---
         const processedPosts = result.map((post: any) => {
           let extractedImg = "";
+          let extractedDesc = post.description || "";
 
-          // 1. 嘗試從 HTML 內容提取第一張圖
           if (post.htmlContent) {
+            // 1. 提取第一張圖
             const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
             if (imgMatch && imgMatch[1]) {
               extractedImg = imgMatch[1];
             }
+
+            // 2. 如果 description 欄位是空的，自動從 HTML 提取純文字作為摘要
+            if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
+              // 移除 HTML 標籤並擷取文字
+              const pureText = post.htmlContent.replace(/<[^>]*>?/gm, '').trim();
+              extractedDesc = pureText.substring(0, 100) + (pureText.length > 100 ? "..." : "");
+            }
           }
 
-          // 2. 決定最終使用的縮圖網址 (優先序: HTML > 外部網址 > Sanity 上傳)
-          const finalThumbnail = extractedImg || post.imageUrl || post.mainImage || "";
+          // 最終保底文字
+          if (!extractedDesc) extractedDesc = "點擊閱讀詳情...";
 
           return {
             ...post,
-            thumbnail: finalThumbnail
+            thumbnail: extractedImg || post.imageUrl || post.mainImage || "",
+            description: extractedDesc
           };
         });
         
@@ -97,7 +106,7 @@ export default function BlogPage() {
       <main className="container mx-auto px-6 pt-32 pb-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <h1 className="text-4xl md:text-6xl font-black italic text-[#ff8800] tracking-tighter">
-            LATEST ARTICLES
+            最新文章
           </h1>
           <p className="text-gray-500 font-mono text-sm">TOTAL_POSTS: {totalPosts}</p>
         </div>
@@ -169,7 +178,7 @@ export default function BlogPage() {
 
                       <div className="mt-auto pt-4 border-t border-white/5">
                         <Link href={`/blog/${post.slug}`} className="inline-flex items-center gap-2 text-[#ff8800] text-lg font-black group/link">
-                          READ ARTICLE <span className="group-hover/link:translate-x-2 transition-transform">→</span>
+                          點擊閱讀內容 <span className="group-hover/link:translate-x-2 transition-transform">→</span>
                         </Link>
                       </div>
                     </div>
