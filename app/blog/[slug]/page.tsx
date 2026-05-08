@@ -73,7 +73,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         </div>
 
         {/* 標題區 */}
-        <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight text-[#ff8800] drop-shadow-sm">
+        <h1 className="text-4xl md:text-6xl font-black mb-8 italic leading-tight text-[#ff8800]">
           {post.title}
         </h1>
         
@@ -89,14 +89,13 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
             <img
               src={urlFor(post.mainImage).url()}
               alt={post.title}
-              className="w-full h-full object-cover shadow-inner"
+              className="w-full h-full object-cover"
             />
           </div>
         )}
 
-        {/* 內容渲染區 - 針對 HTML 與 AEO 強化 */}
+        {/* 內容渲染區 */}
         <article className="prose prose-invert prose-orange max-w-none 
-                        /* 文字與標題優化 */
                         prose-lg md:prose-xl
                         prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
                         prose-headings:text-[#ff8800] prose-headings:font-black prose-headings:italic
@@ -104,21 +103,22 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                         prose-h3:text-2xl prose-h3:mt-8
                         prose-strong:text-[#ff8800] prose-strong:font-bold
                         
-                        /* 列表優化 (AEO 喜好結構) */
                         prose-ul:bg-white/5 prose-ul:p-8 prose-ul:rounded-2xl prose-ul:border prose-ul:border-white/10
                         prose-li:marker:text-[#ff8800] prose-li:text-gray-300
                         
-                        /* 表格優化 (數據提取關鍵) */
-                        prose-table:border-collapse prose-table:my-10
-                        prose-thead:bg-[#ff8800]/10 prose-th:text-[#ff8800] prose-th:p-4 prose-th:border prose-th:border-white/10
+                        /* 強制處理 Excel 的表格樣式 */
+                        prose-table:border-collapse prose-table:my-10 prose-table:block prose-table:overflow-x-auto
+                        prose-thead:bg-[#ff8800]/20 prose-th:text-[#ff8800] prose-th:p-4 prose-th:border prose-th:border-white/10
                         prose-td:p-4 prose-td:border prose-td:border-white/10 prose-td:text-gray-300
                         
-                        /* 圖片與區塊 */
                         prose-img:rounded-2xl prose-img:border prose-img:border-white/10
                         prose-blockquote:border-l-[#ff8800] prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:italic">
           
           {post.htmlContent ? (
-            <div className="auto-html-container" dangerouslySetInnerHTML={{ __html: post.htmlContent }} />
+            <div 
+              className="excel-content-fix [&_tr]:!bg-transparent [&_th]:!bg-[#ff8800]/20 [&_table]:!w-full [&_div]:!contents"
+              dangerouslySetInnerHTML={{ __html: post.htmlContent }} 
+            />
           ) : (
             post.body && <PortableText value={post.body} components={ptComponents} />
           )}
