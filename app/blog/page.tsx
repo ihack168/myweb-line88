@@ -60,21 +60,17 @@ export default function BlogPage() {
           let extractedDesc = post.description || "";
 
           if (post.htmlContent) {
-            // 1. 提取第一張圖
             const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
             if (imgMatch && imgMatch[1]) {
               extractedImg = imgMatch[1];
             }
 
-            // 2. 如果 description 欄位是空的，自動從 HTML 提取純文字作為摘要
             if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
-              // 移除 HTML 標籤並擷取文字
               const pureText = post.htmlContent.replace(/<[^>]*>?/gm, '').trim();
               extractedDesc = pureText.substring(0, 100) + (pureText.length > 100 ? "..." : "");
             }
           }
 
-          // 最終保底文字
           if (!extractedDesc) extractedDesc = "點擊閱讀詳情...";
 
           return {
@@ -108,7 +104,7 @@ export default function BlogPage() {
           <h1 className="text-4xl md:text-6xl font-black italic text-[#ff8800] tracking-tighter">
             最新文章
           </h1>
-          <p className="text-gray-500 font-mono text-sm">TOTAL_POSTS: {totalPosts}</p>
+          <p className="text-gray-500 font-mono text-sm">文章數量: {totalPosts}</p>
         </div>
 
         {loading ? (
@@ -122,6 +118,7 @@ export default function BlogPage() {
                 {posts.map((post) => (
                   <article key={post.id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-[#ff8800]/30 transition-all shadow-2xl">
                     
+                    {/* 圖片預覽區塊 */}
                     <div className="relative h-52 w-full bg-black overflow-hidden">
                       {activeVideo === post.id && post.videoId ? (
                         <iframe
@@ -131,23 +128,35 @@ export default function BlogPage() {
                           allowFullScreen
                         ></iframe>
                       ) : (
-                        <div className="relative h-full w-full cursor-pointer" onClick={() => post.videoId && setActiveVideo(post.id)}>
-                          {post.thumbnail ? (
-                            <img 
-                              src={post.thumbnail} 
-                              alt={post.title} 
-                              className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x225?text=No+Image";
-                              }}
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic text-sm">NO IMAGE FOUND</div>
-                          )}
-                          
+                        <div className="relative h-full w-full">
+                          {/* 將圖片包在 Link 內 */}
+                          <Link href={`/blog/${post.slug}`} className="block w-full h-full cursor-pointer overflow-hidden">
+                            {post.thumbnail ? (
+                              <img 
+                                src={post.thumbnail} 
+                                alt={post.title} 
+                                className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x225?text=No+Image";
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic text-sm">NO IMAGE FOUND</div>
+                            )}
+                          </Link>
+
+                          {/* 如果有影片，顯示播放按鈕，點擊後觸發 iframe 播放而非跳轉 */}
                           {post.videoId && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-16 h-11 bg-[#FF0000] rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
+                            <div 
+                              className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                            >
+                              <div 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveVideo(post.id);
+                                }}
+                                className="w-16 h-11 bg-[#FF0000] rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 pointer-events-auto cursor-pointer"
+                              >
                                 <div className="border-l-[18px] border-l-white border-y-[11px] border-y-transparent ml-1"></div>
                               </div>
                             </div>
@@ -168,9 +177,12 @@ export default function BlogPage() {
                         ))}
                       </div>
 
-                      <h2 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-[#ff8800] transition-colors">
-                        {post.title}
-                      </h2>
+                      {/* 標題點擊也能跳轉 */}
+                      <Link href={`/blog/${post.slug}`}>
+                        <h2 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-[#ff8800] transition-colors cursor-pointer">
+                          {post.title}
+                        </h2>
+                      </Link>
                       
                       <p className="text-gray-400 text-sm line-clamp-3 mb-6 font-light leading-relaxed">
                         {post.description}
