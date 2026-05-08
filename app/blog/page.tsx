@@ -41,21 +41,25 @@ export default function BlogPage() {
         const start = (page - 1) * postsPerPage;
         const end = start + postsPerPage;
 
-        // 1. 抓取文章總數 (確保 _type 匹配)
+        // --- 偵錯資訊 ---
+        console.log("嘗試抓取數據...");
+        console.log("Project ID:", client.config().projectId);
+        console.log("Dataset:", client.config().dataset);
+
+        // 1. 抓取文章總數 (不限類型先抓看看，確保連線正常)
         const count = await client.fetch(`count(*[_type == "post"])`);
+        console.log("資料庫中的文章總數 (type=post):", count);
         setTotalPosts(count);
 
-        // 2. 抓取文章內容
-        // 使用 coalesce 確保即便沒填 publishedAt 也能透過建立時間排序，不會抓不到資料
+        // 2. 抓取文章內容 (移除複雜過濾，先求抓得到資料)
         const result = await client.fetch(
-          `*[_type == "post"] | order(coalesce(publishedAt, _createdAt) desc) [$start...$end] {
+          `*[_type == "post"] | order(_createdAt desc) [$start...$end] {
             "id": _id,
             title,
             "slug": slug.current,
-            "description": select(
-                defined(htmlContent) => "自動化串接文章 - 點擊查看詳情...",
-                defined(description) => description,
-                "點擊閱讀全文內容..."
+            "description": coalesce(
+                description, 
+                select(defined(htmlContent) => "自動化串接內容...", "點擊閱讀詳情...")
             ),
             "thumbnail": mainImage,
             "videoId": youtubeVideoId, 
@@ -65,9 +69,10 @@ export default function BlogPage() {
           { start, end }
         );
         
+        console.log("抓取到的文章列表:", result);
         setPosts(result);
       } catch (err) {
-        console.error("Sanity 抓取失敗:", err);
+        console.error("Sanity 抓取失敗，請檢查 API Token 或 Dataset 設定:", err);
       } finally {
         setLoading(false);
       }
@@ -82,7 +87,7 @@ export default function BlogPage() {
   const totalPages = Math.ceil(totalPosts / postsPerPage) || 1;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
@@ -98,7 +103,7 @@ export default function BlogPage() {
           </div>
         ) : (
           <>
-            {posts.length > 0 ? (
+            {posts && posts.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {posts.map((post) => (
                   <article key={post.id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-[#ff8800]/30 transition-all shadow-2xl">
@@ -114,11 +119,16 @@ export default function BlogPage() {
                         ></iframe>
                       ) : (
                         <div className="relative h-full w-full cursor-pointer" onClick={() => post.videoId && setActiveVideo(post.id)}>
-                          <img 
-                            src={urlFor(post.thumbnail)} 
-                            alt={post.title} 
-                            className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
-                          />
+                          {post.thumbnail ? (
+                            <img 
+                              src={urlFor(post.thumbnail)} 
+                              alt={post.title} 
+                              className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700">NO IMAGE</div>
+                          )}
+                          
                           {post.videoId && (
                             <div className="absolute inset-0 flex items-center justify-center">
                               <div className="w-16 h-11 bg-[#FF0000] rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300">
@@ -161,8 +171,9 @@ export default function BlogPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-20 text-gray-500 text-xl font-bold">
-                暫時沒有相關文章。
+              <div className="text-center py-40 border border-dashed border-white/10 rounded-3xl">
+                <p className="text-gray-500 text-xl font-bold mb-2">暫時沒有相關文章。</p>
+                <p className="text-gray-700 text-sm font-mono">Check Sanity Studio - Published status</p>
               </div>
             )}
 
@@ -172,18 +183,18 @@ export default function BlogPage() {
                 <button 
                   onClick={() => setPage(p => Math.max(1, p - 1))} 
                   disabled={page === 1} 
-                  className="mr-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
+                  className="mr-2 text-xs font-bold tracking-widest border border-white/20 px-6 py-3 rounded-xl hover:bg-white/5 disabled:opacity-10 transition-all text-white uppercase"
                 >
-                  PREV
+                  Prev
                 </button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
                   <button
                     key={num}
                     onClick={() => setPage(num)}
-                    className={`w-10 h-10 rounded-lg font-mono font-bold transition-all duration-300 border ${
+                    className={`w-12 h-12 rounded-xl font-mono font-bold transition-all duration-300 border ${
                       page === num 
-                        ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.6)] scale-110" 
+                        ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.4)] scale-110" 
                         : "bg-transparent text-gray-400 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
                     }`}
                   >
@@ -194,9 +205,9 @@ export default function BlogPage() {
                 <button 
                   onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
                   disabled={page >= totalPages} 
-                  className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-4 py-2 rounded-lg hover:bg-white/5 disabled:opacity-10 transition-all text-white"
+                  className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-6 py-3 rounded-xl hover:bg-white/5 disabled:opacity-10 transition-all text-white uppercase"
                 >
-                  NEXT
+                  Next
                 </button>
               </div>
             )}
