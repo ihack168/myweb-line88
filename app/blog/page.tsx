@@ -18,7 +18,7 @@ interface Post {
   id: string;
   title: string;
   slug: string;
-  description: string; // 用於摘要
+  description: string; 
   thumbnail: string;
   videoId?: string;
   tags: string[];
@@ -32,37 +32,39 @@ export default function BlogPage() {
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
-  const postsPerPage = 9; // 每頁顯示 9 篇文章
+  const postsPerPage = 9; 
 
   useEffect(() => {
     async function fetchSanityPosts() {
       setLoading(true);
       try {
-        // 計算分頁範圍
         const start = (page - 1) * postsPerPage;
         const end = start + postsPerPage;
 
-        // 1. 抓取文章總數
+        // 1. 抓取文章總數 (確保 _type 匹配)
         const count = await client.fetch(`count(*[_type == "post"])`);
         setTotalPosts(count);
 
         // 2. 抓取文章內容
+        // 使用 coalesce 確保即便沒填 publishedAt 也能透過建立時間排序，不會抓不到資料
         const result = await client.fetch(
-          `*[_type == "post"] | order(publishedAt desc) [$start...$end] {
+          `*[_type == "post"] | order(coalesce(publishedAt, _createdAt) desc) [$start...$end] {
             "id": _id,
             title,
             "slug": slug.current,
             "description": select(
+                defined(htmlContent) => "自動化串接文章 - 點擊查看詳情...",
                 defined(description) => description,
                 "點擊閱讀全文內容..."
             ),
             "thumbnail": mainImage,
-            "videoId": youtubeVideoId, // 假設你在 Sanity 欄位叫這個
+            "videoId": youtubeVideoId, 
             "tags": categories[]->title,
-            publishedAt
+            "publishedAt": coalesce(publishedAt, _createdAt)
           }`,
           { start, end }
         );
+        
         setPosts(result);
       } catch (err) {
         console.error("Sanity 抓取失敗:", err);
