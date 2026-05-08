@@ -14,7 +14,6 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
-// --- 新增：定義 PortableText 如何渲染圖片 ---
 const ptComponents = {
   types: {
     image: ({ value }: any) => {
@@ -48,6 +47,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
       publishedAt,
       mainImage,
       body,
+      htmlContent, 
       "authorName": author->name,
       "tags": categories[]->title
     }`,
@@ -90,15 +90,20 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
 
+        {/* 內容渲染區 */}
         <div className="prose prose-invert prose-orange max-w-none prose-lg 
                         prose-h2:text-[#ff8800] prose-h2:italic prose-h2:border-l-4 prose-h2:border-[#ff8800] prose-h2:pl-4
                         prose-strong:text-[#ff8800] 
-                        prose-table:border prose-table:border-white/20 prose-th:bg-white/5">
-          {post.body && (
-            typeof post.body === 'string' 
-              ? <div dangerouslySetInnerHTML={{ __html: post.body }} />
-              : <PortableText value={post.body} components={ptComponents} /> // <--- 這裡傳入自定義組件
+                        prose-table:border prose-table:border-white/20 prose-th:bg-white/5
+                        prose-img:rounded-xl">
+          
+          {/* 優先顯示 HTML 欄位（適合你的 Excel 大量灌單），如果沒有才顯示標準 Body */}
+          {post.htmlContent ? (
+            <div dangerouslySetInnerHTML={{ __html: post.htmlContent }} />
+          ) : (
+            post.body && <PortableText value={post.body} components={ptComponents} />
           )}
+
         </div>
       </main>
       <Footer />
