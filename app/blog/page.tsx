@@ -1,17 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { client } from "@/lib/sanity";
-import { createImageUrlBuilder } from "@sanity/image-url";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import Link from "next/link";
-
-// --- Sanity 圖片工具 ---
-const builder = createImageUrlBuilder(client);
-function urlFor(source: any) {
-  if (!source) return "";
-  return builder.image(source).url();
-}
 
 // --- 定義類型 ---
 interface Post {
@@ -19,7 +11,7 @@ interface Post {
   title: string;
   slug: string;
   description: string; 
-  thumbnail: string;
+  thumbnail: string; // 這裡現在會是純網址字串
   videoId?: string;
   tags: string[];
   publishedAt: string;
@@ -41,17 +33,12 @@ export default function BlogPage() {
         const start = (page - 1) * postsPerPage;
         const end = start + postsPerPage;
 
-        // --- 偵錯資訊 ---
-        console.log("嘗試抓取數據...");
-        console.log("Project ID:", client.config().projectId);
-        console.log("Dataset:", client.config().dataset);
-
-        // 1. 抓取文章總數 (不限類型先抓看看，確保連線正常)
-        const count = await client.fetch(`count(*[_type == "post"])`);
-        console.log("資料庫中的文章總數 (type=post):", count);
+        // 1. 抓取文章總數 (增加 cache: 'no-store' 確保資料即時)
+        const count = await client.fetch(`count(*[_type == "post"])`, {}, { cache: 'no-store' });
         setTotalPosts(count);
 
-        // 2. 抓取文章內容 (移除複雜過濾，先求抓得到資料)
+        // 2. 抓取文章內容
+        // 重點：thumbnail 部分會優先抓取你的外部網址欄位 (假設叫 imageUrl)
         const result = await client.fetch(
           `*[_type == "post"] | order(_createdAt desc) [$start...$end] {
             "id": _id,
@@ -59,20 +46,20 @@ export default function BlogPage() {
             "slug": slug.current,
             "description": coalesce(
                 description, 
-                select(defined(htmlContent) => "自動化串接內容...", "點擊閱讀詳情...")
+                "點擊閱讀詳情..."
             ),
-            "thumbnail": mainImage,
+            "thumbnail": coalesce(imageUrl, mainImage, ""), 
             "videoId": youtubeVideoId, 
             "tags": categories[]->title,
             "publishedAt": coalesce(publishedAt, _createdAt)
           }`,
-          { start, end }
+          { start, end },
+          { cache: 'no-store' }
         );
         
-        console.log("抓取到的文章列表:", result);
         setPosts(result);
       } catch (err) {
-        console.error("Sanity 抓取失敗，請檢查 API Token 或 Dataset 設定:", err);
+        console.error("Sanity 抓取失敗:", err);
       } finally {
         setLoading(false);
       }
@@ -121,12 +108,16 @@ export default function BlogPage() {
                         <div className="relative h-full w-full cursor-pointer" onClick={() => post.videoId && setActiveVideo(post.id)}>
                           {post.thumbnail ? (
                             <img 
-                              src={urlFor(post.thumbnail)} 
+                              src={post.thumbnail} 
                               alt={post.title} 
                               className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
+                              // 如果圖片網址失效的處理
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x225?text=No+Image";
+                              }}
                             />
                           ) : (
-                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700">NO IMAGE</div>
+                            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic">NO IMAGE</div>
                           )}
                           
                           {post.videoId && (

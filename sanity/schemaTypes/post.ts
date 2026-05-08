@@ -25,9 +25,17 @@ export default defineType({
       type: 'reference',
       to: {type: 'author'},
     }),
+    // --- 新增：外部圖片網址欄位 ---
+    defineField({
+      name: 'imageUrl',
+      title: 'External Image URL (外部圖片網址)',
+      type: 'url',
+      description: '直接貼上外部網站的圖片連結 (例如 https://...)，這將作為列表頁的封面圖。',
+    }),
+    // 原有的 Sanity 上傳圖片欄位（保留備用）
     defineField({
       name: 'mainImage',
-      title: 'Main image',
+      title: 'Main image (Sanity Upload)',
       type: 'image',
       options: {
         hotspot: true,
@@ -49,12 +57,19 @@ export default defineType({
       title: 'Body (Standard Editor)',
       type: 'blockContent',
     }),
-    // --- 新增：HTML 專用欄位，用於接收 Excel/按鍵精靈產出的內容 ---
+    // --- HTML 專用欄位 ---
     defineField({
       name: 'htmlContent',
       title: 'HTML Content (Excel Auto-post)',
       type: 'text',
       description: '這裡是存放按鍵精靈產出的原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
+    }),
+    // --- 新增：YouTube 影片 ID 欄位 (配合你 page.tsx 的功能) ---
+    defineField({
+      name: 'youtubeVideoId',
+      title: 'YouTube Video ID',
+      type: 'string',
+      description: '輸入 YouTube 影片 ID (例如: dQw4w9WgXcQ)，前端會自動顯示播放按鈕。',
     }),
   ],
 
