@@ -5,7 +5,6 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { notFound } from "next/navigation";
 
-// --- 關鍵：強制每次請求都重新抓取資料，不使用舊快取 ---
 export const revalidate = 0; 
 export const dynamic = 'force-dynamic';
 
@@ -15,12 +14,33 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
+// --- 新增：定義 PortableText 如何渲染圖片 ---
+const ptComponents = {
+  types: {
+    image: ({ value }: any) => {
+      if (!value?.asset?._ref) return null;
+      return (
+        <div className="my-8 flex flex-col items-center">
+          <img
+            src={urlFor(value).url()}
+            alt={value.alt || "文章圖片"}
+            className="rounded-xl border border-white/10 shadow-lg"
+            loading="lazy"
+          />
+          {value.caption && (
+            <p className="mt-2 text-sm text-gray-400 italic">{value.caption}</p>
+          )}
+        </div>
+      );
+    },
+  },
+};
+
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   
   const resolvedParams = await params;
   const slug = resolvedParams.slug;
 
-  // 使用 fetch 的時候加上 cache: 'no-store' 確保資料最新
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
       title,
@@ -43,7 +63,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Navbar />
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        {/* 文章標籤 */}
         <div className="flex gap-2 mb-6">
           {post.tags?.map((tag: string) => (
             <span key={tag} className="text-[#ff8800] bg-[#ff8800]/10 px-3 py-1 rounded-full text-sm font-bold">
@@ -52,7 +71,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           ))}
         </div>
 
-        {/* 標題與發布日期 */}
         <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight text-[#ff8800]">
           {post.title}
         </h1>
@@ -62,7 +80,6 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("zh-TW") : ""}</span>
         </div>
 
-        {/* 主圖 */}
         {post.mainImage && (
           <div className="relative w-full h-[400px] mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
             <img
@@ -73,20 +90,14 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
 
-        {/* 文章內容 */}
         <div className="prose prose-invert prose-orange max-w-none prose-lg 
                         prose-h2:text-[#ff8800] prose-h2:italic prose-h2:border-l-4 prose-h2:border-[#ff8800] prose-h2:pl-4
                         prose-strong:text-[#ff8800] 
                         prose-table:border prose-table:border-white/20 prose-th:bg-white/5">
-          {/* 
-              注意：如果你 AI 產出的 HTML 存放在 body 欄位且是字串格式，
-              請將下方 PortableText 換成：
-              <div dangerouslySetInnerHTML={{ __html: post.body }} />
-          */}
           {post.body && (
             typeof post.body === 'string' 
               ? <div dangerouslySetInnerHTML={{ __html: post.body }} />
-              : <PortableText value={post.body} />
+              : <PortableText value={post.body} components={ptComponents} /> // <--- 這裡傳入自定義組件
           )}
         </div>
       </main>
@@ -95,14 +106,9 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
   );
 }
 
-// 靜態路由生成 (保留用於加速已知頁面，但因上方 revalidate=0，所以會動態更新)
 export async function generateStaticParams() {
   const query = `*[_type == "post"]{ "slug": slug.current }`;
   const posts = await client.fetch(query);
-
   if (!posts) return [];
-
-  return posts.map((post: any) => ({
-    slug: post.slug,
-  }));
+  return posts.map((post: any) => ({ slug: post.slug }));
 }
