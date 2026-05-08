@@ -116,7 +116,19 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
           
           {post.htmlContent ? (
             <div 
-              className="excel-content-fix [&_tr]:!bg-transparent [&_th]:!bg-[#ff8800]/20 [&_table]:!w-full [&_div]:!contents"
+              className="excel-content-fix 
+                         [&_tr]:!bg-transparent 
+                         [&_th]:!bg-[#ff8800]/20 
+                         [&_table]:!w-full 
+                         [&_div]:!contents
+                         /* 強制將 HTML 內的圖片轉為圓角樣式 */
+                         [&_img]:rounded-2xl 
+                         [&_img]:border 
+                         [&_img]:border-white/10 
+                         [&_img]:shadow-lg 
+                         [&_img]:my-8 
+                         [&_img]:mx-auto 
+                         [&_img]:block"
               dangerouslySetInnerHTML={{ __html: post.htmlContent }} 
             />
           ) : (
