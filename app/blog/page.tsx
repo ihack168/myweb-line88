@@ -59,12 +59,14 @@ export default function BlogPage() {
           let extractedImg = "";
           let extractedDesc = post.description || "";
 
+          // 1. 優先從 HTML 內容提取第一張圖片
           if (post.htmlContent) {
             const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
             if (imgMatch && imgMatch[1]) {
               extractedImg = imgMatch[1];
             }
 
+            // 如果沒有摘要，從 HTML 提取純文字作為摘要
             if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
               const pureText = post.htmlContent.replace(/<[^>]*>?/gm, '').trim();
               extractedDesc = pureText.substring(0, 100) + (pureText.length > 100 ? "..." : "");
@@ -73,9 +75,15 @@ export default function BlogPage() {
 
           if (!extractedDesc) extractedDesc = "點擊閱讀詳情...";
 
+          // 2. YouTube 縮圖邏輯 (如果沒有 HTML 圖片，就抓 YouTube 封面)
+          const youtubeThumb = post.videoId 
+            ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg` 
+            : "";
+
           return {
             ...post,
-            thumbnail: extractedImg || post.imageUrl || post.mainImage || "",
+            // 優先級：HTML圖片 > YouTube封面 > 外部連結 > 上傳圖片
+            thumbnail: extractedImg || youtubeThumb || post.imageUrl || post.mainImage || "",
             description: extractedDesc
           };
         });
@@ -129,7 +137,7 @@ export default function BlogPage() {
                         ></iframe>
                       ) : (
                         <div className="relative h-full w-full">
-                          {/* 將圖片包在 Link 內 */}
+                          {/* 縮圖顯示區 */}
                           <Link href={`/blog/${post.slug}`} className="block w-full h-full cursor-pointer overflow-hidden">
                             {post.thumbnail ? (
                               <img 
@@ -137,7 +145,13 @@ export default function BlogPage() {
                                 alt={post.title} 
                                 className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
                                 onError={(e) => {
-                                  (e.target as HTMLImageElement).src = "https://via.placeholder.com/400x225?text=No+Image";
+                                  const target = e.target as HTMLImageElement;
+                                  // 如果 YouTube 高畫質圖 (maxres) 失敗，切換到標準畫質 (hqdefault)
+                                  if (target.src.includes('maxresdefault')) {
+                                    target.src = target.src.replace('maxresdefault', 'hqdefault');
+                                  } else {
+                                    target.src = "https://via.placeholder.com/400x225?text=No+Image";
+                                  }
                                 }}
                               />
                             ) : (
@@ -145,13 +159,12 @@ export default function BlogPage() {
                             )}
                           </Link>
 
-                          {/* 如果有影片，顯示播放按鈕，點擊後觸發 iframe 播放而非跳轉 */}
+                          {/* YouTube 播放按鈕 */}
                           {post.videoId && (
-                            <div 
-                              className="absolute inset-0 flex items-center justify-center pointer-events-none"
-                            >
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                               <div 
                                 onClick={(e) => {
+                                  e.preventDefault(); // 阻止 Link 跳轉
                                   e.stopPropagation();
                                   setActiveVideo(post.id);
                                 }}
@@ -177,7 +190,6 @@ export default function BlogPage() {
                         ))}
                       </div>
 
-                      {/* 標題點擊也能跳轉 */}
                       <Link href={`/blog/${post.slug}`}>
                         <h2 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-[#ff8800] transition-colors cursor-pointer">
                           {post.title}
