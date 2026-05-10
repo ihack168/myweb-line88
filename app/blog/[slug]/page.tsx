@@ -182,6 +182,13 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                 [&_tr]:!bg-transparent
                 [&_th]:!bg-[#ff8800]/20
                 [&_table]:!w-full
+                [&_td]:!border
+                [&_td]:!border-white/20
+                [&_th]:!border
+                [&_th]:!border-white/20
+                [&_table]:!border-collapse
+                [&_table]:!border
+                [&_table]:!border-white/20
                 [&_img]:rounded-2xl
                 [&_img]:border
                 [&_img]:border-white/10
