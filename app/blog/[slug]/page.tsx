@@ -1,150 +1,247 @@
-import { client } from "@/lib/sanity"; 
-import { createImageUrlBuilder } from "@sanity/image-url";
-import { PortableText } from "@portabletext/react";
+"use client";
+import { useState, useEffect } from "react";
+import { client } from "@/lib/sanity";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
-import { notFound } from "next/navigation";
+import Link from "next/link";
 
-export const revalidate = 0; 
-export const dynamic = 'force-dynamic';
-
-const builder = createImageUrlBuilder(client);
-function urlFor(source: any) {
-  if (!source) return { url: () => "" };
-  return builder.image(source);
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  description: string; 
+  thumbnail: string;
+  videoId?: string;
+  tags: string[];
+  publishedAt: string;
+  htmlContent?: string;
 }
 
-const ptComponents = {
-  types: {
-    image: ({ value }: any) => {
-      if (!value?.asset?._ref) return null;
-      return (
-        <div className="my-8 flex flex-col items-center">
-          <img
-            src={urlFor(value).url()}
-            alt={value.alt || "文章圖片"}
-            className="rounded-xl border border-white/10 shadow-lg"
-            loading="lazy"
-          />
-          {value.caption && (
-            <p className="mt-2 text-sm text-gray-400 italic">{value.caption}</p>
-          )}
-        </div>
-      );
-    },
-  },
-};
+export default function BlogPage() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
-export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
-  
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+  const postsPerPage = 9; 
 
-  const post = await client.fetch(
-    `*[_type == "post" && slug.current == $slug][0]{
-      title,
-      "slug": slug.current,
-      publishedAt,
-      mainImage,
-      body,
-      htmlContent, 
-      "authorName": author->name,
-      "tags": categories[]->title
-    }`,
-    { slug: slug },
-    { cache: 'no-store' } 
-  );
+  useEffect(() => {
+    async function fetchSanityPosts() {
+      setLoading(true);
+      try {
+        const start = (page - 1) * postsPerPage;
+        const end = start + postsPerPage;
 
-  if (!post) {
-    notFound();
-  }
+        const count = await client.fetch(`count(*[_type == "post"])`, {}, { cache: 'no-store' });
+        setTotalPosts(count);
+
+        const result = await client.fetch(
+          `*[_type == "post"] | order(_createdAt desc) [$start...$end] {
+            "id": _id,
+            title,
+            "slug": slug.current,
+            "description": description, 
+            "imageUrl": imageUrl,
+            "mainImage": mainImage.asset->url,
+            "htmlContent": htmlContent,
+            "videoId": youtubeVideoId, 
+            "tags": categories[]->title,
+            "publishedAt": coalesce(publishedAt, _createdAt)
+          }`,
+          { start, end },
+          { cache: 'no-store' }
+        );
+
+        const processedPosts = result.map((post: any) => {
+          let extractedImg = "";
+          let extractedDesc = post.description || "";
+
+          if (post.htmlContent) {
+            const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch && imgMatch[1]) {
+              extractedImg = imgMatch[1];
+            }
+
+            if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
+              const pureText = post.htmlContent.replace(/<[^>]*>?/gm, '').trim();
+              extractedDesc = pureText.substring(0, 100) + (pureText.length > 100 ? "..." : "");
+            }
+          }
+
+          if (!extractedDesc) extractedDesc = "點擊閱讀詳情...";
+
+          const youtubeThumb = post.videoId 
+            ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg` 
+            : "";
+
+          return {
+            ...post,
+            thumbnail: extractedImg || youtubeThumb || post.imageUrl || post.mainImage || "",
+            description: extractedDesc
+          };
+        });
+        
+        setPosts(processedPosts);
+      } catch (err) {
+        console.error("Sanity 抓取失敗:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSanityPosts();
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [page]);
+
+  const totalPages = Math.ceil(totalPosts / postsPerPage) || 1;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
       <Navbar />
-      <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        {/* 標籤區 */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {post.tags?.map((tag: string) => (
-            <span key={tag} className="text-[#ff8800] bg-[#ff8800]/10 border border-[#ff8800]/20 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
-              #{tag}
-            </span>
-          ))}
+      <main className="container mx-auto px-6 pt-32 pb-20">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+          <h1 className="text-4xl md:text-6xl font-black italic text-[#ff8800] tracking-tighter">
+            最新文章
+          </h1>
+          <p className="text-gray-500 font-mono text-sm">文章數量: {totalPosts}</p>
         </div>
 
-        {/* 標題區 */}
-        <h1 className="text-4xl md:text-6xl font-black mb-8 italic leading-tight text-[#ff8800]">
-          {post.title}
-        </h1>
-        
-        <div className="flex items-center gap-4 text-gray-400 mb-12 text-sm">
-          <span className="font-bold text-gray-200">By {post.authorName || "Lockhead Hex Admin"}</span>
-          <span className="text-white/20">|</span>
-          <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("zh-TW") : ""}</span>
-        </div>
-
-        {/* 主圖 */}
-        {post.mainImage && (
-          <div className="relative w-full h-[300px] md:h-[450px] mb-16 rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(255,136,0,0.1)]">
-            <img
-              src={urlFor(post.mainImage).url()}
-              alt={post.title}
-              className="w-full h-full object-cover"
-            />
+        {loading ? (
+          <div className="flex justify-center py-40">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#ff8800]"></div>
           </div>
+        ) : (
+          <>
+            {posts && posts.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {posts.map((post) => (
+                  <article key={post.id} className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden flex flex-col hover:border-[#ff8800]/30 transition-all shadow-2xl">
+                    <div className="relative h-52 w-full bg-black overflow-hidden">
+                      {activeVideo === post.id && post.videoId ? (
+                        <iframe
+                          src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`}
+                          className="w-full h-full border-none"
+                          allow="autoplay; encrypted-media"
+                          allowFullScreen
+                        ></iframe>
+                      ) : (
+                        <div className="relative h-full w-full">
+                          <Link href={`/blog/${post.slug}`} className="block w-full h-full cursor-pointer overflow-hidden">
+                            {post.thumbnail ? (
+                              <img 
+                                src={post.thumbnail} 
+                                alt={post.title} 
+                                className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110" 
+                                onError={(e) => {
+                                  const target = e.target as HTMLImageElement;
+                                  if (target.src.includes('maxresdefault')) {
+                                    target.src = target.src.replace('maxresdefault', 'hqdefault');
+                                  } else {
+                                    target.src = "https://via.placeholder.com/400x225?text=No+Image";
+                                  }
+                                }}
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic text-sm">NO IMAGE FOUND</div>
+                            )}
+                          </Link>
+
+                          {post.videoId && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  setActiveVideo(post.id);
+                                }}
+                                className="w-16 h-11 bg-[#FF0000] rounded-xl flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform duration-300 pointer-events-auto cursor-pointer"
+                              >
+                                <div className="border-l-[18px] border-l-white border-y-[11px] border-y-transparent ml-1"></div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6 flex-grow flex flex-col">
+                      <div className="flex flex-wrap gap-2 mb-4">
+                        {(post.tags || []).map((tag) => (
+                          <span 
+                            key={tag} 
+                            className="text-[12px] font-bold bg-[#ff8800]/10 text-[#ff8800] px-2 py-0.5 rounded border border-[#ff8800]/20"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+
+                      <Link href={`/blog/${post.slug}`}>
+                        <h2 className="text-xl font-bold mb-4 line-clamp-2 leading-tight group-hover:text-[#ff8800] transition-colors cursor-pointer">
+                          {post.title}
+                        </h2>
+                      </Link>
+                      
+                      <p className="text-gray-400 text-sm line-clamp-3 mb-6 font-light leading-relaxed">
+                        {post.description}
+                      </p>
+
+                      <div className="mt-auto pt-4 border-t border-white/5">
+                        <Link href={`/blog/${post.slug}`} className="inline-flex items-center gap-2 text-[#ff8800] text-lg font-black group/link">
+                          點擊閱讀內容 <span className="group-hover/link:translate-x-2 transition-transform">→</span>
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-40 border border-dashed border-white/10 rounded-3xl">
+                <p className="text-gray-500 text-xl font-bold mb-2">暫時沒有相關文章。</p>
+                <p className="text-gray-700 text-sm font-mono">Check Sanity Studio - Published status</p>
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="mt-20 flex flex-wrap justify-center items-center gap-2">
+                <button 
+                  onClick={() => setPage(p => Math.max(1, p - 1))} 
+                  disabled={page === 1} 
+                  className="mr-2 text-xs font-bold tracking-widest border border-white/20 px-6 py-3 rounded-xl hover:bg-white/5 disabled:opacity-10 transition-all text-white uppercase"
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => setPage(num)}
+                    className={`w-12 h-12 rounded-xl font-mono font-bold transition-all duration-300 border ${
+                      page === num 
+                        ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.4)] scale-110" 
+                        : "bg-transparent text-gray-400 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
+                    }`}
+                  >
+                    {num}
+                  </button>
+                ))}
+
+                <button 
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))} 
+                  disabled={page >= totalPages} 
+                  className="ml-2 text-xs font-bold tracking-widest border border-white/20 px-6 py-3 rounded-xl hover:bg-white/5 disabled:opacity-10 transition-all text-white uppercase"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
-
-        {/* 內容渲染區 */}
-        <article className="prose prose-invert prose-orange max-w-none 
-                        prose-lg md:prose-xl
-                        prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
-                        prose-headings:text-[#ff8800] prose-headings:font-black prose-headings:italic
-                        prose-h2:text-3xl prose-h2:border-l-8 prose-h2:border-[#ff8800] prose-h2:pl-6 prose-h2:mt-12 prose-h2:mb-6
-                        prose-h3:text-2xl prose-h3:mt-8
-                        prose-strong:text-[#ff8800] prose-strong:font-bold
-                        
-                        prose-ul:bg-white/5 prose-ul:p-8 prose-ul:rounded-2xl prose-ul:border prose-ul:border-white/10
-                        prose-li:marker:text-[#ff8800] prose-li:text-gray-300
-                        
-                        /* 強制處理 Excel 的表格樣式 */
-                        prose-table:border-collapse prose-table:my-10 prose-table:block prose-table:overflow-x-auto
-                        prose-thead:bg-[#ff8800]/20 prose-th:text-[#ff8800] prose-th:p-4 prose-th:border prose-th:border-white/10
-                        prose-td:p-4 prose-td:border prose-td:border-white/10 prose-td:text-gray-300
-                        
-                        prose-img:rounded-2xl prose-img:border prose-img:border-white/10
-                        prose-blockquote:border-l-[#ff8800] prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:italic">
-          
-          {post.htmlContent ? (
-            <div 
-              className="excel-content-fix 
-                         [&_tr]:!bg-transparent 
-                         [&_th]:!bg-[#ff8800]/20 
-                         [&_table]:!w-full 
-                         [&_div]:!contents
-                         /* 強制將 HTML 內的圖片轉為圓角樣式 */
-                         [&_img]:rounded-2xl 
-                         [&_img]:border 
-                         [&_img]:border-white/10 
-                         [&_img]:shadow-lg 
-                         [&_img]:my-8 
-                         [&_img]:mx-auto 
-                         [&_img]:block"
-              dangerouslySetInnerHTML={{ __html: post.htmlContent }} 
-            />
-          ) : (
-            post.body && <PortableText value={post.body} components={ptComponents} />
-          )}
-
-        </article>
       </main>
       <Footer />
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  const query = `*[_type == "post"]{ "slug": slug.current }`;
-  const posts = await client.fetch(query);
-  if (!posts) return [];
-  return posts.map((post: any) => ({ slug: post.slug }));
 }
