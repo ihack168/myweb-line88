@@ -1,0 +1,23 @@
+name: Auto Post to Sanity
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # 08:00 台灣時間
+    - cron: '0 2 * * *'   # 10:00 台灣時間
+    - cron: '0 5 * * *'   # 13:00 台灣時間
+    - cron: '0 7 * * *'   # 15:00 台灣時間
+    - cron: '0 12 * * *'  # 20:00 台灣時間
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run auto post script
+        run: node .github/scripts/auto-post.mjs
+        env:
+          SANITY_TOKEN: ${{ secrets.SANITY_TOKEN }}
