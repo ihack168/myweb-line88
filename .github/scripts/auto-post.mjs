@@ -3,16 +3,22 @@ import https from 'https';
 const SANITY_PROJECT_ID = 't0di9pwy';
 const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
-const SHEET_ID = '1-Fz9hbsuvh4Gy8vHmX_mNUH2TGN4YO9iAHbVxNSTb9g';
-// 強制導出最新的 CSV 格式
-const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0&t=${Date.now()}`;
+
+// 換回原本的 pub 連結，但我們用程式強制它不使用快取
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pmx70YP1kXfiQj0eLCsJmcN9mfFtVwJtzM5nTLqubzpMPEpNxdtpYYYJrAwobyNg1AAfZhLH/pub?output=csv';
 const POSTS_PER_RUN = 5;
 
-// 支援自動處理重新導向的抓取函式
 function fetchCSV(url) {
+  // 在網址後方加上時間戳記，這對 Google pub 連結非常有效
+  const finalUrl = `${url}&t=${Date.now()}`;
   return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      // 如果遇到重新導向 (301/302)，自動追蹤新網址
+    https.get(finalUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/csv'
+      }
+    }, (res) => {
+      // 處理重新導向
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         return fetchCSV(res.headers.location).then(resolve).catch(reject);
       }
@@ -57,7 +63,7 @@ function parseCSV(text) {
   return rows;
 }
 
-async function createPost(title, htmlContent, tags, imageFilename) {
+async function createPost(title, htmlContent, tags) {
   const slug = encodeURIComponent(title.toLowerCase().replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s-]/g, '').replace(/[\s_]+/g, '-')).substring(0, 96);
   const doc = {
     _type: 'post',
@@ -89,20 +95,18 @@ async function createPost(title, htmlContent, tags, imageFilename) {
 }
 
 async function main() {
-  console.log('📥 正在從 Google Sheets 導出資料...');
+  console.log('📥 正在讀取 Google Sheets...');
   const csv = await fetchCSV(SHEET_CSV_URL);
-  const rows = parseCSV(csv);
   
-  // 檢查是否抓到了真正的資料而不是 HTML
   if (csv.includes('<!DOCTYPE html>') || csv.includes('<HTML>')) {
-    console.error('❌ 抓取失敗：Google 回傳了網頁內容而非 CSV 資料。請確認試算表共用權限為「知道連結的人皆可檢視」。');
+    console.log('--- 抓取內容片段 ---');
+    console.log(csv.substring(0, 200));
+    console.error('❌ 依然抓到 HTML 網頁。這通常是 Google 的安全阻擋。');
     return;
   }
 
+  const rows = parseCSV(csv);
   console.log(`📊 成功抓取資料，共 ${rows.length} 行`);
-
-  // 除錯：印出第一行資料確認欄位
-  if (rows.length > 0) console.log(`DEBUG 第一行內容:`, JSON.stringify(rows[0]));
 
   const pending = [];
   for (let i = 0; i < rows.length; i++) {
