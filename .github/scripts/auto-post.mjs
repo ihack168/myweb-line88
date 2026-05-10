@@ -8,7 +8,7 @@ const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pm
 /**
  * [重要] 請在此處貼上你從 Google Apps Script 部署得到的「網頁應用程式 URL」
  */
-const GOOGLE_SCRIPT_URL = '你的_APPS_SCRIPT_網頁應用程式網址_貼在這裡';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVOx_tENXE12RhIaY05GcOCfACNBbv956EP7pjDhf8-wgfZOkVtX3hSe6VGfLomlD0/exec';
 
 const POSTS_PER_RUN = 5;
 
