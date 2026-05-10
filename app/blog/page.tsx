@@ -42,7 +42,6 @@ async function getPost(slug: string) {
   return client.fetch(query, { slug });
 }
 
-// SEO Metadata
 export async function generateMetadata({
   params,
 }: {
@@ -164,7 +163,6 @@ export default async function BlogPostPage({
       })
     : null;
 
-  // JSON-LD 結構化資料 (AEO/SEO)
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -193,7 +191,6 @@ export default async function BlogPostPage({
       <Navbar />
 
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        {/* 麵包屑導航 */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-10 font-mono">
           <Link href="/" className="hover:text-[#ff8800] transition-colors">首頁</Link>
           <span>/</span>
@@ -202,7 +199,6 @@ export default async function BlogPostPage({
           <span className="text-gray-400 truncate max-w-[200px]">{post.title}</span>
         </nav>
 
-        {/* 標籤 */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {post.tags.map((tag: string) => (
@@ -216,12 +212,10 @@ export default async function BlogPostPage({
           </div>
         )}
 
-        {/* 標題 */}
         <h1 className="text-4xl md:text-6xl font-black italic leading-tight text-[#ff8800] mb-8">
           {post.title}
         </h1>
 
-        {/* 作者與日期 */}
         <div className="flex items-center gap-4 text-gray-400 mb-12 text-sm">
           {post.author && (
             <span className="font-bold text-gray-200">By {post.author}</span>
@@ -232,7 +226,6 @@ export default async function BlogPostPage({
           {publishedDate && <span>{publishedDate}</span>}
         </div>
 
-        {/* 主圖 */}
         {post.mainImage && (
           <div className="mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
             <img
@@ -243,7 +236,6 @@ export default async function BlogPostPage({
           </div>
         )}
 
-        {/* 文章內容 */}
         <article>
           {post.body ? (
             <PortableText value={post.body} components={components} />
@@ -252,7 +244,6 @@ export default async function BlogPostPage({
           )}
         </article>
 
-        {/* 底部返回 */}
         <div className="mt-16 pt-8 border-t border-white/10 flex items-center justify-between">
           <Link
             href="/blog"
