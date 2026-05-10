@@ -64,12 +64,23 @@ export default defineType({
       type: 'text',
       description: '這裡是存放原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
     }),
-    // --- 新增：YouTube 影片 ID 欄位 (配合你 page.tsx 的功能) ---
+    // --- 新增：YouTube 影片 ID 欄位 ---
     defineField({
       name: 'youtubeVideoId',
       title: 'YouTube Video ID',
       type: 'string',
       description: '輸入 YouTube 影片 ID (例如: dQw4w9WgXcQ)，前端會自動顯示播放按鈕。',
+    }),
+    // --- 新增：標籤 / 關鍵字欄位 (用於 SEO/AEO) ---
+    defineField({
+      name: 'tags',
+      title: '標籤 / 關鍵字',
+      type: 'array',
+      description: '用於文章分類與 AEO 優化，例如：LINE行銷, 自動化工具, AI客服',
+      of: [{type: 'string'}],
+      options: {
+        layout: 'tags',
+      },
     }),
   ],
 
