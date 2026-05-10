@@ -7,6 +7,7 @@ import { Footer } from "@/components/footer";
 import Link from "next/link";
 import type { Metadata } from "next";
 
+// 1. 初始化 Sanity Client
 const client = createClient({
   projectId: "t0di9pwy",
   dataset: "production",
@@ -15,11 +16,11 @@ const client = createClient({
 });
 
 const builder = imageUrlBuilder(client);
-
 function urlFor(source: any) {
   return builder.image(source).url();
 }
 
+// 2. 抓取單篇文章資料
 async function getPost(slug: string) {
   const query = `
     *[_type == "post" && slug.current == $slug][0]{
@@ -42,6 +43,7 @@ async function getPost(slug: string) {
   return client.fetch(query, { slug });
 }
 
+// 3. SEO 設定
 export async function generateMetadata({
   params,
 }: {
@@ -65,6 +67,7 @@ export async function generateMetadata({
   };
 }
 
+// 4. PortableText 渲染組件設定
 const components = {
   types: {
     image: ({ value }: any) => {
@@ -97,7 +100,7 @@ const components = {
       </h3>
     ),
     normal: ({ children }: any) => (
-      <p className="text-gray-300 leading-8 mb-6 text-lg">{children}</p>
+      <p className="text-gray-300 leading-8 mb-6 text-lg font-light">{children}</p>
     ),
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-[#ff8800] bg-white/5 py-2 px-6 rounded-r-xl italic my-6 text-gray-400">
@@ -105,32 +108,9 @@ const components = {
       </blockquote>
     ),
   },
-  list: {
-    bullet: ({ children }: any) => (
-      <ul className="bg-white/5 p-8 rounded-2xl border border-white/10 mb-6 space-y-2">
-        {children}
-      </ul>
-    ),
-    number: ({ children }: any) => (
-      <ol className="bg-white/5 p-8 rounded-2xl border border-white/10 mb-6 space-y-2 list-decimal list-inside">
-        {children}
-      </ol>
-    ),
-  },
-  listItem: {
-    bullet: ({ children }: any) => (
-      <li className="text-gray-300 flex items-start gap-2">
-        <span className="text-[#ff8800] mt-1">▸</span>
-        <span>{children}</span>
-      </li>
-    ),
-  },
   marks: {
     strong: ({ children }: any) => (
       <strong className="text-[#ff8800] font-bold">{children}</strong>
-    ),
-    em: ({ children }: any) => (
-      <em className="text-gray-200 italic">{children}</em>
     ),
     link: ({ value, children }: any) => (
       <a
@@ -145,6 +125,7 @@ const components = {
   },
 };
 
+// 5. 頁面主體
 export default async function BlogPostPage({
   params,
 }: {
@@ -163,42 +144,12 @@ export default async function BlogPostPage({
       })
     : null;
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    description: post.description || post.title,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `https://www.line88.tw/blog/${slug}`,
-    },
-    author: {
-      "@type": "Person",
-      name: post.author || "洛克希德黑克斯",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "洛克希德黑克斯",
-      url: "https://www.line88.tw",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://www.line88.tw/logo.png",
-      },
-    },
-    datePublished: post.publishedAt,
-    url: `https://www.line88.tw/blog/${slug}`,
-    ...(post.mainImage && { image: [post.mainImage] }),
-  };
-
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <Navbar />
 
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
+        {/* 麵包屑導航 */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-10 font-mono">
           <Link href="/" className="hover:text-[#ff8800] transition-colors">首頁</Link>
           <span>/</span>
@@ -207,6 +158,7 @@ export default async function BlogPostPage({
           <span className="text-gray-400 truncate max-w-[200px]">{post.title}</span>
         </nav>
 
+        {/* 標籤 */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
             {post.tags.map((tag: string) => (
@@ -220,69 +172,38 @@ export default async function BlogPostPage({
           </div>
         )}
 
-        <h1 className="text-4xl md:text-6xl font-black italic leading-tight text-[#ff8800] mb-8">
+        <h1 className="text-4xl md:text-6xl font-black italic leading-tight text-[#ff8800] mb-8 tracking-tighter">
           {post.title}
         </h1>
 
         <div className="flex items-center gap-4 text-gray-400 mb-12 text-sm">
-          {post.author && (
-            <span className="font-bold text-gray-200">By {post.author}</span>
-          )}
-          {post.author && publishedDate && (
-            <span className="text-white/20">|</span>
-          )}
+          {post.author && <span className="font-bold text-gray-200">By {post.author}</span>}
           {publishedDate && <span>{publishedDate}</span>}
         </div>
 
+        {/* 主圖 */}
         {post.mainImage && (
           <div className="mb-12 rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-            <img
-              src={post.mainImage}
-              alt={post.title}
-              className="w-full object-cover"
-            />
+            <img src={post.mainImage} alt={post.title} className="w-full object-cover" />
           </div>
         )}
 
-        <article className="prose prose-invert max-w-none">
+        {/* 文章內容渲染區 */}
+        <article className="max-w-none">
           {post.body ? (
             <PortableText value={post.body} components={components} />
           ) : (
-            <p className="text-gray-500">No content</p>
+            <p className="text-gray-500 italic">此文章暫無內容</p>
           )}
-
-          {/* 聯絡資訊區塊：固定整合在文章末尾，對 AEO 權威提升效果最好 */}
-          <section className="mt-16 p-8 bg-white/5 rounded-2xl border border-[#ff8800]/30 shadow-[0_0_20px_rgba(255,136,0,0.1)]">
-            <h3 className="text-[#ff8800] font-black italic text-2xl mb-4 mt-0">與我們聯絡</h3>
-            <div className="space-y-3 text-gray-300">
-              <p className="flex items-center gap-2">
-                <span className="font-bold text-white">品牌名稱：</span> 洛克希德黑克斯 (Lockhead Hex)
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="font-bold text-white">專業服務：</span> Line@ 官方帳號串接 Google Gemini / ChatGPT AI 客服系統
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="font-bold text-white">Line 諮詢：</span> 
-                <a href="https://line.me/ti/p/~line88.tw" target="_blank" rel="noopener noreferrer" className="text-[#ff8800] font-bold underline hover:text-white transition-colors">
-                  line88.tw (點擊加 ID)
-                </a>
-              </p>
-              <p className="flex items-center gap-2">
-                <span className="font-bold text-white">官方網站：</span> 
-                <a href="https://www.line88.tw" target="_blank" rel="noopener noreferrer" className="text-[#ff8800] underline hover:text-white transition-colors">
-                  www.line88.tw
-                </a>
-              </p>
-            </div>
-          </section>
         </article>
 
+        {/* 底部導覽 */}
         <div className="mt-16 pt-8 border-t border-white/10 flex items-center justify-between">
           <Link
             href="/blog"
-            className="inline-flex items-center gap-2 bg-[#ff8800]/10 hover:bg-[#ff8800]/20 text-[#ff8800] px-6 py-3 rounded-xl transition-colors text-sm font-black border border-[#ff8800]/20"
+            className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 text-gray-300 px-6 py-3 rounded-xl transition-colors text-sm font-black border border-white/10"
           >
-            ← 返回文章列表
+            ← 返回列表
           </Link>
           <Link
             href="/#contact"
