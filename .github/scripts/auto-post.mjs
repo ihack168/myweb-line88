@@ -1,67 +1,91 @@
 import https from 'https';
-import { google } from 'googleapis'; // 需要在 package.json 加入 "googleapis"
 
 const SANITY_PROJECT_ID = 't0di9pwy';
 const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
-const SHEET_ID = '1-Fz9hbsuvh4Gy8vHmX_mNUH2TGN4YO9iAHbVxNSTb9g';
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pmx70YP1kXfiQj0eLCsJmcN9mfFtVwJtzM5nTLqubzpMPEpNxdtpYYYJrAwobyNg1AAfZhLH/pub?output=csv';
+// 貼上你剛才產生的 Google Apps Script 網址
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVOx_tENXE12RhIaY05GcOCfACNBbv956EP7pjDhf8-wgfZOkVtX3hSe6VGfLomlD0/exec';
 const POSTS_PER_RUN = 5;
 
-// 認證 Google Sheets API
-const auth = new google.auth.GoogleAuth({
-  credentials: JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_JSON),
-  scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-});
-const sheets = google.sheets({ version: 'v4', auth });
+// 發文成功後，呼叫 Google Script 標記 G 欄
+async function markAsPublishedOnSheet(rowIndex) {
+  const url = GOOGLE_SCRIPT_URL;
+  const data = JSON.stringify({ row: rowIndex });
 
-// 1. 抓取資料 (改用 API 抓取更穩定，且無延遲)
-async function getSheetData() {
-  const res = await sheets.spreadsheets.values.get({
-    spreadsheetId: SHEET_ID,
-    range: 'A:G', // 讀取 A 到 G 欄
+  return new Promise((resolve) => {
+    const req = https.request(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }, (res) => {
+      res.on('data', () => {});
+      res.on('end', () => resolve());
+    });
+    req.write(data);
+    req.end();
   });
-  return res.data.values || [];
 }
 
-// 2. 標記為已發布 (寫回 G 欄)
-async function markAsPublished(rowIndex) {
-  const range = `G${rowIndex + 1}`; // 索引從 0 開始，所以 +1
-  await sheets.spreadsheets.values.update({
-    spreadsheetId: SHEET_ID,
-    range: range,
-    valueInputOption: 'RAW',
-    resource: { values: [['published']] },
+function fetchCSV(url) {
+  const finalUrl = `${url}&t=${Date.now()}`;
+  return new Promise((resolve, reject) => {
+    https.get(finalUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/csv'
+      }
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchCSV(res.headers.location).then(resolve).catch(reject);
+      }
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+    }).on('error', reject);
   });
-  console.log(`✅ 已在試算表第 ${rowIndex + 1} 行標記為已發布`);
 }
 
-// 3. 處理圖片網址
-function parseSanityImageUrl(imageRaw) {
-  if (!imageRaw || !imageRaw.includes(',')) return null;
-  const parts = imageRaw.split(',');
-  const imageAssetId = parts[1].trim().replace(/^image-/, '');
-  const lastDashIndex = imageAssetId.lastIndexOf('-');
-  const finalString = imageAssetId.substring(0, lastDashIndex) + '.' + imageAssetId.substring(lastDashIndex + 1);
-  return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${finalString}`;
+function parseCSV(text) {
+  const rows = [];
+  let currentField = '';
+  let inQuotes = false;
+  let currentRow = [];
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    if (char === '"' && inQuotes && text[i+1] === '"') { currentField += '"'; i++; }
+    else if (char === '"') { inQuotes = !inQuotes; }
+    else if (char === ',' && !inQuotes) { currentRow.push(currentField.trim()); currentField = ''; }
+    else if ((char === '\r' || char === '\n') && !inQuotes) {
+      if (currentField || currentRow.length > 0) {
+        currentRow.push(currentField.trim());
+        rows.push(currentRow);
+        currentField = ''; currentRow = [];
+      }
+      if (char === '\r' && text[i+1] === '\n') i++;
+    } else { currentField += char; }
+  }
+  if (currentRow.length > 0 || currentField) { currentRow.push(currentField.trim()); rows.push(currentRow); }
+  return rows;
 }
 
-// 4. 發送到 Sanity (修正 Slug 重複問題)
 async function createPost(title, htmlContent, tags, imageRaw) {
-  // 加入隨機 4 碼確保 Slug 唯一
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-  const baseSlug = encodeURIComponent(title.toLowerCase().replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s-]/g, '').replace(/[\s_]+/g, '-')).substring(0, 80);
-  const finalSlug = `${baseSlug}-${randomSuffix}`;
+  // 加入隨機尾綴解決 Slug 重複問題
+  const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-4);
+  const slug = encodeURIComponent(title.toLowerCase().replace(/[^\u4e00-\u9fa5a-zA-Z0-9\s-]/g, '').replace(/[\s_]+/g, '-')).substring(0, 80) + `-${uniqueId}`;
 
+  // 處理圖片
   let finalHtml = htmlContent;
-  const imageUrl = parseSanityImageUrl(imageRaw);
-  if (imageUrl) {
-    finalHtml = `<img src="${imageUrl}" alt="${title}">\n` + htmlContent;
+  if (imageRaw && imageRaw.includes(',')) {
+    const imageAssetId = imageRaw.split(',')[1].trim().replace(/^image-/, '');
+    const lastDash = imageAssetId.lastIndexOf('-');
+    const imgUrl = `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${imageAssetId.substring(0, lastDash)}.${imageAssetId.substring(lastDash + 1)}`;
+    finalHtml = `<img src="${imgUrl}" alt="${title}">\n` + htmlContent;
   }
 
   const doc = {
     _type: 'post',
     title,
-    slug: { _type: 'slug', current: finalSlug },
+    slug: { _type: 'slug', current: slug },
     htmlContent: finalHtml,
     publishedAt: new Date().toISOString(),
     ...(tags ? { tags: tags.split(/[,，]/).map(t => t.trim()).filter(Boolean) } : {}),
@@ -88,44 +112,32 @@ async function createPost(title, htmlContent, tags, imageRaw) {
   });
 }
 
-// 主程式
 async function main() {
-  console.log('📥 透過 API 讀取試算表...');
-  const rows = await getSheetData();
-  console.log(`📊 共讀取到 ${rows.length} 行資料`);
-
+  console.log('📥 正在讀取試算表...');
+  const csv = await fetchCSV(SHEET_CSV_URL);
+  const rows = parseCSV(csv);
+  
   const pending = [];
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
-    const title = row[1]?.trim();     // B
-    const html = row[2]?.trim();      // C
-    const tags = row[3]?.trim();      // D
-    const imageRaw = row[5]?.trim();  // F
-    const published = row[6]?.trim(); // G
-
-    if (!title || title === "標題" || published === "published") continue;
-
-    pending.push({ rowIndex: i, title, html, tags, imageRaw });
+    const title = row[1]?.trim();
+    const published = row[6]?.trim();
+    if (!title || title === "標題" || (published && published.toLowerCase().includes('published'))) continue;
+    pending.push({ rowIndex: i, title, html: row[2], tags: row[3], imageRaw: row[5] });
   }
 
   if (pending.length === 0) {
-    console.log('✅ 所有文章皆已發布，沒有新工作。');
+    console.log('✅ 沒有待處理的文章。');
     return;
   }
 
   const toPost = pending.slice(0, POSTS_PER_RUN);
   for (const item of toPost) {
-    try {
-      console.log(`🚀 正在發布: ${item.title}`);
-      const result = await createPost(item.title, item.html, item.tags, item.imageRaw);
-      
-      if (result.results || result.mutations) {
-        console.log(`✅ Sanity 發布成功`);
-        // 關鍵：發布成功後，寫回試算表
-        await markAsPublished(item.rowIndex);
-      }
-    } catch (err) {
-      console.error(`❌ 失敗: ${item.title}`, err.message);
+    console.log(`🚀 發布: ${item.title}`);
+    const result = await createPost(item.title, item.html, item.tags, item.imageRaw);
+    if (result.results || result.mutations) {
+      console.log(`✅ Sanity 成功，正在回填試算表...`);
+      await markAsPublishedOnSheet(item.rowIndex);
     }
   }
 }
