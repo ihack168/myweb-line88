@@ -12,11 +12,25 @@ on:
 jobs:
   post:
     runs-on: ubuntu-latest
+    
+    # 設定全域環境變數，解決 Node 20 警告並強制使用 Node 24
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24' # 升級到 24 確保未來兩年免維護
+          
+      - name: Install dependencies
+        # 如果你的 .mjs 腳本有用到第三方套件（如 sanity/client），請取消下面這行註解
+        # run: npm install
+        run: echo "Starting post script..."
+
       - name: Run auto post script
         run: node .github/scripts/auto-post.mjs
         env:
