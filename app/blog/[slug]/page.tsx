@@ -163,7 +163,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         <article className="
           prose prose-invert prose-orange max-w-none
           prose-lg md:prose-xl
-          prose-p:text-gray-300 prose-p:leading-relaxed prose-p:mb-6
+          prose-p:text-gray-300 prose-p:leading-[1.9] prose-p:mb-4
           prose-headings:text-[#ff8800] prose-headings:font-black prose-headings:italic
           prose-h2:text-3xl prose-h2:border-l-8 prose-h2:border-[#ff8800] prose-h2:pl-6 prose-h2:mt-12 prose-h2:mb-6
           prose-h3:text-2xl prose-h3:mt-8
@@ -189,6 +189,20 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
                 [&_img]:my-8
                 [&_img]:mx-auto
                 [&_img]:block
+                [&_p]:mb-4
+                [&_p]:leading-[1.9]
+                [&_p]:text-gray-300
+                [&_h2]:text-3xl
+                [&_h2]:font-black
+                [&_h2]:italic
+                [&_h2]:text-[#ff8800]
+                [&_h2]:border-l-8
+                [&_h2]:border-[#ff8800]
+                [&_h2]:pl-6
+                [&_h2]:mt-12
+                [&_h2]:mb-6
+                [&_li]:text-gray-300
+                [&_li]:mb-1
               "
               dangerouslySetInnerHTML={{ __html: post.htmlContent }}
             />
