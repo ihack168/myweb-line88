@@ -7,7 +7,7 @@ const navLinks = [
   { label: "首頁", href: "/" },
   { label: "服務介紹", href: "/#services" },
   { label: "最新文章", href: "/blog" },
-  { label: "Blog", href: "https://blog.line88.tw/" },
+  //{ label: "Blog", href: "https://blog.line88.tw/" },
   { label: "聯絡我們", href: "/#contact" },
 ]
 
