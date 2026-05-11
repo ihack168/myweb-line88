@@ -5,9 +5,7 @@ const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pmx70YP1kXfiQj0eLCsJmcN9mfFtVwJtzM5nTLqubzpMPEpNxdtpYYYJrAwobyNg1AAfZhLH/pub?output=csv';
 
-/**
- * [重要] 請在此處貼上你從 Google Apps Script 部署得到的「網頁應用程式 URL」
- */
+// Google Apps Script 網址
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVOx_tENXE12RhIaY05GcOCfACNBbv956EP7pjDhf8-wgfZOkVtX3hSe6VGfLomlD0/exec';
 
 const POSTS_PER_RUN = 5;
@@ -32,7 +30,7 @@ function fetchCSV(url) {
   });
 }
 
-// 2. 解析 CSV (處理 HTML 內容中的引號與逗號)
+// 2. 解析 CSV
 function parseCSV(text) {
   const rows = [];
   let currentField = '';
@@ -56,10 +54,11 @@ function parseCSV(text) {
   return rows;
 }
 
-// 3. 發文成功後，回填「published」標記到 Google 試算表
+// 3. 發文成功後回填標記 (簡化判斷邏輯)
 async function markAsPublishedOnSheet(rowIndex) {
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('貼在這裡')) {
-    console.warn('⚠️ 未設定 GOOGLE_SCRIPT_URL，跳過回填標記步驟。');
+  // 只判斷網址是否存在，不再檢查中文關鍵字
+  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.length < 10) {
+    console.warn('⚠️ GOOGLE_SCRIPT_URL 無效，跳過回填。');
     return;
   }
   const data = JSON.stringify({ row: rowIndex });
@@ -68,7 +67,6 @@ async function markAsPublishedOnSheet(rowIndex) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     }, (res) => {
-      // 處理 Google Script 的重新導向
       if (res.statusCode === 302 && res.headers.location) {
         https.get(res.headers.location, (res2) => {
           res2.on('data', () => {});
@@ -80,7 +78,7 @@ async function markAsPublishedOnSheet(rowIndex) {
       }
     });
     req.on('error', (e) => {
-      console.error('❌ 回填標記失敗:', e.message);
+      console.error('❌ 回填失敗:', e.message);
       resolve();
     });
     req.write(data);
@@ -88,7 +86,7 @@ async function markAsPublishedOnSheet(rowIndex) {
   });
 }
 
-// 4. 解析 F 欄位中的圖片 ID 並轉換為網址
+// 4. 解析圖片
 function parseSanityImageUrl(imageRaw) {
   if (!imageRaw || !imageRaw.includes(',')) return null;
   const parts = imageRaw.split(',');
@@ -99,21 +97,16 @@ function parseSanityImageUrl(imageRaw) {
   return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${finalString}`;
 }
 
-// 5. 建立 Sanity 文章
+// 5. 建立文章 (短 Slug 防止 ERR_HTTP2)
 async function createPost(title, htmlContent, tags, imageRaw) {
-  // 生成短縮且唯一的 Slug，避免 ERR_HTTP2_PROTOCOL_ERROR
-  const cleanTitle = title
-    .replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '') // 僅保留中英數
-    .substring(0, 15); // 限制長度
+  const cleanTitle = title.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '').substring(0, 15);
   const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6);
   const finalSlug = encodeURIComponent(cleanTitle) + `-${uniqueId}`;
 
-  // 處理 HTML 前置圖片
   let finalHtml = htmlContent;
   const imageUrl = parseSanityImageUrl(imageRaw);
   if (imageUrl) {
     finalHtml = `<img src="${imageUrl}" alt="${title}">\n` + htmlContent;
-    console.log(`📸 圖片已插入: ${imageUrl}`);
   }
 
   const doc = {
@@ -146,57 +139,34 @@ async function createPost(title, htmlContent, tags, imageRaw) {
   });
 }
 
-// 主執行流程
 async function main() {
-  console.log('📥 正在獲取最新試算表資料...');
+  console.log('📥 執行中...');
   const csv = await fetchCSV(SHEET_CSV_URL);
   const rows = parseCSV(csv);
-  console.log(`📊 掃描完成，共 ${rows.length} 行`);
-
+  
   const pending = [];
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const title = row[1]?.trim();
     const published = row[6]?.trim();
-
-    // 跳過標題列、空標題或已發布的文章
-    if (!title || title === "標題" || title === "註記" || (published && published.toLowerCase().includes('published'))) {
-      continue;
-    }
-
-    pending.push({
-      rowIndex: i,
-      title,
-      html: row[2]?.trim(),
-      tags: row[3]?.trim(),
-      imageRaw: row[5]?.trim()
-    });
+    if (!title || title === "標題" || title === "註記" || (published && published.toLowerCase().includes('published'))) continue;
+    pending.push({ rowIndex: i, title, html: row[2], tags: row[3], imageRaw: row[5] });
   }
 
   if (pending.length === 0) {
-    console.log('✅ 目前沒有待處理的新文章。');
+    console.log('✅ 無待處理文章');
     return;
   }
 
   const toPost = pending.slice(0, POSTS_PER_RUN);
-  console.log(`🚀 準備處理 ${toPost.length} 篇文章...`);
-
   for (const item of toPost) {
-    try {
-      console.log(`📝 正在發布: ${item.title}`);
-      const result = await createPost(item.title, item.html, item.tags, item.imageRaw);
-      
-      if (result.results || result.mutations) {
-        console.log(`✅ Sanity 發布成功，執行試算表標記...`);
-        await markAsPublishedOnSheet(item.rowIndex);
-      } else {
-        console.error(`❌ Sanity API 錯誤:`, JSON.stringify(result));
-      }
-    } catch (err) {
-      console.error(`❌ 處理第 ${item.rowIndex + 1} 行時發生錯誤:`, err.message);
+    console.log(`🚀 發布: ${item.title}`);
+    const result = await createPost(item.title, item.html, item.tags, item.imageRaw);
+    if (result.results || result.mutations) {
+      console.log(`✅ Sanity 成功，執行回填...`);
+      await markAsPublishedOnSheet(item.rowIndex);
     }
   }
-  console.log('🎉 任務結束');
 }
-
 main().catch(console.error);
+// Last Update: 09:50 AM
