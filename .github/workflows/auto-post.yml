@@ -3,10 +3,8 @@ name: Auto Post to Sanity
 on:
   schedule:
     - cron: '0 0 * * *'   # 08:00 台灣時間
+    - cron: '0 1 * * *'   # 09:00 台灣時間
     - cron: '0 2 * * *'   # 10:00 台灣時間
-    - cron: '0 3 * * *'   # 13:00 台灣時間
-    - cron: '0 4 * * *'   # 15:00 台灣時間
-    - cron: '0 5 * * *'  # 20:00 台灣時間
   workflow_dispatch:
 
 jobs:
