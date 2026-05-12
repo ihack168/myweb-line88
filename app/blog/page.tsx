@@ -109,7 +109,7 @@ export default function BlogPage() {
             <h1 className="text-4xl md:text-6xl font-black italic text-[#ff8800] tracking-tighter">
               最新文章
             </h1>
-            <p className="text-gray-400 mt-2 italic">SEO & AEO 數位行銷策略與實戰</p>
+            <p className="text-gray-400 mt-2 italic">...</p>
           </header>
           <p className="text-gray-500 font-mono text-sm">文章數量: {totalPosts}</p>
         </div>
