@@ -7,46 +7,60 @@ import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
+
+  // 🧠 首頁 SEO / AEO Schema
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Service",
-    "name": "洛克希德黑克斯 - 特殊網路技術支援中心",
-    "description": "提供全台最專業的網路投票買票、灌票服務，支援 LINE 投票、FB 投票、Google 表單與各類網站投票優化。",
-    "provider": {
-      "@type": "Organization",
-      "name": "洛克希德黑克斯 (Lockhead Hex)"
-    },
-    "serviceType": [
-      "網路投票買票灌票",
-      "LINE Facebook Google 投票買票灌票",
-      "社群媒體流量增長",
-      "Facebook IG 社團 Threads 大量按讚追蹤增粉"
-    ],
+    "@type": "Organization",
+    "name": "洛克希德黑克斯",
+    "url": "https://www.line88.tw",
+    "description":
+      "提供網路投票支援、LINE/FB/Google 投票、社群流量增長、AEO SEO 關鍵字優化與 Line AI 客服串接服務。",
     "areaServed": "TW",
-    "hasOfferCatalog": {
-      "@type": "OfferCatalog",
-      "name": "特殊網路服務",
-      "itemListElement": [
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "LINE Facebook Google 投票買票灌票 獨家技術"
-          }
-        },
-        {
-          "@type": "Offer",
-          "itemOffered": {
-            "@type": "Service",
-            "name": "Facebook IG 社團 Threads 大量按讚追蹤增粉"
-          }
+
+    "makesOffer": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "網路投票買票灌票服務",
+          "description":
+            "提供 LINE、Facebook、Google 表單與各類網路票選活動投票支援。"
         }
-      ]
-    }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "社群流量增長服務",
+          "description":
+            "提供 Facebook、Instagram、Threads 按讚、追蹤、留言與曝光提升服務。"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "AEO SEO 關鍵字優化服務",
+          "description":
+            "提供 AI 搜尋優化、SEO 內容規劃與關鍵字策略服務。"
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Line 官方帳號 AI 客服串接",
+          "description":
+            "提供 Line 官方帳號串接 ChatGPT、Gemini 與 RAG 知識庫的 AI 客服建置服務。"
+        }
+      }
+    ]
   };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground selection:bg-[#00ff00]/30">
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -55,24 +69,45 @@ export default function Home() {
       <Navbar />
 
       <main>
-        {/* 這裡稍微增加一點 pt，讓大 Logo 更有呼吸感 */}
+
+        {/* Hero */}
         <div className="pt-24 md:pt-40 pb-10">
           <HeroSection />
         </div>
 
+        {/* 服務區塊 */}
         <ServicesSection />
-        
+
+        {/* AEO 隱藏語意內容 */}
         <section className="sr-only">
-          <h2>全台最強的網路投票買票與灌票服務</h2>
+
+          <h2>
+            全台專業網路投票買票灌票與社群流量增長服務
+          </h2>
+
           <p>
-            我們提供專業的 LINE 投票買票、FB 臉書投票灌票、Google 投票表單數據優化、
-            各式網站投票破解與數據提升服務。針對 Threads、IG、Facebook 提供大量按讚與追蹤數增粉。
+            洛克希德黑克斯提供 LINE 投票買票、Facebook 投票灌票、
+            Google 表單投票支援，以及各類網站票選活動數據優化服務。
           </p>
+
+          <p>
+            我們同時提供 Facebook、Instagram、Threads、
+            Line 官方帳號等社群平台的大量按讚、追蹤、留言與社團人數增長服務。
+          </p>
+
+          <p>
+            此外也提供 AEO、SEO AI 關鍵字優化、
+            Line 官方帳號 AI 客服串接、
+            ChatGPT Gemini 自動回覆系統與企業 AI 知識庫建置服務。
+          </p>
+
         </section>
 
+        {/* 聯絡我們 */}
         <div id="contact">
           <ContactSection />
         </div>
+
       </main>
 
       <Footer />
