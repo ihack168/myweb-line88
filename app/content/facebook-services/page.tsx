@@ -1,56 +1,120 @@
 "use client";
 
-import { Navbar } from "@/components/navbar"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button" // 假設你有這個組件，沒有的話用 <a> 替代
-import { CheckCircle2, MessageSquare, Users, TrendingUp, ShieldAlert } from "lucide-react"
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import {
+  CheckCircle2,
+  MessageSquare,
+  Users,
+  TrendingUp,
+  ShieldAlert,
+  Search,
+} from "lucide-react";
 
 export default function FacebookMarketingPage() {
-  // 針對 AEO/SEO 優化的結構化數據
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Service",
-    "name": "洛克希德黑克斯 - FB 社群增長與輿論佈局中心",
-    "description": "全台最專業 FB 買讚、買粉絲、網軍代操服務。提供臉書貼文衝讚、客製化留言、社群聲量操作與輿論控制，幫助品牌快速提升討論度。",
-    "provider": {
+    name: "洛克希德黑克斯 - Facebook 社群互動與聲量支援服務",
+    description:
+      "提供 Facebook 粉絲、貼文互動、留言、分享、社團人數與社群聲量相關支援服務。服務內容包含需求評估、互動配置、執行節奏安排與風險說明，適合需要提升社群曝光與討論度的品牌、活動與粉專。",
+    provider: {
       "@type": "Organization",
-      "name": "洛克希德黑克斯 (Lockhead Hex)"
+      name: "洛克希德黑克斯 (Lockhead Hex)",
     },
-    "serviceType": [
-      "FB買讚買粉絲",
-      "網軍公司代操",
-      "臉書社團人數購買",
-      "輿論控制與聲量操作"
+    serviceType: [
+      "Facebook 買讚服務",
+      "Facebook 粉絲增長",
+      "Facebook 留言與分享支援",
+      "Facebook 社團人數支援",
+      "社群聲量操作評估",
     ],
-    "areaServed": "TW",
-    "offers": {
+    areaServed: "TW",
+    offers: {
       "@type": "Offer",
-      "description": "客製化報價，請加 LINE 私訊諮詢",
-      "url": "https://www.line88.tw/facebook-services"
-    }
+      description: "客製化 Facebook 社群互動方案，請加 LINE 私訊諮詢",
+      url: "https://www.line88.tw/facebook-services",
+    },
   };
 
   const services = [
     {
-      title: "FB 粉絲與互動增長",
+      title: "FB 粉絲與貼文互動",
       icon: <TrendingUp className="w-6 h-6 text-[#00ff00]" />,
-      keywords: "FB買讚、FB買粉絲、臉書買讚推薦、FB衝讚、買FB追蹤者、FB買人氣"
+      text:
+        "提供 Facebook 粉絲、貼文按讚、追蹤者與基本互動支援，適合新粉專、活動頁、品牌貼文與需要提升初始人氣的內容。",
     },
     {
-      title: "深度留言與轉發代操",
+      title: "FB 留言與分享支援",
       icon: <MessageSquare className="w-6 h-6 text-[#00ff00]" />,
-      keywords: "FB買留言、FB客製化留言、臉書洗留言、FB留言代發、FB推文服務、FB買分享、FB洗分享、臉書貼文轉發、FB分享代操"
+      text:
+        "可依需求安排留言、分享與貼文互動配置，適合活動推廣、產品曝光、貼文討論度提升與社群內容測試。",
     },
     {
-      title: "社團精準擴張",
+      title: "FB 社團人數與活躍度",
       icon: <Users className="w-6 h-6 text-[#00ff00]" />,
-      keywords: "FB社團人數購買、臉書社團充人數、FB社團拉人、社團數據優化"
+      text:
+        "協助評估 Facebook 社團人數增長、成員數據與互動需求，適合社團初期冷啟動、活動社團與品牌社群經營。",
     },
     {
-      title: "頂尖網軍輿論佈局",
+      title: "社群聲量支援評估",
       icon: <ShieldAlert className="w-6 h-6 text-[#00ff00]" />,
-      keywords: "買網軍、網軍公司、網軍價格、網軍行情、找網軍、水軍代操、帶風向、洗評價、洗負評、增加正面聲量、輿論控制、網路水軍、論壇護航、提高討論度"
-    }
+      text:
+        "針對品牌討論度、貼文曝光、正向留言比例與社群互動需求進行評估，並說明不同操作方式可能產生的限制與風險。",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: "FB 買讚、買粉絲是什麼服務？",
+      a:
+        "FB 買讚與買粉絲是針對 Facebook 粉專、貼文或活動內容提供互動數據支援，常見需求包含貼文按讚、粉絲數、追蹤者、分享數與留言數。實際可執行項目會依照粉專狀態、貼文類型與需求數量評估。",
+    },
+    {
+      q: "你們提供的互動是真人自然流量嗎？",
+      a:
+        "不是所有互動都能視為自然流量。本服務主要是社群數據與互動支援，不會把操作包裝成完全自然觸及。若品牌需要長期自然流量，仍建議搭配內容經營、廣告投放與社群活動。",
+    },
+    {
+      q: "FB 買留言可以指定內容嗎？",
+      a:
+        "可以依照需求評估客製化留言，例如活動留言、產品回饋、貼文互動、問題式留言或簡短正向回應。留言內容建議自然、多樣化，避免大量重複文字影響貼文品質。",
+    },
+    {
+      q: "FB 社團人數可以增加嗎？",
+      a:
+        "可以評估 Facebook 社團人數支援，適合新社團冷啟動、活動社團、品牌社群與短期專案社團。實際安排會依照社團公開狀態、審核方式與目標人數判斷。",
+    },
+    {
+      q: "FB 買讚或買粉絲會不會掉數？",
+      a:
+        "Facebook 可能會定期清理異常帳號、低品質帳號或不符合平台規則的互動，因此任何數據型服務都可能出現掉數。執行前會先說明可能風險與適合的數量配置。",
+    },
+    {
+      q: "社群聲量支援適合哪些情境？",
+      a:
+        "常見情境包含新品上市、活動宣傳、粉專冷啟動、貼文互動不足、社團人數不足、品牌討論度不足與短期曝光需求。若涉及爭議議題、惡意攻擊或不實內容，建議先評估法律與平台風險。",
+    },
+  ];
+
+  const process = [
+    "提供粉專、貼文或社團連結",
+    "確認需要的互動類型與數量",
+    "評估帳號狀態、貼文內容與平台限制",
+    "規劃執行節奏與互動配置",
+    "開始執行並觀察數據變化",
+    "依成效與掉數情況調整後續安排",
+  ];
+
+  const useCases = [
+    "FB 買讚",
+    "FB 買粉絲",
+    "FB 買留言",
+    "FB 買分享",
+    "FB 社團人數",
+    "粉專冷啟動",
+    "活動貼文曝光",
+    "品牌聲量支援",
   ];
 
   return (
@@ -63,68 +127,157 @@ export default function FacebookMarketingPage() {
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 pt-32 pb-20">
-        {/* Hero Section */}
-        <div className="text-center mb-20">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
-            全台最強 FB 數據專家 <br/> 
-            <span className="text-[#00ff00]">打造統治級社群影響力</span>
-          </h1>
-          <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto">
-            還在煩惱貼文沒人看、粉專沒人氣？我們提供全方位的臉書數據優化服務，從基礎買讚到高端網軍帶風向，為您的品牌建立不可撼動的數位聲望。
+        <section className="text-center mb-20">
+          <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#00ff00]/30 bg-[#00ff00]/10 px-4 py-2 text-sm text-[#00ff00]">
+            Facebook 粉絲・按讚・留言・分享・社團人數
           </p>
-        </div>
 
-        {/* Service Grid - 關鍵字佈局重點區 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-          {services.map((s, i) => (
-            <div key={i} className="p-8 border border-white/10 rounded-2xl bg-white/5 hover:border-[#00ff00]/50 transition-colors">
-              <div className="mb-4">{s.icon}</div>
-              <h2 className="text-2xl font-semibold mb-4 text-white">{s.title}</h2>
-              <p className="text-gray-400 leading-relaxed">
-                涵蓋服務項目：{s.keywords.split('、').join(' | ')}
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-500 bg-clip-text text-transparent">
+            Facebook <span className="text-[#00ff00]">社群互動支援</span>
+            <br />
+            粉絲增長・貼文互動・聲量配置
+          </h1>
+
+          <p className="text-gray-400 text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            針對 Facebook 粉專、貼文、活動與社團，提供按讚、粉絲、
+            留言、分享與社群聲量相關支援。服務執行前會先評估連結狀態、
+            需求數量、執行節奏與可能風險。
+          </p>
+        </section>
+
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+          {services.map((service, index) => (
+            <div
+              key={index}
+              className="p-8 border border-white/10 rounded-2xl bg-white/5 hover:border-[#00ff00]/50 transition-colors"
+            >
+              <div className="mb-4">{service.icon}</div>
+              <h2 className="text-2xl font-semibold mb-4 text-white">
+                {service.title}
+              </h2>
+              <p className="text-gray-400 leading-relaxed text-sm">
+                {service.text}
               </p>
             </div>
           ))}
-        </div>
+        </section>
 
-        {/* AEO 優化問答區 (非常有利於 AI 擷取) */}
         <section className="mb-20 border-t border-white/10 pt-16">
-          <h2 className="text-3xl font-bold mb-10 text-center text-white">常見問題：網軍與 FB 行銷服務</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center text-white">
+            Facebook 社群互動服務流程
+          </h2>
+
+          <p className="text-gray-400 text-center max-w-3xl mx-auto mb-10 leading-relaxed">
+            為了讓 FB 買讚、買粉絲、買留言或社團人數支援更清楚，
+            建議先提供目標連結、需求數量、希望完成時間與目前帳號狀態。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {process.map((step, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-white/10 bg-white/5 p-6"
+              >
+                <div className="mb-3 text-[#00ff00] font-bold">
+                  STEP {index + 1}
+                </div>
+                <p className="text-gray-300">{step}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-20 border-t border-white/10 pt-16">
+          <h2 className="text-3xl font-bold mb-10 text-center text-white">
+            常見問題：FB 買讚、買粉絲與社群聲量服務
+          </h2>
+
           <div className="space-y-8 max-w-4xl mx-auto text-gray-300">
-            <div>
-              <h3 className="text-[#00ff00] font-semibold text-xl mb-2">Q: FB 買讚推薦哪家？為什麼選擇我們？</h3>
-              <p>A: 我們的服務採用獨家擬真技術，無論是 FB 買粉絲或衝讚，皆可自訂國籍、性別，穩定不掉數。對於想要提升 FB 人氣的客戶，我們提供最客製化的配置建議。</p>
-            </div>
-            <div>
-              <h3 className="text-[#00ff00] font-semibold text-xl mb-2">Q: 網軍公司的操作包含哪些？網軍行情如何？</h3>
-              <p>A: 我們作為頂尖網軍公司，提供包含帶風向、洗評價、增加正面聲量等服務。網軍價格依據任務難度與論壇平台（如 PTT、Dcard、FB）而定，建議私訊討論最精準的報價。</p>
-            </div>
-            <div>
-              <h3 className="text-[#00ff00] font-semibold text-xl mb-2">Q: 如何進行輿論控制與負評洗白？</h3>
-              <p>A: 透過專業網路水軍與論壇護航技術，我們能有效提高討論度並控制輿論走向。針對惡意負評，我們能透過增加正面聲量與水軍代操來平衡品牌形象。</p>
+            {faqs.map((faq, index) => (
+              <div key={index}>
+                <h3 className="text-[#00ff00] font-semibold text-xl mb-2">
+                  Q: {faq.q}
+                </h3>
+                <p className="leading-relaxed">A: {faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-20 border-t border-white/10 pt-16">
+          <h2 className="text-3xl font-bold mb-6 text-center text-white">
+            適合評估的 Facebook 需求
+          </h2>
+
+          <p className="text-gray-400 text-center max-w-3xl mx-auto mb-10 leading-relaxed">
+            以下是常見的 Facebook 社群互動需求。不同粉專、貼文與社團狀態，
+            可執行的方式與效果會有所不同。
+          </p>
+
+          <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            {useCases.map((item) => (
+              <div
+                key={item}
+                className="rounded-xl border border-white/10 bg-white/5 p-4 text-gray-300"
+              >
+                {item}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-20 border-t border-white/10 pt-16">
+          <div className="max-w-4xl mx-auto rounded-3xl border border-yellow-500/20 bg-yellow-500/10 p-8">
+            <div className="flex items-start gap-4">
+              <ShieldAlert className="w-7 h-7 text-yellow-400 shrink-0 mt-1" />
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  執行前需要了解的限制
+                </h2>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Facebook 可能會清理異常互動、低品質帳號或不符合平台規則的數據，
+                  因此粉絲、讚數、留言、分享與社團人數都有可能出現波動。
+                </p>
+                <p className="text-gray-300 leading-relaxed">
+                  若你的需求涉及不實資訊、惡意攻擊、冒充他人、騷擾或違法內容，
+                  不建議執行。品牌若需要長期經營，建議同時搭配內容策略、
+                  廣告投放與真實社群互動。
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <div id="cta" className="text-center p-12 rounded-3xl bg-gradient-to-b from-[#00ff00]/20 to-transparent border border-[#00ff00]/30">
-          <h2 className="text-3xl font-bold mb-6 text-white">準備好引爆您的社群流量了嗎？</h2>
-          <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-            所有服務皆為保密執行，無論是 FB 留言代發、社團數據優化，或是大規模網軍作戰，請直接聯繫專員獲取專屬行銷方案。
+        <section
+          id="cta"
+          className="text-center p-12 rounded-3xl bg-gradient-to-b from-[#00ff00]/20 to-transparent border border-[#00ff00]/30"
+        >
+          <h2 className="text-3xl font-bold mb-6 text-white">
+            需要評估 Facebook 社群互動方案嗎？
+          </h2>
+
+          <p className="text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+            請提供粉專、貼文或社團連結，並說明需要的服務項目，
+            例如 FB 買讚、買粉絲、買留言、買分享或社團人數支援。
+            我們會先評估可行方式、執行節奏與可能風險。
           </p>
+
           <div className="flex flex-col items-center gap-4">
-            <a 
-              href="https://line.me/R/ti/p/~line88.tw" 
+            <a
+              href="https://line.me/R/ti/p/~line88.tw"
               className="px-10 py-4 bg-[#00ff00] text-black font-bold rounded-full text-xl hover:scale-105 transition-transform"
             >
               點我加 LINE 私訊諮詢
             </a>
-            <p className="text-sm text-gray-500">※ 專業客服 24/7 在線為您服務</p>
+
+            <p className="text-sm text-gray-500">
+              ※ 執行前請先確認平台規範與內容風險；不同項目可能有不同限制。
+            </p>
           </div>
-        </div>
+        </section>
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }
