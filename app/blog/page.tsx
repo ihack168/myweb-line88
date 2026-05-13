@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { client } from "@/lib/sanity";
 import { Navbar } from "@/components/navbar";
@@ -19,7 +19,7 @@ interface Post {
   htmlContent?: string;
 }
 
-export default function BlogPage() {
+function BlogPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -106,7 +106,11 @@ export default function BlogPage() {
           return {
             ...post,
             thumbnail:
-              extractedImg || youtubeThumb || post.imageUrl || post.mainImage || "",
+              extractedImg ||
+              youtubeThumb ||
+              post.imageUrl ||
+              post.mainImage ||
+              "",
             description: extractedDesc,
             tags: Array.isArray(post.tags) ? post.tags : [],
           };
@@ -342,5 +346,19 @@ export default function BlogPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function BlogPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-[#ff8800]"></div>
+        </div>
+      }
+    >
+      <BlogPageContent />
+    </Suspense>
   );
 }
