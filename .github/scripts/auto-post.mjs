@@ -8,7 +8,7 @@ const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pm
 // Google Apps Script 網址
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVOx_tENXE12RhIaY05GcOCfACNBbv956EP7pjDhf8-wgfZOkVtX3hSe6VGfLomlD0/exec';
 
-const POSTS_PER_RUN = 5;
+const POSTS_PER_RUN = 1;
 
 // 1. 抓取 CSV，加時間戳避免快取
 function fetchCSV(url) {
