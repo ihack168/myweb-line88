@@ -235,37 +235,15 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         </div>
       </main>
 
-      {/* 右下浮動諮詢按鈕 */}
       <Link
         href="/#contact"
-        className="
-          fixed bottom-6 right-6 z-50
-          group flex items-center gap-3
-          rounded-full bg-[#ff8800]
-          px-5 py-4
-          text-black font-black
-          text-sm md:text-base
-          shadow-[0_0_30px_rgba(255,136,0,0.55)]
-          hover:scale-105
-          hover:bg-[#ffaa33]
-          transition-all duration-300
-          border border-white/20
-          backdrop-blur-md
-        "
+        className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 rounded-full bg-[#ff8800] px-6 py-4 text-black font-black text-base shadow-[0_0_35px_rgba(255,136,0,0.75)] hover:scale-110 hover:bg-[#ffaa33] transition-all duration-300 border border-white/20"
       >
-        {/* 呼吸動畫圓點 */}
         <span className="relative flex h-3 w-3">
           <span className="absolute inline-flex h-full w-full rounded-full bg-black opacity-40 animate-ping"></span>
           <span className="relative inline-flex rounded-full h-3 w-3 bg-black"></span>
         </span>
-
-        {/* 文字 */}
-        <span>免費諮詢</span>
-
-        {/* 箭頭 */}
-        <span className="hidden sm:inline group-hover:translate-x-1 transition-transform">
-          →
-        </span>
+        免費諮詢 →
       </Link>
 
       <Footer />
