@@ -17,7 +17,21 @@ export default defineType({
       options: {
         source: 'title',
         maxLength: 96,
+        // 關鍵修正：讓後台手動生成格式 = 自動發文腳本格式
+        slugify: (input) => {
+          const cleanTitle = input
+            .toLowerCase()
+            .replace(/\s+/g, '-') // 空格換橫槓
+            .replace(/[^\u4e00-\u9fa5a-z0-9-]/g, '') // 刪除特殊符號
+            .substring(0, 15) // 與 auto-post.mjs 同步取前 15 字，避免切斷中文字元編碼
+
+          const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6)
+          
+          // 強制進行 URL 編碼，確保前台能用舊有的邏輯抓到文章
+          return encodeURIComponent(cleanTitle) + `-${uniqueId}`
+        },
       },
+      validation: (Rule) => Rule.required().error('Slug 是必填項目，否則前台無法點擊'),
     }),
     defineField({
       name: 'author',
@@ -32,7 +46,7 @@ export default defineType({
       type: 'url',
       description: '直接貼上外部網站的圖片連結 (例如 https://...)，這將作為列表頁的封面圖。',
     }),
-    // 原有的 Sanity 上傳圖片欄位（保留備用）
+    // 原有的 Sanity 上傳圖片欄位
     defineField({
       name: 'mainImage',
       title: 'Main image (Sanity Upload)',

@@ -146,9 +146,16 @@ function parseSanityImageUrl(imageRaw) {
 
 // 5. 建立文章
 async function createPost(title, htmlContent, tags, imageRaw) {
-  const cleanTitle = title.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '').substring(0, 15);
+  // --- 核心修正處 ---
+  // 先清理標題字元，保留中英數
+  const cleanTitle = title.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
+  // 先截斷長度（避免編碼後的中文字被切斷）
+  const shortTitle = cleanTitle.substring(0, 15);
+  // 生成隨機 ID (取當下秒數後 6 碼)
   const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6);
-  const finalSlug = encodeURIComponent(cleanTitle) + `-${uniqueId}`;
+  // 組合最終 Slug：編碼後的標題-ID
+  const finalSlug = encodeURIComponent(shortTitle) + `-${uniqueId}`;
+  // ----------------
 
   let finalHtml = htmlContent;
   const imageUrl = parseSanityImageUrl(imageRaw);
@@ -280,5 +287,3 @@ main()
     console.error('❌ 主流程失敗:', error);
     process.exit(1);
   });
-
-// Last Update: GitHub Actions explicit exit version
