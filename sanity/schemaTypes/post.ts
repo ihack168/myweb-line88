@@ -86,16 +86,17 @@ export default defineType({
       description: '輸入 YouTube 影片 ID (例如: dQw4w9WgXcQ)，前端會自動顯示播放按鈕。',
     }),
     // --- 新增：標籤 / 關鍵字欄位 (用於 SEO/AEO) ---
-    defineField({
-      name: 'tags',
-      title: '標籤 / 關鍵字',
-      type: 'array',
-      description: '用於文章分類與 AEO 優化，例如：LINE行銷, 自動化工具, AI客服',
-      of: [{type: 'string'}],
-      options: {
-        layout: 'tags',
-      },
-    }),
+defineField({
+  name: 'tags',
+  title: '標籤 / 關鍵字',
+  type: 'array',
+  description: '每個標籤請分開新增，例如：猛健樂、週纖達、瑞倍適',
+  of: [
+    {
+      type: 'string',
+    },
+  ],
+}),
   ],
 
   preview: {
