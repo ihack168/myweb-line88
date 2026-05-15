@@ -132,7 +132,7 @@ export function Navbar() {
 
             <div className="px-6 pb-6">
               <p className="text-sm leading-relaxed text-gray-400 border-t border-white/10 pt-4">
-                專業網站設計、內容建置與數位自動化服務。
+                AI技術整合、串接 AEO SEO優化技術:網路投票灌票支援。
               </p>
             </div>
           </div>
