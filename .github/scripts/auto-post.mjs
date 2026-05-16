@@ -3,90 +3,55 @@ import https from 'https';
 const SANITY_PROJECT_ID = 't0di9pwy';
 const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pmx70YP1kXfiQj0eLCsJmcN9mfFtVwJtzM5nTLqubzpMPEpNxdtpYYYJrAwobyNg1AAfZhLH/pub?output=csv';
+
+// 只要改這裡，就能切換不同 sheet
+const SHEET_NAME = 'line88';
 
 // Google Apps Script 網址
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJO4OjtVfURgK-s5KT9v4zVtUbwFFyzpmeSNBDlMg2Ka155-wSztYr7PJ4ZwH2VOtC/exec';
+const GOOGLE_SCRIPT_BASE_URL =
+  'https://script.google.com/macros/s/AKfycbzJO4OjtVfURgK-s5KT9v4zVtUbwFFyzpmeSNBDlMg2Ka155-wSztYr7PJ4ZwH2VOtC/exec';
 
-const POSTS_PER_RUN = 1;
+const GOOGLE_SCRIPT_URL =
+  `${GOOGLE_SCRIPT_BASE_URL}?sheet=${encodeURIComponent(SHEET_NAME)}`;
 
-// 1. 抓取 CSV，加時間戳避免快取
-function fetchCSV(url) {
-  const finalUrl = `${url}&t=${Date.now()}`;
-
+async function fetchNextPost() {
   return new Promise((resolve, reject) => {
     https
-      .get(
-        finalUrl,
-        {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            Accept: 'text/csv',
-          },
-        },
-        (res) => {
-          if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-            return fetchCSV(res.headers.location).then(resolve).catch(reject);
-          }
+      .get(GOOGLE_SCRIPT_URL, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          https
+            .get(res.headers.location, (res2) => {
+              let data = '';
+              res2.on('data', (chunk) => (data += chunk));
+              res2.on('end', () => {
+                try {
+                  resolve(JSON.parse(data));
+                } catch (err) {
+                  reject(new Error(`Apps Script JSON 解析失敗: ${data}`));
+                }
+              });
+            })
+            .on('error', reject);
 
-          let data = '';
-          res.on('data', (chunk) => (data += chunk));
-          res.on('end', () => resolve(data));
+          return;
         }
-      )
+
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (err) {
+            reject(new Error(`Apps Script JSON 解析失敗: ${data}`));
+          }
+        });
+      })
       .on('error', reject);
   });
 }
 
-// 2. 解析 CSV
-function parseCSV(text) {
-  const rows = [];
-  let currentField = '';
-  let inQuotes = false;
-  let currentRow = [];
-
-  for (let i = 0; i < text.length; i++) {
-    const char = text[i];
-
-    if (char === '"' && inQuotes && text[i + 1] === '"') {
-      currentField += '"';
-      i++;
-    } else if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
-      currentRow.push(currentField.trim());
-      currentField = '';
-    } else if ((char === '\r' || char === '\n') && !inQuotes) {
-      if (currentField || currentRow.length > 0) {
-        currentRow.push(currentField.trim());
-        rows.push(currentRow);
-        currentField = '';
-        currentRow = [];
-      }
-
-      if (char === '\r' && text[i + 1] === '\n') i++;
-    } else {
-      currentField += char;
-    }
-  }
-
-  if (currentRow.length > 0 || currentField) {
-    currentRow.push(currentField.trim());
-    rows.push(currentRow);
-  }
-
-  return rows;
-}
-
-// 3. 發文成功後回填標記
-async function markAsPublishedOnSheet(rowIndex) {
-  if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.length < 10) {
-    console.warn('⚠️ GOOGLE_SCRIPT_URL 無效，跳過回填。');
-    return;
-  }
-
-  const data = JSON.stringify({ row: rowIndex });
+async function markAsPublishedOnSheet(rowNumber) {
+  const data = JSON.stringify({ row: rowNumber });
 
   return new Promise((resolve) => {
     const req = https.request(
@@ -99,7 +64,7 @@ async function markAsPublishedOnSheet(rowIndex) {
         },
       },
       (res) => {
-        if (res.statusCode === 302 && res.headers.location) {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
           https
             .get(res.headers.location, (res2) => {
               res2.on('data', () => {});
@@ -109,10 +74,12 @@ async function markAsPublishedOnSheet(rowIndex) {
               console.error('❌ 回填 redirect 失敗:', e.message);
               resolve();
             });
-        } else {
-          res.on('data', () => {});
-          res.on('end', () => resolve());
+
+          return;
         }
+
+        res.on('data', () => {});
+        res.on('end', () => resolve());
       }
     );
 
@@ -126,7 +93,6 @@ async function markAsPublishedOnSheet(rowIndex) {
   });
 }
 
-// 4. 解析 Sanity 圖片網址
 function parseSanityImageUrl(imageRaw) {
   if (!imageRaw || !imageRaw.includes(',')) return null;
 
@@ -144,24 +110,17 @@ function parseSanityImageUrl(imageRaw) {
   return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${finalString}`;
 }
 
-// 5. 建立文章
 async function createPost(title, htmlContent, tags, imageRaw) {
-  // --- 核心修正處 ---
-  // 先清理標題字元，保留中英數
   const cleanTitle = title.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
-  // 先截斷長度（避免編碼後的中文字被切斷）
   const shortTitle = cleanTitle.substring(0, 15);
-  // 生成隨機 ID (取當下秒數後 6 碼)
   const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6);
-  // 組合最終 Slug：編碼後的標題-ID
   const finalSlug = encodeURIComponent(shortTitle) + `-${uniqueId}`;
-  // ----------------
 
-  let finalHtml = htmlContent;
+  let finalHtml = htmlContent || '';
   const imageUrl = parseSanityImageUrl(imageRaw);
 
   if (imageUrl) {
-    finalHtml = `<img src="${imageUrl}" alt="${title}">\n` + htmlContent;
+    finalHtml = `<img src="${imageUrl}" alt="${title}">\n` + finalHtml;
   }
 
   const doc = {
@@ -225,56 +184,40 @@ async function createPost(title, htmlContent, tags, imageRaw) {
 }
 
 async function main() {
-  console.log('📥 執行中...');
+  console.log(`📥 從 Apps Script 讀取 sheet：${SHEET_NAME}`);
 
-  const csv = await fetchCSV(SHEET_CSV_URL);
-  const rows = parseCSV(csv);
+  const post = await fetchNextPost();
 
-  const pending = [];
-
-  for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-
-    const title = row[1]?.trim();
-    const published = row[6]?.trim();
-
-    if (
-      !title ||
-      title === '標題' ||
-      title === '註記' ||
-      (published && published.toLowerCase().includes('published'))
-    ) {
-      continue;
-    }
-
-    pending.push({
-      rowIndex: i,
-      title,
-      html: row[2],
-      tags: row[3],
-      imageRaw: row[5],
-    });
-  }
-
-  if (pending.length === 0) {
+  if (!post || post.error) {
     console.log('✅ 無待處理文章');
+    console.log(post);
     return;
   }
 
-  const toPost = pending.slice(0, POSTS_PER_RUN);
+  console.log(`📄 目前 sheet：${post.sheetName || SHEET_NAME}`);
+  console.log(`📌 目前列號：${post.row}`);
 
-  for (const item of toPost) {
-    console.log(`🚀 發布: ${item.title}`);
+  const title = post.tabb?.trim();
+  const html = post.tabc || '';
+  const tags = post.tabd || '';
+  const imageRaw = post.tabe || '';
 
-    const result = await createPost(item.title, item.html, item.tags, item.imageRaw);
+  if (!title || !html) {
+    console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
+    console.log(post);
+    return;
+  }
 
-    if (result.results || result.mutations) {
-      console.log('✅ Sanity 成功，執行回填...');
-      await markAsPublishedOnSheet(item.rowIndex);
-      console.log('✅ Google Sheet 回填完成');
-    } else {
-      console.warn('⚠️ Sanity 回傳異常:', JSON.stringify(result));
-    }
+  console.log(`🚀 發布: ${title}`);
+
+  const result = await createPost(title, html, tags, imageRaw);
+
+  if (result.results || result.mutations) {
+    console.log('✅ Sanity 成功，執行回填...');
+    await markAsPublishedOnSheet(post.row);
+    console.log('✅ Google Sheet 回填完成');
+  } else {
+    console.warn('⚠️ Sanity 回傳異常:', JSON.stringify(result));
   }
 }
 
