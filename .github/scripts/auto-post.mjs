@@ -6,7 +6,7 @@ const SANITY_TOKEN = process.env.SANITY_TOKEN;
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFA7B3pmx70YP1kXfiQj0eLCsJmcN9mfFtVwJtzM5nTLqubzpMPEpNxdtpYYYJrAwobyNg1AAfZhLH/pub?output=csv';
 
 // Google Apps Script 網址
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwVOx_tENXE12RhIaY05GcOCfACNBbv956EP7pjDhf8-wgfZOkVtX3hSe6VGfLomlD0/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzJO4OjtVfURgK-s5KT9v4zVtUbwFFyzpmeSNBDlMg2Ka155-wSztYr7PJ4ZwH2VOtC/exec';
 
 const POSTS_PER_RUN = 1;
 
