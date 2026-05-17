@@ -258,6 +258,7 @@ async function main() {
   console.log(`📥 從 Apps Script 讀取 sheet：${SHEET_NAME}`);
 
   const post = await fetchNextPost();
+  console.log('🧾 Apps Script 回傳完整 post:', JSON.stringify(post, null, 2));
 
   if (!post || post.error) {
     console.log('✅ 無待處理文章');
