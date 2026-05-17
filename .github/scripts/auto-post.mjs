@@ -18,11 +18,17 @@ async function fetchNextPost() {
   return new Promise((resolve, reject) => {
     https
       .get(GOOGLE_SCRIPT_URL, (res) => {
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
           https
             .get(res.headers.location, (res2) => {
               let data = '';
+
               res2.on('data', (chunk) => (data += chunk));
+
               res2.on('end', () => {
                 try {
                   resolve(JSON.parse(data));
@@ -37,7 +43,9 @@ async function fetchNextPost() {
         }
 
         let data = '';
+
         res.on('data', (chunk) => (data += chunk));
+
         res.on('end', () => {
           try {
             resolve(JSON.parse(data));
@@ -64,7 +72,11 @@ async function markAsPublishedOnSheet(rowNumber) {
         },
       },
       (res) => {
-        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        if (
+          res.statusCode >= 300 &&
+          res.statusCode < 400 &&
+          res.headers.location
+        ) {
           https
             .get(res.headers.location, (res2) => {
               res2.on('data', () => {});
@@ -94,44 +106,93 @@ async function markAsPublishedOnSheet(rowNumber) {
 }
 
 function parseSanityImageUrl(imageRaw) {
-  if (!imageRaw || !imageRaw.includes(',')) return null;
+  if (!imageRaw) return null;
 
-  const parts = imageRaw.split(',');
-  const imageAssetId = parts[1].trim().replace(/^image-/, '');
-  const lastDashIndex = imageAssetId.lastIndexOf('-');
+  try {
+    // 支援：
+    // xxx.png, image-xxxxx-1200x800-png
+    // 或只有 image-xxxxx-1200x800-png
 
-  if (lastDashIndex === -1) return null;
+    const parts = imageRaw.split(',');
 
-  const finalString =
-    imageAssetId.substring(0, lastDashIndex) +
-    '.' +
-    imageAssetId.substring(lastDashIndex + 1);
+    const assetRef = (parts[1] || parts[0]).trim();
 
-  return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${finalString}`;
+    const match = assetRef.match(
+      /^image-([a-f0-9]+)-(\d+x\d+)-([a-zA-Z0-9]+)$/
+    );
+
+    if (!match) {
+      console.warn('⚠️ 無法解析圖片 asset:', imageRaw);
+      return null;
+    }
+
+    const [, assetId, size, ext] = match;
+
+    return `https://cdn.sanity.io/images/${SANITY_PROJECT_ID}/${SANITY_DATASET}/${assetId}-${size}.${ext}`;
+  } catch (error) {
+    console.error('❌ parseSanityImageUrl 失敗:', error);
+    return null;
+  }
 }
 
 async function createPost(title, htmlContent, tags, imageRaw) {
-  const cleanTitle = title.toLowerCase().replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
+  const cleanTitle = title
+    .toLowerCase()
+    .replace(/[^\u4e00-\u9fa5a-z0-9]/g, '');
+
   const shortTitle = cleanTitle.substring(0, 15);
-  const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6);
-  const finalSlug = encodeURIComponent(shortTitle) + `-${uniqueId}`;
+
+  const uniqueId = Math.floor(Date.now() / 1000)
+    .toString()
+    .slice(-6);
+
+  const finalSlug =
+    encodeURIComponent(shortTitle) + `-${uniqueId}`;
 
   let finalHtml = htmlContent || '';
+
   const imageUrl = parseSanityImageUrl(imageRaw);
 
+  console.log('🖼 imageRaw:', imageRaw);
+  console.log('🖼 imageUrl:', imageUrl);
+
+  // SEO / AEO 圖片 alt
+  const imageAlt = `${title} 示意圖`;
+
+  // 首圖 prepend
   if (imageUrl) {
-    finalHtml = `<img src="${imageUrl}" alt="${title}">\n` + finalHtml;
+    finalHtml = `
+<p>
+  <img
+    src="${imageUrl}"
+    alt="${imageAlt}"
+    loading="lazy"
+  />
+</p>
+
+${finalHtml}
+`;
   }
+
+  console.log(
+    '📝 finalHtml preview:',
+    finalHtml.substring(0, 500)
+  );
 
   const doc = {
     _type: 'post',
+
     title,
+
     slug: {
       _type: 'slug',
       current: finalSlug,
     },
+
     htmlContent: finalHtml,
+
     publishedAt: new Date().toISOString(),
+
     ...(tags
       ? {
           tags: tags
@@ -154,14 +215,20 @@ async function createPost(title, htmlContent, tags, imageRaw) {
     const req = https.request(
       {
         hostname: `${SANITY_PROJECT_ID}.api.sanity.io`,
+
         path: `/v2024-01-01/data/mutate/${SANITY_DATASET}`,
+
         method: 'POST',
+
         headers: {
           'Content-Type': 'application/json',
+
           Authorization: `Bearer ${SANITY_TOKEN}`,
+
           'Content-Length': Buffer.byteLength(body),
         },
       },
+
       (res) => {
         let data = '';
 
@@ -171,14 +238,18 @@ async function createPost(title, htmlContent, tags, imageRaw) {
           try {
             resolve(JSON.parse(data));
           } catch (error) {
-            reject(new Error(`Sanity 回傳 JSON 解析失敗: ${data}`));
+            reject(
+              new Error(`Sanity 回傳 JSON 解析失敗: ${data}`)
+            );
           }
         });
       }
     );
 
     req.on('error', reject);
+
     req.write(body);
+
     req.end();
   });
 }
@@ -198,8 +269,11 @@ async function main() {
   console.log(`📌 目前列號：${post.row}`);
 
   const title = post.tabb?.trim();
+
   const html = post.tabc || '';
+
   const tags = post.tabd || '';
+
   const imageRaw = post.tabe || '';
 
   if (!title || !html) {
@@ -210,14 +284,24 @@ async function main() {
 
   console.log(`🚀 發布: ${title}`);
 
-  const result = await createPost(title, html, tags, imageRaw);
+  const result = await createPost(
+    title,
+    html,
+    tags,
+    imageRaw
+  );
 
   if (result.results || result.mutations) {
     console.log('✅ Sanity 成功，執行回填...');
+
     await markAsPublishedOnSheet(post.row);
+
     console.log('✅ Google Sheet 回填完成');
   } else {
-    console.warn('⚠️ Sanity 回傳異常:', JSON.stringify(result));
+    console.warn(
+      '⚠️ Sanity 回傳異常:',
+      JSON.stringify(result)
+    );
   }
 }
 
