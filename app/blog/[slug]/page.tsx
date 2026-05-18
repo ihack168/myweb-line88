@@ -143,7 +143,7 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
         {/* 作者與日期 */}
         <div className="flex items-center gap-4 text-gray-400 mb-12 text-sm border-b border-white/10 pb-8">
-          <span className="font-bold text-gray-200">✍ {post.authorName || "Lockhead Hex Admin"}</span>
+          {/* <span className="font-bold text-gray-200">✍ {post.authorName || "Lockhead Hex Admin"}</span> */}
           <span className="text-white/20">|</span>
           <span>{publishedDate}</span>
         </div>
