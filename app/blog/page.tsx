@@ -31,7 +31,7 @@ function BlogPageContent() {
   const [loading, setLoading] = useState(true);
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
-  const postsPerPage = 9;
+  const postsPerPage = 15;
 
   useEffect(() => {
     setPage(1);
