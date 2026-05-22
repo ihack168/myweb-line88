@@ -104,10 +104,26 @@ function getSafePostCount(value) {
 }
 
 function parseSanityImageUrl(imageRaw) {
-  if (!imageRaw || !imageRaw.includes(',')) return null;
+  if (!imageRaw) return null;
 
-  const parts = imageRaw.split(',');
-  const imageAssetId = parts[1].trim().replace(/^image-/, '');
+  const raw = String(imageRaw).trim();
+
+  if (!raw) return null;
+
+  // 如果 F 欄本身就是圖片網址，直接使用
+  if (raw.startsWith('http://') || raw.startsWith('https://')) {
+    return raw;
+  }
+
+  // F 欄格式：
+  // line-ai-bot-61.png, image-xxxxx-1672x941-png
+  const parts = raw.split(',');
+  const assetPart =
+    parts.length > 1
+      ? parts[1].trim()
+      : parts[0].trim();
+
+  const imageAssetId = assetPart.replace(/^image-/, '');
   const lastDashIndex = imageAssetId.lastIndexOf('-');
 
   if (lastDashIndex === -1) return null;
@@ -132,6 +148,9 @@ async function createPost(title, htmlContent, tags, imageRaw) {
 
   let finalHtml = htmlContent || '';
   const imageUrl = parseSanityImageUrl(imageRaw);
+
+  console.log(`🖼️ F欄原始圖片資料：${imageRaw || '(空)'}`);
+  console.log(`🖼️ 解析後圖片網址：${imageUrl || '(無圖片)'}`);
 
   if (imageUrl) {
     finalHtml = `<img src="${imageUrl}" alt="${title}">\n` + finalHtml;
@@ -232,17 +251,13 @@ async function main() {
     console.log(`📄 目前 sheet：${post.sheetName || SHEET_NAME}`);
     console.log(`📌 目前列號：${post.row}`);
 
-    // Apps Script 目前回傳：
-    // tabb = B欄標題
-    // tabc = C欄HTML
-    // tabd = D欄Tags
-    // tabf = F欄圖片
-    const title = String(post.tabb || post.title || '').trim();
-    const html = String(post.tabc || post.html || '').trim();
-    const tags = String(post.tabd || post.tags || '').trim();
-    const imageRaw = String(post.tabf || post.image || '').trim();
+    const title = String(post.title || '').trim();
+    const html = String(post.html || '').trim();
+    const tags = String(post.tags || '').trim();
+    const imageRaw = String(post.image || '').trim();
 
     console.log(`📌 標題：${title}`);
+    console.log(`🏷️ Tags：${tags || '(空)'}`);
 
     if (!title || !html) {
       console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
