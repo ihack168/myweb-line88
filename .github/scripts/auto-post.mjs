@@ -231,12 +231,18 @@ async function main() {
 
     console.log(`📄 目前 sheet：${post.sheetName || SHEET_NAME}`);
     console.log(`📌 目前列號：${post.row}`);
-    console.log(`📌 標題：${post.title}`);
 
-    const title = String(post.title || '').trim();
-    const html = String(post.html || '').trim();
-    const tags = String(post.tags || '').trim();
-    const imageRaw = String(post.image || '').trim();
+    // Apps Script 目前回傳：
+    // tabb = B欄標題
+    // tabc = C欄HTML
+    // tabd = D欄Tags
+    // tabf = F欄圖片
+    const title = String(post.tabb || post.title || '').trim();
+    const html = String(post.tabc || post.html || '').trim();
+    const tags = String(post.tabd || post.tags || '').trim();
+    const imageRaw = String(post.tabf || post.image || '').trim();
+
+    console.log(`📌 標題：${title}`);
 
     if (!title || !html) {
       console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
