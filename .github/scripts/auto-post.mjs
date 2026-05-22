@@ -1,6 +1,6 @@
 import https from 'https';
 
-const SANITY_PROJECT_ID = 'oo1n2doq';
+const SANITY_PROJECT_ID = 't0di9pwy';
 const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
 
@@ -234,10 +234,10 @@ async function main() {
     console.log(`📌 目前列號：${post.row}`);
     console.log(`📌 A4 指定列：${post.a4}`);
 
-    const title = String(post.a4title || '').trim();
-    const html = String(post.a4html || '').trim();
-    const tags = String(post.a4tags || '').trim();
-    const imageRaw = String(post.a4image || '').trim();
+const title = String(post.title || '').trim();
+const html = String(post.html || '').trim();
+const tags = String(post.tags || '').trim();
+const imageRaw = String(post.image || '').trim();
 
     if (!title || !html) {
       console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
