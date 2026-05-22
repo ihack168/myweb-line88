@@ -9,7 +9,7 @@ const SHEET_NAME = 'line88';
 
 // Google Apps Script 網址
 const GOOGLE_SCRIPT_BASE_URL =
-  'https://script.google.com/macros/s/AKfycbzJO4OjtVfURgK-s5KT9v4zVtUbwFFyzpmeSNBDlMg2Ka155-wSztYr7PJ4ZwH2VOtC/exec';
+  'https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec';
 
 const GOOGLE_SCRIPT_URL =
   `${GOOGLE_SCRIPT_BASE_URL}?sheet=${encodeURIComponent(SHEET_NAME)}`;
