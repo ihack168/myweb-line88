@@ -214,7 +214,6 @@ async function main() {
   console.log(`🚀 本次實際預計發 ${postCount} 篇`);
 
   for (let i = 0; i < postCount; i++) {
-
     console.log(`\n====================`);
     console.log(`🚀 第 ${i + 1} 篇 / 共 ${postCount} 篇`);
     console.log(`====================`);
@@ -232,12 +231,12 @@ async function main() {
 
     console.log(`📄 目前 sheet：${post.sheetName || SHEET_NAME}`);
     console.log(`📌 目前列號：${post.row}`);
-    console.log(`📌 A4 指定列：${post.a4}`);
+    console.log(`📌 標題：${post.title}`);
 
-const title = String(post.title || '').trim();
-const html = String(post.html || '').trim();
-const tags = String(post.tags || '').trim();
-const imageRaw = String(post.image || '').trim();
+    const title = String(post.title || '').trim();
+    const html = String(post.html || '').trim();
+    const tags = String(post.tags || '').trim();
+    const imageRaw = String(post.image || '').trim();
 
     if (!title || !html) {
       console.log('⚠️ 標題或 HTML 內容是空的，停止發文');
