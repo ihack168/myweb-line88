@@ -5,7 +5,7 @@ const SANITY_DATASET = 'production';
 const SANITY_TOKEN = process.env.SANITY_TOKEN;
 
 // 只要改這裡，就能切換不同 sheet
-const SHEET_NAME = 'merrygood';
+const SHEET_NAME = 'line88';
 
 // Google Apps Script 網址
 const GOOGLE_SCRIPT_BASE_URL =
