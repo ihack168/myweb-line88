@@ -1,48 +1,97 @@
+import React, {useState} from 'react'
 import {defineField, defineType, set} from 'sanity'
+import {Box, Button, Card, Flex, Stack, Text, TextArea} from '@sanity/ui'
 
-function CommaSeparatedTagsInput(props: any) {
-  const {renderDefault, value = [], onChange} = props
+function TagsInput(props: any) {
+  const {value = [], onChange} = props
+  const [input, setInput] = useState('')
 
-  const addTags = (text: string) => {
-    if (!text) return
-
-    const newTags = text
-      .split(/,|，/)
+  const parseTags = (text: string) => {
+    return text
+      .replace(/[()（）]/g, '')
+      .split(/,|，|\n/)
       .map((tag) => tag.trim())
       .filter(Boolean)
-
-    if (newTags.length <= 1) return
-
-    const mergedTags = Array.from(new Set([...value, ...newTags]))
-
-    onChange(set(mergedTags))
   }
 
-  const handlePaste = (event: React.ClipboardEvent) => {
-    const text = event.clipboardData.getData('text')
+  const addTags = (text: string) => {
+    const tags = parseTags(text)
 
-    if (text.includes(',') || text.includes('，')) {
-      event.preventDefault()
-      addTags(text)
-    }
+    if (!tags.length) return
+
+    const merged = Array.from(new Set([...value, ...tags]))
+
+    onChange(set(merged))
+    setInput('')
   }
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    const target = event.target as HTMLInputElement
-    const text = target.value
-
-    if (event.key === 'Enter' && (text.includes(',') || text.includes('，'))) {
-      event.preventDefault()
-      addTags(text)
-      target.value = ''
-    }
+  const removeTag = (tag: string) => {
+    onChange(set(value.filter((item: string) => item !== tag)))
   }
 
-  return renderDefault({
-    ...props,
-    onPaste: handlePaste,
-    onKeyDown: handleKeyDown,
-  })
+  return React.createElement(
+    Stack,
+    {space: 3},
+
+    React.createElement(TextArea, {
+      value: input,
+      rows: 3,
+      placeholder: '可直接貼上：週纖達,減重針,減肥療程,減重門診,減重醫學,減肥診所',
+      onChange: (event: any) => setInput(event.currentTarget.value),
+      onPaste: (event: any) => {
+        const text = event.clipboardData.getData('text')
+        event.preventDefault()
+        addTags(text)
+      },
+      onKeyDown: (event: any) => {
+        if (event.key === 'Enter') {
+          event.preventDefault()
+          addTags(input)
+        }
+      },
+    }),
+
+    React.createElement(Button, {
+      text: '新增 Tags',
+      tone: 'primary',
+      onClick: () => addTags(input),
+    }),
+
+    React.createElement(
+      Flex,
+      {wrap: 'wrap', gap: 2},
+      value.map((tag: string) =>
+        React.createElement(
+          Card,
+          {
+            key: tag,
+            padding: 2,
+            radius: 2,
+            tone: 'primary',
+            shadow: 1,
+          },
+          React.createElement(
+            Flex,
+            {align: 'center', gap: 2},
+            React.createElement(Text, {size: 1}, tag),
+            React.createElement(Button, {
+              text: '×',
+              mode: 'bleed',
+              tone: 'critical',
+              onClick: () => removeTag(tag),
+            })
+          )
+        )
+      )
+    ),
+
+    value.length === 0 &&
+      React.createElement(
+        Box,
+        null,
+        React.createElement(Text, {size: 1, muted: true}, '尚未新增標籤')
+      )
+  )
 }
 
 export default defineType({
@@ -55,6 +104,7 @@ export default defineType({
       title: 'Title',
       type: 'string',
     }),
+
     defineField({
       name: 'slug',
       title: 'Slug',
@@ -74,20 +124,37 @@ export default defineType({
           return encodeURIComponent(cleanTitle) + `-${uniqueId}`
         },
       },
-      validation: (Rule) => Rule.required().error('Slug 是必填項目，否則前台無法點擊'),
+      validation: (Rule) =>
+        Rule.required().error('Slug 是必填項目，否則前台無法點擊'),
     }),
+
+    defineField({
+      name: 'htmlContent',
+      title: 'HTML Content (Excel Auto-post)',
+      type: 'text',
+      description:
+        '這裡是存放原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
+    }),
+
+    defineField({
+      name: 'tags',
+      title: '標籤 / 關鍵字',
+      type: 'array',
+      description:
+        '可直接貼上tags',
+      of: [{type: 'string'}],
+      components: {
+        input: TagsInput,
+      },
+    }),
+
     defineField({
       name: 'author',
       title: 'Author',
       type: 'reference',
       to: {type: 'author'},
     }),
-    defineField({
-      name: 'imageUrl',
-      title: 'External Image URL (外部圖片網址)',
-      type: 'url',
-      description: '直接貼上外部網站的圖片連結 (例如 https://...)，這將作為列表頁的封面圖。',
-    }),
+
     defineField({
       name: 'mainImage',
       title: 'Main image (Sanity Upload)',
@@ -96,46 +163,24 @@ export default defineType({
         hotspot: true,
       },
     }),
+
     defineField({
       name: 'categories',
       title: 'Categories',
       type: 'array',
       of: [{type: 'reference', to: {type: 'category'}}],
     }),
+
     defineField({
       name: 'publishedAt',
       title: 'Published at',
       type: 'datetime',
     }),
+
     defineField({
       name: 'body',
       title: 'Body (Standard Editor)',
       type: 'blockContent',
-    }),
-    defineField({
-      name: 'htmlContent',
-      title: 'HTML Content (Excel Auto-post)',
-      type: 'text',
-      description: '這裡是存放原始 HTML 代碼。如果此欄位有內容，前端將優先顯示此處。',
-    }),
-    defineField({
-      name: 'youtubeVideoId',
-      title: 'YouTube Video ID',
-      type: 'string',
-      description: '輸入 YouTube 影片 ID (例如: dQw4w9WgXcQ)，前端會自動顯示播放按鈕。',
-    }),
-    defineField({
-      name: 'tags',
-      title: '標籤 / 關鍵字',
-      type: 'array',
-      description: '可直接輸入多個標籤，用逗號分隔，例如：猛健樂,週纖達,瑞倍適，然後按 Enter。',
-      of: [{type: 'string'}],
-      options: {
-        layout: 'tags',
-      },
-      components: {
-        input: CommaSeparatedTagsInput,
-      },
     }),
   ],
 
