@@ -72,6 +72,7 @@ export default function RootLayout({
           src="https://www.googletagmanager.com/gtag/js?id=G-2X29DPN458"
           strategy="afterInteractive"
         />
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="febf1b62-e4ea-449e-af9b-dd91619e1116"></script>
 
         <Script id="google-analytics" strategy="afterInteractive">
           {`
