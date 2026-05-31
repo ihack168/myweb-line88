@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/:year(20\\d{2})/:month(\\d{2})/:slug*.html",
+      "destination": "https://blog.line88.tw/:year/:month/:slug*.html",
+      "permanent": true
+    }
+  ]
+}
