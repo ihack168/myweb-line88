@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  verification: {
+    google: 'nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM',
+  },
   title: '洛克希德黑克斯｜網路投票、社群流量、AEO SEO 與 Line AI 客服服務',
 
   description:
