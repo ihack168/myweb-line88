@@ -19,6 +19,16 @@ interface Post {
   htmlContent?: string;
 }
 
+function optimizeSanityImageUrl(url?: string) {
+  if (!url) return "";
+
+  if (!url.includes("cdn.sanity.io/images")) return url;
+
+  if (url.includes("auto=format")) return url;
+
+  return `${url}${url.includes("?") ? "&" : "?"}auto=format`;
+}
+
 function BlogPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -46,9 +56,7 @@ function BlogPageContent() {
         const end = start + postsPerPage;
 
         const tagFilter =
-          selectedTag !== "全部"
-            ? `&& "${selectedTag}" in tags`
-            : "";
+          selectedTag !== "全部" ? `&& "${selectedTag}" in tags` : "";
 
         const count = await client.fetch(
           `count(*[_type == "post" ${tagFilter}])`,
@@ -83,7 +91,7 @@ function BlogPageContent() {
             const imgMatch = post.htmlContent.match(/<img[^>]+src="([^">]+)"/);
 
             if (imgMatch && imgMatch[1]) {
-              extractedImg = imgMatch[1];
+              extractedImg = optimizeSanityImageUrl(imgMatch[1]);
             }
 
             if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
@@ -108,8 +116,8 @@ function BlogPageContent() {
             thumbnail:
               extractedImg ||
               youtubeThumb ||
-              post.imageUrl ||
-              post.mainImage ||
+              optimizeSanityImageUrl(post.imageUrl) ||
+              optimizeSanityImageUrl(post.mainImage) ||
               "",
             description: extractedDesc,
             tags: Array.isArray(post.tags) ? post.tags : [],
@@ -220,6 +228,7 @@ function BlogPageContent() {
                                 src={post.thumbnail}
                                 alt={post.title}
                                 className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
+                                loading="lazy"
                               />
                             ) : (
                               <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-zinc-700 italic text-sm">
