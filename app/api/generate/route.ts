@@ -37,11 +37,11 @@ export async function POST(req: Request) {
     const answer =
       data?.choices?.[0]?.message?.content || "";
 
-    return NextResponse.json({
-      ok: true,
-      answer,
-      raw: data,
-    });
+return new Response(answer, {
+  headers: {
+    "Content-Type": "text/plain; charset=utf-8",
+  },
+});
   } catch (error) {
     return NextResponse.json(
       {
