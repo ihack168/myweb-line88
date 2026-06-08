@@ -6,6 +6,8 @@ const SANITY_TOKEN = process.env.SANITY_TOKEN;
 
 const SHEET_NAME = 'line88';
 
+const OFFICIAL_BASE_URL = 'https://www.line88.tw/blog';
+
 const GOOGLE_SCRIPT_BASE_URL =
   'https://script.google.com/macros/s/AKfycbwFpZDhMveHhdOYdDkh02JpWk28jUCBqikyM-Urg_6Uw2jTH7d8ZluKxinKTWh5_20N/exec';
 
@@ -80,12 +82,8 @@ function getJsonFromUrl(url, label) {
   });
 }
 
-async function fetchNextPost() {
-  return getJsonFromUrl(GOOGLE_SCRIPT_URL, 'Apps Script');
-}
-
-async function markAsPublishedOnSheet(rowNumber) {
-  const data = JSON.stringify({ row: rowNumber });
+function postJsonToAppsScript(payload, label) {
+  const data = JSON.stringify(payload);
 
   return new Promise((resolve) => {
     const req = https.request(
@@ -100,58 +98,104 @@ async function markAsPublishedOnSheet(rowNumber) {
         timeout: REQUEST_TIMEOUT,
       },
       (res) => {
-        console.log(`📝 回填 Google Sheet HTTP 狀態碼：${res.statusCode}`);
+        const chunks = [];
+
+        console.log(`📝 ${label} Google Sheet HTTP 狀態碼：${res.statusCode}`);
 
         if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
-          console.log(`➡️ 回填 redirect 到：${res.headers.location}`);
+          console.log(`➡️ ${label} redirect 到：${res.headers.location}`);
 
-          const redirectReq = https.get(
+          const redirectReq = https.request(
             res.headers.location,
             {
+              method: 'POST',
               headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+                'Content-Length': Buffer.byteLength(data, 'utf8'),
                 'User-Agent': 'Mozilla/5.0 GitHub-Actions-AutoPost',
               },
               timeout: REQUEST_TIMEOUT,
             },
             (res2) => {
-              res2.on('data', () => {});
-              res2.on('end', () => resolve());
+              const redirectChunks = [];
+
+              res2.on('data', (chunk) => {
+                redirectChunks.push(chunk);
+              });
+
+              res2.on('end', () => {
+                const redirectText = Buffer.concat(redirectChunks).toString('utf8');
+                console.log(`📦 ${label} redirect 回傳：${redirectText}`);
+                resolve(redirectText);
+              });
             }
           );
 
           redirectReq.on('timeout', () => {
             redirectReq.destroy();
-            console.error('❌ 回填 redirect 請求逾時');
-            resolve();
+            console.error(`❌ ${label} redirect 請求逾時`);
+            resolve('');
           });
 
           redirectReq.on('error', (e) => {
-            console.error('❌ 回填 redirect 失敗:', e.message);
-            resolve();
+            console.error(`❌ ${label} redirect 失敗:`, e.message);
+            resolve('');
           });
 
+          redirectReq.write(Buffer.from(data, 'utf8'));
+          redirectReq.end();
           return;
         }
 
-        res.on('data', () => {});
-        res.on('end', () => resolve());
+        res.on('data', (chunk) => {
+          chunks.push(chunk);
+        });
+
+        res.on('end', () => {
+          const text = Buffer.concat(chunks).toString('utf8');
+          console.log(`📦 ${label} 回傳：${text}`);
+          resolve(text);
+        });
       }
     );
 
     req.on('timeout', () => {
       req.destroy();
-      console.error('❌ 回填 Google Sheet 請求逾時');
-      resolve();
+      console.error(`❌ ${label} Google Sheet 請求逾時`);
+      resolve('');
     });
 
     req.on('error', (e) => {
-      console.error('❌ 回填失敗:', e.message);
-      resolve();
+      console.error(`❌ ${label} 失敗:`, e.message);
+      resolve('');
     });
 
     req.write(Buffer.from(data, 'utf8'));
     req.end();
   });
+}
+
+async function fetchNextPost() {
+  return getJsonFromUrl(GOOGLE_SCRIPT_URL, 'Apps Script');
+}
+
+async function saveOfficialUrlToSheet(rowNumber, officialUrl) {
+  return postJsonToAppsScript(
+    {
+      row: rowNumber,
+      officialUrl: officialUrl,
+    },
+    '回寫 I 欄 officialUrl'
+  );
+}
+
+async function markAsPublishedOnSheet(rowNumber) {
+  return postJsonToAppsScript(
+    {
+      row: rowNumber,
+    },
+    '回填 published'
+  );
 }
 
 function getSafePostCount(value) {
@@ -194,6 +238,10 @@ async function createPost(title, htmlContent, tags, webpImageUrl) {
   const shortTitle = cleanTitle.substring(0, 15);
   const uniqueId = Math.floor(Date.now() / 1000).toString().slice(-6);
   const finalSlug = encodeURIComponent(shortTitle) + `-${uniqueId}`;
+  const officialUrl = `${OFFICIAL_BASE_URL}/${finalSlug}`;
+
+  console.log(`🔗 本篇 slug：${finalSlug}`);
+  console.log(`🔗 本篇官網網址：${officialUrl}`);
 
   const finalHtml = buildFinalHtml(title, htmlContent, webpImageUrl);
 
@@ -272,7 +320,11 @@ async function createPost(title, htmlContent, tags, webpImageUrl) {
             console.error('❌ 如果剛更新 Secret，請重新 Run workflow，不要用正在執行中的舊 workflow');
           }
 
-          resolve(parsed);
+          resolve({
+            sanityResult: parsed,
+            slug: finalSlug,
+            officialUrl: officialUrl,
+          });
         });
       }
     );
@@ -341,14 +393,20 @@ async function main() {
 
     console.log(`🚀 發布：${title}`);
 
-    const result = await createPost(title, html, tags, webpImageUrl);
+    const createResult = await createPost(title, html, tags, webpImageUrl);
+    const sanityResult = createResult.sanityResult;
 
-    if (result.results || result.mutations) {
-      console.log('✅ Sanity 成功，執行回填...');
+    if (sanityResult.results || sanityResult.mutations) {
+      console.log('✅ Sanity 成功');
+
+      console.log(`🔗 準備回寫 I 欄網址：${createResult.officialUrl}`);
+      await saveOfficialUrlToSheet(post.row, createResult.officialUrl);
+      console.log('✅ I 欄網址回寫完成');
+
       await markAsPublishedOnSheet(post.row);
-      console.log('✅ Google Sheet 回填完成');
+      console.log('✅ G 欄 published 回填完成');
     } else {
-      console.warn('⚠️ Sanity 回傳異常:', JSON.stringify(result));
+      console.warn('⚠️ Sanity 回傳異常:', JSON.stringify(sanityResult));
       break;
     }
   }
