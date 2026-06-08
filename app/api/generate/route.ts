@@ -15,6 +15,14 @@ function limitText(text: string, maxLength = 3000) {
   return text.length > maxLength ? text.substring(0, maxLength) : text;
 }
 
+function escapeHtmlAttr(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function makeWritingStyle() {
   return {
     tone: pick([
@@ -61,6 +69,13 @@ function makeWritingStyle() {
     h2Count: rand(3, 5),
     faqCount: rand(2, 3),
     wordTarget: rand(700, 1100),
+    linkText: pick([
+      "可以參考這篇整理",
+      "這裡有更完整的介紹",
+      "想看完整資訊可以看這篇",
+      "相關整理可以看這裡",
+      "延伸閱讀可以看這篇",
+    ]),
   };
 }
 
@@ -77,12 +92,17 @@ function extractJsonObject(text: string) {
   }
 }
 
+function removeAllLinks(html: string) {
+  return html.replace(/<a\b[^>]*>(.*?)<\/a>/gis, "$1");
+}
+
 export async function POST(req: Request) {
   try {
     const { prompt, keyword, sourceText, imageUrl, officialUrl } =
       await req.json();
 
     const finalKeyword = keyword || prompt || "";
+    const finalOfficialUrl = String(officialUrl || "").trim();
 
     if (!finalKeyword) {
       return NextResponse.json(
@@ -112,7 +132,7 @@ export async function POST(req: Request) {
 你是一位會寫外部部落格文章的內容寫手。
 
 這篇文章用途：
-發在外部部落格、生活網站、心得型文章平台，用來自然介紹主題，並合理導流到官網文章。
+發在外部部落格、生活網站、心得型文章平台，用來自然介紹主題，輔助官網 SEO / AEO。
 
 請根據關鍵字與原文資料，寫一篇「輕鬆、自然、像真人分享」的短篇部落格文章。
 
@@ -124,9 +144,6 @@ ${safeSourceText}
 
 【圖片網址】
 ${imageUrl || ""}
-
-【官網來源網址】
-${officialUrl || ""}
 
 【本次寫作風格】
 語氣：${style.tone}
@@ -148,21 +165,8 @@ FAQ數量：約 ${style.faqCount} 個
 7. 不要虛構價格、數據、法規、療效、保證或優惠。
 8. 不要用太多專業術語。
 9. 不要過度推銷。
-10. 可以用「如果你也在查這個主題」、「我覺得可以先了解」這類自然語氣。
-11. 外部連結要自然出現，不要像廣告。
-12. 文章目的是輔助官網 SEO / AEO，不是直接銷售頁。
-
-【外部連結規則】
-如果有官網來源網址，請在文章中段或結尾自然插入一次連結。
-連結文字不要每次都一樣，可自然使用：
-「可以參考這篇整理」
-「官網這篇說明」
-「這裡有更完整的介紹」
-「想看完整資訊可以看這篇」
-「相關整理可以看這裡」
-
-連結格式：
-<a href="${officialUrl || ""}" target="_blank" rel="nofollow noopener">自然連結文字</a>
+10. 不要自行產生任何網址。
+11. 不要輸出任何 <a> 連結，外部連結會由程式自動加入。
 
 【HTML規則】
 1. html 不要包含 h1。
@@ -170,10 +174,11 @@ FAQ數量：約 ${style.faqCount} 個
 3. 圖片格式：
 <img src="${imageUrl || ""}" alt="文章標題 ${finalKeyword}" />
 4. 圖片後文章從 p 或 h2 開始都可以。
-5. 可使用 h2、h3、p、ul、li、strong、a。
-6. FAQ 可以有，但不要太長。
-7. 不要輸出 markdown。
-8. 不要輸出程式碼區塊。
+5. 可使用 h2、h3、p、ul、li、strong。
+6. 禁止使用 a 標籤。
+7. FAQ 可以有，但不要太長。
+8. 不要輸出 markdown。
+9. 不要輸出程式碼區塊。
 
 【輸出格式】
 只能輸出 JSON。
@@ -248,7 +253,16 @@ JSON 格式必須完全符合：
     }
 
     const title = String(parsed.title || "").trim();
-    const html = String(parsed.html || "").trim();
+    let html = String(parsed.html || "").trim();
+
+    html = removeAllLinks(html);
+
+    if (finalOfficialUrl) {
+      const safeUrl = escapeHtmlAttr(finalOfficialUrl);
+      const safeLinkText = escapeHtmlAttr(style.linkText);
+
+      html += `\n<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
+    }
 
     if (!title || !html) {
       return NextResponse.json(
