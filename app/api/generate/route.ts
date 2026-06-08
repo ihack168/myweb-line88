@@ -10,7 +10,7 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function limitText(text: string, maxLength = 4500) {
+function limitText(text: string, maxLength = 3000) {
   if (!text) return "";
   return text.length > maxLength ? text.substring(0, maxLength) : text;
 }
@@ -18,63 +18,49 @@ function limitText(text: string, maxLength = 4500) {
 function makeWritingStyle() {
   return {
     tone: pick([
-      "專業可信",
-      "自然口語",
-      "中性客觀",
-      "新手友善",
-      "品牌官網感",
-      "顧問解說感",
-      "知識型文章",
-      "AEO問答導向",
-      "SEO內容風格",
-      "百科說明風格",
+      "輕鬆部落客口吻",
+      "真實消費者心得",
+      "朋友分享感",
+      "生活經驗分享",
+      "自然聊天語氣",
+      "踩雷提醒口吻",
+      "簡單懶人包口吻",
+      "個人觀察口吻",
     ]),
     structure: pick([
-      "先講結論再展開",
-      "問題開場再說明",
-      "重點條列再補充",
-      "情境導入再解析",
-      "FAQ導向架構",
-      "步驟流程架構",
-      "痛點解決架構",
-      "購買決策架構",
-      "比較分析架構",
-      "完整攻略架構",
+      "先說自己的需求再帶出重點",
+      "用生活情境開場",
+      "用問題開場再分享心得",
+      "先講簡單結論再補充",
+      "用比較輕鬆的段落分享",
+      "像寫部落格心得文",
     ]),
     articleAngle: pick([
-      "完整攻略",
-      "常見問題",
-      "選擇指南",
-      "費用解析",
-      "注意事項",
-      "優缺點比較",
-      "流程說明",
-      "實用建議",
-      "懶人包",
-      "專家解析",
-      "使用指南",
-      "新手入門",
+      "使用前可以先了解什麼",
+      "怎麼挑比較不容易踩雷",
+      "一般人會在意的幾個重點",
+      "簡單整理心得與注意事項",
+      "從消費者角度看這件事",
+      "適合新手快速了解",
     ]),
     titleStyle: pick([
+      "心得型標題",
       "疑問句標題",
-      "完整攻略標題",
-      "數字型標題",
-      "比較型標題",
-      "解答型標題",
-      "避坑型標題",
       "懶人包標題",
-      "專家解析標題",
-      "新手指南標題",
+      "經驗分享標題",
+      "避雷提醒標題",
+      "生活化標題",
     ]),
     openingStyle: pick([
-      "直接回答",
-      "問題切入",
-      "情境切入",
-      "重點摘要",
-      "需求導向",
+      "生活情境開場",
+      "直接說需求",
+      "朋友聊天開場",
+      "簡單心得開場",
+      "問題切入開場",
     ]),
-    h2Count: rand(4, 7),
-    faqCount: rand(3, 6),
+    h2Count: rand(3, 5),
+    faqCount: rand(2, 3),
+    wordTarget: rand(700, 1100),
   };
 }
 
@@ -82,9 +68,7 @@ function extractJsonObject(text: string) {
   const first = text.indexOf("{");
   const last = text.lastIndexOf("}");
 
-  if (first === -1 || last === -1 || last <= first) {
-    return null;
-  }
+  if (first === -1 || last === -1 || last <= first) return null;
 
   try {
     return JSON.parse(text.slice(first, last + 1));
@@ -121,13 +105,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const safeSourceText = limitText(sourceText, 4500);
+    const safeSourceText = limitText(sourceText, 3000);
     const style = makeWritingStyle();
 
     const finalPrompt = `
-你是一位專業 SEO / AEO 內容編輯。
+你是一位會寫外部部落格文章的內容寫手。
 
-請根據提供的關鍵字與原文資料，重新撰寫一篇適合網站發布的原創文章。
+這篇文章用途：
+發在外部部落格、生活網站、心得型文章平台，用來自然介紹主題，並合理導流到官網文章。
+
+請根據關鍵字與原文資料，寫一篇「輕鬆、自然、像真人分享」的短篇部落格文章。
 
 【關鍵字】
 ${finalKeyword}
@@ -135,13 +122,13 @@ ${finalKeyword}
 【原文資料】
 ${safeSourceText}
 
-【參考圖片】
+【圖片網址】
 ${imageUrl || ""}
 
-【來源網址】
+【官網來源網址】
 ${officialUrl || ""}
 
-【本次文章風格】
+【本次寫作風格】
 語氣：${style.tone}
 文章架構：${style.structure}
 文章角度：${style.articleAngle}
@@ -149,23 +136,48 @@ ${officialUrl || ""}
 開頭方式：${style.openingStyle}
 H2數量：約 ${style.h2Count} 個
 FAQ數量：約 ${style.faqCount} 個
+文章字數：約 ${style.wordTarget} 字
 
-【寫作規則】
-1. 改寫為全新原創內容。
-2. 不可照抄原文句子。
-3. 保留原文重點。
-4. 重新整理段落與結構。
-5. 合理代入關鍵字。
-6. 不要虛構價格、數據、法規、療效或保證內容。
-7. 不要使用過度誇張語氣。
-8. 適用所有產業。
-9. 文章需符合 SEO 與 AEO 需求。
+【寫作重點】
+1. 文章要像部落客、消費者、一般使用者在分享。
+2. 不要寫得太像官網文、新聞稿、百科文。
+3. 內容不用太長，簡單好讀即可。
+4. 自然帶入關鍵字，不要硬塞。
+5. 保留原文重點，但要重新用自己的話寫。
+6. 不可照抄原文句子。
+7. 不要虛構價格、數據、法規、療效、保證或優惠。
+8. 不要用太多專業術語。
+9. 不要過度推銷。
+10. 可以用「如果你也在查這個主題」、「我覺得可以先了解」這類自然語氣。
+11. 外部連結要自然出現，不要像廣告。
+12. 文章目的是輔助官網 SEO / AEO，不是直接銷售頁。
+
+【外部連結規則】
+如果有官網來源網址，請在文章中段或結尾自然插入一次連結。
+連結文字不要每次都一樣，可自然使用：
+「可以參考這篇整理」
+「官網這篇說明」
+「這裡有更完整的介紹」
+「想看完整資訊可以看這篇」
+「相關整理可以看這裡」
+
+連結格式：
+<a href="${officialUrl || ""}" target="_blank" rel="nofollow noopener">自然連結文字</a>
+
+【HTML規則】
+1. html 不要包含 h1。
+2. html 第一行先放圖片。
+3. 圖片格式：
+<img src="${imageUrl || ""}" alt="文章標題 ${finalKeyword}" />
+4. 圖片後文章從 p 或 h2 開始都可以。
+5. 可使用 h2、h3、p、ul、li、strong、a。
+6. FAQ 可以有，但不要太長。
+7. 不要輸出 markdown。
+8. 不要輸出程式碼區塊。
 
 【輸出格式】
 只能輸出 JSON。
-不要輸出 markdown。
 不要輸出說明文字。
-不要輸出程式碼區塊。
 
 JSON 格式必須完全符合：
 
@@ -175,20 +187,10 @@ JSON 格式必須完全符合：
 }
 
 【title 規則】
-1. title 只放純文字標題。
+1. title 只放純文字。
 2. title 不要包含 h1。
-3. title 要合理包含關鍵字。
-
-【html 規則】
-1. html 不要包含 h1。
-2. html 第一行先放圖片。
-3. 圖片格式如下：
-<img src="${imageUrl || ""}" alt="文章標題 ${finalKeyword}" />
-4. 圖片後文章從 h2 開始。
-5. 可使用 h2、h3、p、ul、li、strong、a。
-6. 如果有來源網址，請合理插入一個外部連結：
-<a href="${officialUrl || ""}" target="_blank" rel="nofollow noopener">相關資訊</a>
-7. html 必須是一個 JSON 字串，換行請使用 \\n，不要讓 JSON 壞掉。
+3. title 要自然包含關鍵字。
+4. title 不要太正式，像部落格標題。
 `;
 
     const groqRes = await fetch(
@@ -207,11 +209,11 @@ JSON 格式必須完全符合：
               content: finalPrompt,
             },
           ],
-          temperature: 1.05,
+          temperature: 1.2,
           top_p: 0.95,
-          frequency_penalty: 0.5,
-          presence_penalty: 0.5,
-          max_tokens: 3000,
+          frequency_penalty: 0.6,
+          presence_penalty: 0.6,
+          max_tokens: 2200,
           response_format: {
             type: "json_object",
           },
