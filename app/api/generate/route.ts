@@ -78,6 +78,21 @@ function makeWritingStyle() {
   };
 }
 
+function extractJsonObject(text: string) {
+  const first = text.indexOf("{");
+  const last = text.lastIndexOf("}");
+
+  if (first === -1 || last === -1 || last <= first) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text.slice(first, last + 1));
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const { prompt, keyword, sourceText, imageUrl, officialUrl } =
@@ -112,8 +127,7 @@ export async function POST(req: Request) {
     const finalPrompt = `
 你是一位專業 SEO / AEO 內容編輯。
 
-請根據提供的關鍵字與原文資料，
-重新撰寫一篇適合網站發布的原創文章。
+請根據提供的關鍵字與原文資料，重新撰寫一篇適合網站發布的原創文章。
 
 【關鍵字】
 ${finalKeyword}
@@ -148,15 +162,24 @@ FAQ數量：約 ${style.faqCount} 個
 9. 文章需符合 SEO 與 AEO 需求。
 
 【輸出格式】
-請嚴格依照下面格式輸出，不要多加其他文字：
+只能輸出 JSON。
+不要輸出 markdown。
+不要輸出說明文字。
+不要輸出程式碼區塊。
 
-===TITLE===
-文章標題
+JSON 格式必須完全符合：
 
-===HTML===
-完整HTML內容
+{
+  "title": "文章標題",
+  "html": "完整HTML內容"
+}
 
-【HTML規則】
+【title 規則】
+1. title 只放純文字標題。
+2. title 不要包含 h1。
+3. title 要合理包含關鍵字。
+
+【html 規則】
 1. html 不要包含 h1。
 2. html 第一行先放圖片。
 3. 圖片格式如下：
@@ -165,9 +188,7 @@ FAQ數量：約 ${style.faqCount} 個
 5. 可使用 h2、h3、p、ul、li、strong、a。
 6. 如果有來源網址，請合理插入一個外部連結：
 <a href="${officialUrl || ""}" target="_blank" rel="nofollow noopener">相關資訊</a>
-7. 不要輸出 markdown。
-8. 不要輸出程式碼區塊。
-9. 不要輸出說明文字。
+7. html 必須是一個 JSON 字串，換行請使用 \\n，不要讓 JSON 壞掉。
 `;
 
     const groqRes = await fetch(
@@ -186,11 +207,14 @@ FAQ數量：約 ${style.faqCount} 個
               content: finalPrompt,
             },
           ],
-          temperature: 1.15,
+          temperature: 1.05,
           top_p: 0.95,
-          frequency_penalty: 0.6,
-          presence_penalty: 0.6,
+          frequency_penalty: 0.5,
+          presence_penalty: 0.5,
           max_tokens: 3000,
+          response_format: {
+            type: "json_object",
+          },
         }),
       }
     );
@@ -207,13 +231,37 @@ FAQ數量：約 ${style.faqCount} 個
       );
     }
 
-    const answer = data?.choices?.[0]?.message?.content || "";
+    const answer = data?.choices?.[0]?.message?.content || "{}";
+    const parsed = extractJsonObject(answer);
 
-    return new Response(answer, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "no-store",
-      },
+    if (!parsed) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "AI 回傳不是合法 JSON",
+          raw: answer,
+        },
+        { status: 500 }
+      );
+    }
+
+    const title = String(parsed.title || "").trim();
+    const html = String(parsed.html || "").trim();
+
+    if (!title || !html) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "AI 回傳缺少 title 或 html",
+          raw: parsed,
+        },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      title,
+      html,
     });
   } catch (error) {
     return NextResponse.json(
@@ -225,4 +273,3 @@ FAQ數量：約 ${style.faqCount} 個
     );
   }
 }
-```
