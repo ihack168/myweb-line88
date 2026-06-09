@@ -207,7 +207,7 @@ JSON 格式必須完全符合：
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "qwen/qwen3-32b",
           messages: [
             {
               role: "user",
