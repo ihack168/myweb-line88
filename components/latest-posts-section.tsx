@@ -17,6 +17,8 @@ interface Post {
   htmlContent?: string
 }
 
+const ORANGE = "#ff7a00"
+
 function optimizeSanityImageUrl(url?: string) {
   if (!url) return ""
 
@@ -117,14 +119,14 @@ export function LatestPostsSection() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden px-6 py-16 bg-[#0a0a0a]">
-      <div className="absolute left-1/2 top-0 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-[#00ff00]/10 blur-[120px]" />
-      <div className="absolute -right-24 bottom-10 h-[260px] w-[260px] rounded-full bg-[#00ff00]/5 blur-[100px]" />
+    <section className="relative overflow-hidden bg-[#0a0a0a] px-6 py-16">
+      <div className="absolute left-1/2 top-0 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-[#ff7a00]/15 blur-[120px]" />
+      <div className="absolute -right-24 bottom-10 h-[260px] w-[260px] rounded-full bg-[#ff7a00]/10 blur-[100px]" />
 
       <div className="relative mx-auto max-w-6xl">
         <div className="mb-12 flex flex-col gap-6 text-center md:flex-row md:items-end md:justify-between md:text-left">
           <div>
-            <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#00ff00]/30 bg-white/5 px-4 py-2 text-[11px] font-bold tracking-[0.2em] text-[#00ff00] shadow-sm backdrop-blur md:mx-0">
+            <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#ff7a00]/40 bg-white/5 px-4 py-2 text-[11px] font-bold tracking-[0.2em] text-[#ff7a00] shadow-sm backdrop-blur md:mx-0">
               <Sparkles size={14} />
               LATEST ARTICLES
             </div>
@@ -140,7 +142,7 @@ export function LatestPostsSection() {
 
           <Link
             href="/blog"
-            className="inline-flex justify-center rounded-full border border-[#00ff00]/30 bg-white/5 px-7 py-3 text-sm font-bold text-[#00ff00] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-[#00ff00]/60 hover:bg-[#00ff00] hover:text-black"
+            className="inline-flex justify-center rounded-full border border-[#ff7a00]/40 bg-white/5 px-7 py-3 text-sm font-bold text-[#ff7a00] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ff7a00]/70 hover:bg-[#ff7a00] hover:text-black"
           >
             查看全部文章 →
           </Link>
@@ -148,14 +150,14 @@ export function LatestPostsSection() {
 
         {loadingPosts ? (
           <div className="flex justify-center py-16">
-            <div className="h-12 w-12 animate-spin rounded-full border-2 border-[#00ff00]/20 border-t-[#00ff00]" />
+            <div className="h-12 w-12 animate-spin rounded-full border-2 border-[#ff7a00]/20 border-t-[#ff7a00]" />
           </div>
         ) : posts.length > 0 ? (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
             {posts.map((post) => (
               <article
                 key={post.id}
-                className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] shadow-[0_12px_40px_rgba(0,255,0,0.06)] backdrop-blur transition-all duration-500 hover:-translate-y-1.5 hover:border-[#00ff00]/40 hover:bg-white/[0.06] hover:shadow-[0_24px_70px_rgba(0,255,0,0.12)]"
+                className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] shadow-[0_12px_40px_rgba(255,122,0,0.08)] backdrop-blur transition-all duration-500 hover:-translate-y-1.5 hover:border-[#ff7a00]/50 hover:bg-white/[0.06] hover:shadow-[0_24px_70px_rgba(255,122,0,0.16)]"
               >
                 <div className="relative h-[200px] w-full overflow-hidden bg-black md:h-[220px]">
                   {activeVideo === post.id && post.videoId ? (
@@ -197,7 +199,7 @@ export function LatestPostsSection() {
                             }}
                             className="pointer-events-auto flex h-12 w-16 cursor-pointer items-center justify-center rounded-2xl bg-white/90 shadow-xl backdrop-blur transition-transform duration-300 group-hover:scale-110"
                           >
-                            <div className="ml-1 border-y-[10px] border-l-[16px] border-y-transparent border-l-[#00ff00]" />
+                            <div className="ml-1 border-y-[10px] border-l-[16px] border-y-transparent border-l-[#ff7a00]" />
                           </div>
                         </div>
                       )}
@@ -211,7 +213,7 @@ export function LatestPostsSection() {
                       <Link
                         key={tag}
                         href={`/blog?tag=${encodeURIComponent(tag)}`}
-                        className="rounded-full border border-[#00ff00]/20 bg-[#00ff00]/5 px-3 py-1 text-xs font-bold text-[#00ff00] transition-all hover:bg-[#00ff00] hover:text-black"
+                        className="rounded-full border border-[#ff7a00]/30 bg-[#ff7a00]/10 px-3 py-1 text-xs font-bold text-[#ff7a00] transition-all hover:bg-[#ff7a00] hover:text-black"
                       >
                         #{tag}
                       </Link>
@@ -219,7 +221,7 @@ export function LatestPostsSection() {
                   </div>
 
                   <Link href={`/blog/${post.slug}`}>
-                    <h3 className="line-clamp-2 text-xl font-black leading-snug text-white transition-colors group-hover:text-[#00ff00]">
+                    <h3 className="line-clamp-2 text-xl font-black leading-snug text-white transition-colors group-hover:text-[#ff7a00]">
                       {post.title}
                     </h3>
                   </Link>
@@ -231,7 +233,7 @@ export function LatestPostsSection() {
                   <div className="mt-auto pt-6">
                     <Link
                       href={`/blog/${post.slug}`}
-                      className="inline-flex items-center text-sm font-bold text-[#00ff00]"
+                      className="inline-flex items-center text-sm font-bold text-[#ff7a00]"
                     >
                       閱讀文章
                       <span className="ml-2 transition-transform group-hover:translate-x-1">
@@ -244,7 +246,7 @@ export function LatestPostsSection() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[2.5rem] border border-dashed border-[#00ff00]/25 bg-white/[0.03] px-6 py-16 text-center shadow-[0_18px_50px_rgba(0,255,0,0.06)] backdrop-blur">
+          <div className="rounded-[2.5rem] border border-dashed border-[#ff7a00]/30 bg-white/[0.03] px-6 py-16 text-center shadow-[0_18px_50px_rgba(255,122,0,0.08)] backdrop-blur">
             <p className="text-xl font-black text-white">
               暫時沒有最新文章
             </p>
