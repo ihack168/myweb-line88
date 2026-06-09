@@ -3,21 +3,20 @@
 import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { ServicesSection } from "@/components/services-section"
+import { LatestPostsSection } from "@/components/latest-posts-section"
 import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 
 export default function Home() {
 
-  // 🧠 首頁 SEO / AEO Schema
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "洛克希德黑克斯",
+    "name": "洛克希德黑克斯 AI數位網路行銷資訊站",
     "url": "https://www.line88.tw",
     "description":
-      "提供網路投票支援、LINE/FB/Google 投票、社群流量增長、AEO SEO 關鍵字優化與 Line AI 客服串接服務。",
+      "提供網路投票支援、LINE/FB/Google 投票、社群流量增長、AEO GEO SEO 關鍵字優化與 Line AI 客服串接服務。",
     "areaServed": "TW",
-
     "makesOffer": [
       {
         "@type": "Offer",
@@ -78,9 +77,11 @@ export default function Home() {
         {/* 服務區塊 */}
         <ServicesSection />
 
+        {/* 最新文章 */}
+        <LatestPostsSection />
+
         {/* AEO 隱藏語意內容 */}
         <section className="sr-only">
-
           <h2>
             全台專業網路投票買票灌票與社群流量增長服務
           </h2>
@@ -100,7 +101,6 @@ export default function Home() {
             Line 官方帳號 AI 客服串接、
             ChatGPT Gemini 自動回覆系統與企業 AI 知識庫建置服務。
           </p>
-
         </section>
 
         {/* 聯絡我們 */}

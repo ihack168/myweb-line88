@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   verification: {
     google: 'nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM',
   },
-  title: '洛克希德黑克斯｜網路投票、社群流量、AEO SEO 與 Line AI 客服服務',
+  title: '洛克希德黑克斯｜網路投票、社群流量、AEO GEO SEO 與 AI數位網路行銷資訊站',
 
   description:
     '洛克希德黑克斯提供網路投票支援、Facebook/Instagram/Threads 社群流量增長、AEO SEO 關鍵字優化與 Line 官方帳號 AI 客服串接服務。',
