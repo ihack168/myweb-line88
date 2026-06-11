@@ -80,7 +80,7 @@ function makeWritingStyle() {
     ]),
     h2Count: rand(3, 5),
     faqCount: rand(2, 3),
-    wordTarget: rand(700, 1100),
+    wordTarget: rand(500, 800),
     linkText: pick([
       "可以參考這篇整理",
       "這裡有更完整的介紹",
@@ -233,7 +233,7 @@ JSON 格式必須完全符合：
           top_p: 0.95,
           frequency_penalty: 0.6,
           presence_penalty: 0.6,
-          max_tokens: 1200,
+          max_tokens: 1600,
           response_format: {
             type: "json_object",
           },
