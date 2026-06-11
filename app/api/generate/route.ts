@@ -222,7 +222,7 @@ JSON 格式必須完全符合：
           "Content-Type": "application/json; charset=utf-8",
         },
         body: JSON.stringify({
-          model: "qwen/qwen3-32b",
+          model: "llama-3.1-8b-instant",
           messages: [
             {
               role: "user",
