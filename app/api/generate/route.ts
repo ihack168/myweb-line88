@@ -137,7 +137,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const safeSourceText = limitText(sourceText, 3000);
+    const safeSourceText = limitText(sourceText, 1800);
     const style = makeWritingStyle();
 
     const finalPrompt = `
@@ -222,7 +222,7 @@ JSON 格式必須完全符合：
           "Content-Type": "application/json; charset=utf-8",
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "qwen/qwen3-32b",
           messages: [
             {
               role: "user",
@@ -233,7 +233,7 @@ JSON 格式必須完全符合：
           top_p: 0.95,
           frequency_penalty: 0.6,
           presence_penalty: 0.6,
-          max_tokens: 2200,
+          max_tokens: 1200,
           response_format: {
             type: "json_object",
           },
