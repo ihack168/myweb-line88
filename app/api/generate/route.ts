@@ -16,11 +16,23 @@ function limitText(text: string, maxLength = 3000) {
 }
 
 function escapeHtmlAttr(value: string) {
-  return value
+  return String(value || "")
     .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function toBase64Utf8(value: string) {
+  return Buffer.from(value || "", "utf8").toString("base64");
+}
+
+function hasBadText(value: string) {
+  return (
+    value.includes("�") ||
+    value.includes("????") ||
+    value.includes("???")
+  );
 }
 
 function makeWritingStyle() {
@@ -106,21 +118,21 @@ export async function POST(req: Request) {
 
     if (!finalKeyword) {
       return NextResponse.json(
-        { error: "缺少 keyword 或 prompt" },
+        { ok: false, error: "缺少 keyword 或 prompt" },
         { status: 400 }
       );
     }
 
     if (!sourceText) {
       return NextResponse.json(
-        { error: "缺少 sourceText" },
+        { ok: false, error: "缺少 sourceText" },
         { status: 400 }
       );
     }
 
     if (!process.env.GROQ_API_KEY) {
       return NextResponse.json(
-        { error: "缺少 GROQ_API_KEY" },
+        { ok: false, error: "缺少 GROQ_API_KEY" },
         { status: 500 }
       );
     }
@@ -167,6 +179,8 @@ FAQ數量：約 ${style.faqCount} 個
 9. 不要過度推銷。
 10. 不要自行產生任何網址。
 11. 不要輸出任何 <a> 連結，外部連結會由程式自動加入。
+12. 不要輸出 ???、????、亂碼、替代符號或無意義字元。
+13. 如果資料不足，請保守描述，不要硬補。
 
 【HTML規則】
 1. html 不要包含 h1。
@@ -179,6 +193,7 @@ FAQ數量：約 ${style.faqCount} 個
 7. FAQ 可以有，但不要太長。
 8. 不要輸出 markdown。
 9. 不要輸出程式碼區塊。
+10. <div class="article-content">開始，</div>結束。
 
 【輸出格式】
 只能輸出 JSON。
@@ -204,7 +219,7 @@ JSON 格式必須完全符合：
         method: "POST",
         headers: {
           Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=utf-8",
         },
         body: JSON.stringify({
           model: "qwen/qwen3-32b",
@@ -275,9 +290,28 @@ JSON 格式必須完全符合：
       );
     }
 
+    if (hasBadText(title) || hasBadText(html)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "內容含有疑似亂碼",
+          title,
+          html,
+          titleBase64: toBase64Utf8(title),
+          htmlBase64: toBase64Utf8(html),
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
+      ok: true,
+
       title,
       html,
+
+      titleBase64: toBase64Utf8(title),
+      htmlBase64: toBase64Utf8(html),
     });
   } catch (error) {
     return NextResponse.json(
