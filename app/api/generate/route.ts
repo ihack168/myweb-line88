@@ -80,7 +80,7 @@ function makeWritingStyle() {
     ]),
     h2Count: rand(3, 5),
     faqCount: rand(2, 3),
-    wordTarget: rand(500, 800),
+    wordTarget: rand(500, 1000),
     linkText: pick([
       "可以參考這篇整理",
       "這裡有更完整的介紹",
@@ -137,7 +137,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const safeSourceText = limitText(sourceText, 1800);
+    const safeSourceText = limitText(sourceText, 3000);
     const style = makeWritingStyle();
 
     const finalPrompt = `
@@ -233,7 +233,7 @@ JSON 格式必須完全符合：
           top_p: 0.95,
           frequency_penalty: 0.6,
           presence_penalty: 0.6,
-          max_tokens: 1600,
+          max_tokens: 3000,
           response_format: {
             type: "json_object",
           },
