@@ -35,6 +35,97 @@ function hasBadText(value: string) {
   );
 }
 
+function getGroqApiKeys() {
+  return String(process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+async function callGroqWithRotation(body: any) {
+  const keys = getGroqApiKeys();
+
+  if (!keys.length) {
+    return {
+      ok: false,
+      status: 500,
+      data: {
+        ok: false,
+        error: "缺少 GROQ_API_KEYS 或 GROQ_API_KEY",
+      },
+      usedKeyIndex: null,
+    };
+  }
+
+  const startIndex = Math.floor(Math.random() * keys.length);
+  let lastError: any = null;
+  let lastStatus = 500;
+
+  for (let i = 0; i < keys.length; i++) {
+    const keyIndex = (startIndex + i) % keys.length;
+    const apiKey = keys[keyIndex];
+
+    try {
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(body),
+      });
+
+      let data: any = null;
+
+      try {
+        data = await res.json();
+      } catch {
+        data = {
+          error: "Groq 回傳不是 JSON",
+        };
+      }
+
+      if (res.ok) {
+        return {
+          ok: true,
+          status: res.status,
+          data,
+          usedKeyIndex: keyIndex + 1,
+        };
+      }
+
+      lastError = data;
+      lastStatus = res.status;
+
+      if ([401, 403, 429, 500, 502, 503, 504].includes(res.status)) {
+        continue;
+      }
+
+      return {
+        ok: false,
+        status: res.status,
+        data,
+        usedKeyIndex: keyIndex + 1,
+      };
+    } catch (error) {
+      lastError = String(error);
+      lastStatus = 500;
+      continue;
+    }
+  }
+
+  return {
+    ok: false,
+    status: lastStatus || 500,
+    data: {
+      ok: false,
+      error: "所有 GROQ API KEY 都失敗",
+      lastError,
+    },
+    usedKeyIndex: null,
+  };
+}
+
 function makeWritingStyle() {
   return {
     tone: pick([
@@ -130,13 +221,6 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!process.env.GROQ_API_KEY) {
-      return NextResponse.json(
-        { ok: false, error: "缺少 GROQ_API_KEY" },
-        { status: 500 }
-      );
-    }
-
     const safeSourceText = limitText(sourceText, 3000);
     const style = makeWritingStyle();
 
@@ -213,43 +297,34 @@ JSON 格式必須完全符合：
 4. title 不要太正式，像部落格標題。
 `;
 
-    const groqRes = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
-          "Content-Type": "application/json; charset=utf-8",
+    const groqResult = await callGroqWithRotation({
+      model: "qwen/qwen3-32b",
+      messages: [
+        {
+          role: "user",
+          content: finalPrompt,
         },
-        body: JSON.stringify({
-          model: "qwen/qwen3-32b",
-          messages: [
-            {
-              role: "user",
-              content: finalPrompt,
-            },
-          ],
-          temperature: 1.2,
-          top_p: 0.95,
-          frequency_penalty: 0.6,
-          presence_penalty: 0.6,
-          max_tokens: 3000,
-          response_format: {
-            type: "json_object",
-          },
-        }),
-      }
-    );
+      ],
+      temperature: 1.2,
+      top_p: 0.95,
+      frequency_penalty: 0.6,
+      presence_penalty: 0.6,
+      max_tokens: 3000,
+      response_format: {
+        type: "json_object",
+      },
+    });
 
-    const data = await groqRes.json();
+    const data = groqResult.data;
 
-    if (!groqRes.ok) {
+    if (!groqResult.ok) {
       return NextResponse.json(
         {
           ok: false,
           error: data,
+          usedKeyIndex: groqResult.usedKeyIndex || null,
         },
-        { status: groqRes.status }
+        { status: groqResult.status }
       );
     }
 
@@ -262,6 +337,7 @@ JSON 格式必須完全符合：
           ok: false,
           error: "AI 回傳不是合法 JSON",
           raw: answer,
+          usedKeyIndex: groqResult.usedKeyIndex || null,
         },
         { status: 500 }
       );
@@ -272,22 +348,18 @@ JSON 格式必須完全符合：
 
     html = removeAllLinks(html);
 
-if (finalOfficialUrl) {
-  const safeUrl = escapeHtmlAttr(finalOfficialUrl);
-  const safeLinkText = escapeHtmlAttr(style.linkText);
+    if (finalOfficialUrl) {
+      const safeUrl = escapeHtmlAttr(finalOfficialUrl);
+      const safeLinkText = escapeHtmlAttr(style.linkText);
 
-  const linkHtml =
-    `<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
+      const linkHtml = `<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
 
-  if (html.includes("</div>")) {
-    html = html.replace(
-      "</div>",
-      linkHtml + "\n</div>"
-    );
-  } else {
-    html += "\n" + linkHtml;
-  }
-}
+      if (html.includes("</div>")) {
+        html = html.replace("</div>", linkHtml + "\n</div>");
+      } else {
+        html += "\n" + linkHtml;
+      }
+    }
 
     if (!title || !html) {
       return NextResponse.json(
@@ -295,6 +367,7 @@ if (finalOfficialUrl) {
           ok: false,
           error: "AI 回傳缺少 title 或 html",
           raw: parsed,
+          usedKeyIndex: groqResult.usedKeyIndex || null,
         },
         { status: 500 }
       );
@@ -307,6 +380,7 @@ if (finalOfficialUrl) {
           error: "內容含有疑似亂碼",
           title,
           html,
+          usedKeyIndex: groqResult.usedKeyIndex || null,
           titleBase64: toBase64Utf8(title),
           htmlBase64: toBase64Utf8(html),
         },
@@ -319,6 +393,8 @@ if (finalOfficialUrl) {
 
       title,
       html,
+
+      usedKeyIndex: groqResult.usedKeyIndex || null,
 
       titleBase64: toBase64Utf8(title),
       htmlBase64: toBase64Utf8(html),
