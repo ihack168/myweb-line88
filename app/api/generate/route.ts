@@ -272,12 +272,22 @@ JSON 格式必須完全符合：
 
     html = removeAllLinks(html);
 
-    if (finalOfficialUrl) {
-      const safeUrl = escapeHtmlAttr(finalOfficialUrl);
-      const safeLinkText = escapeHtmlAttr(style.linkText);
+if (finalOfficialUrl) {
+  const safeUrl = escapeHtmlAttr(finalOfficialUrl);
+  const safeLinkText = escapeHtmlAttr(style.linkText);
 
-      html += `\n<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
-    }
+  const linkHtml =
+    `<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
+
+  if (html.includes("</div>")) {
+    html = html.replace(
+      "</div>",
+      linkHtml + "\n</div>"
+    );
+  } else {
+    html += "\n" + linkHtml;
+  }
+}
 
     if (!title || !html) {
       return NextResponse.json(
