@@ -10,6 +10,11 @@
       "source": "/search/label/:label*",
       "destination": "https://blog.line88.tw/search/label/:label*",
       "permanent": true
+    },
+    {
+      "source": "/search",
+      "destination": "https://blog.line88.tw/search",
+      "permanent": true
     }
   ]
 }
