@@ -182,17 +182,34 @@ function makeWritingStyle() {
   };
 }
 
-function extractJsonObject(text: string) {
-  const first = text.indexOf("{");
-  const last = text.lastIndexOf("}");
+/**
+ * 改用分隔符格式解析模型輸出，不再依賴 JSON.parse。
+ * 預期格式：
+ * [TITLE]
+ * ...標題...
+ * [HTML]
+ * ...html...
+ * [END]
+ */
+function extractTitleAndHtml(text: string): { title: string; html: string } | null {
+  if (!text) return null;
 
-  if (first === -1 || last === -1 || last <= first) return null;
+  let cleaned = text.trim();
 
-  try {
-    return JSON.parse(text.slice(first, last + 1));
-  } catch {
-    return null;
-  }
+  // 移除模型偶爾仍會加上的 markdown code fence
+  cleaned = cleaned.replace(/^```[a-zA-Z]*\s*/m, "").replace(/```\s*$/m, "").trim();
+
+  const titleMatch = cleaned.match(/\[TITLE\]([\s\S]*?)\[HTML\]/i);
+  const htmlMatch = cleaned.match(/\[HTML\]([\s\S]*?)(\[END\]|$)/i);
+
+  if (!titleMatch || !htmlMatch) return null;
+
+  const title = titleMatch[1].trim();
+  const html = htmlMatch[1].trim();
+
+  if (!title || !html) return null;
+
+  return { title, html };
 }
 
 function removeAllLinks(html: string) {
@@ -222,9 +239,20 @@ export async function POST(req: Request) {
     }
 
     const safeSourceText = limitText(sourceText, 3000);
-    const style = makeWritingStyle();
 
-    const finalPrompt = `
+    let parsed: { title: string; html: string } | null = null;
+    let lastRaw = "";
+    let lastUsedKeyIndex: number | null = null;
+    let lastFailReason: any = null;
+    let style = makeWritingStyle();
+
+    const MAX_ATTEMPTS = 3;
+
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      // 每次重試重新隨機一組風格，避免重複生成同一份壞輸出
+      style = makeWritingStyle();
+
+      const finalPrompt = `
 你是一位會寫外部部落格文章的內容寫手。
 
 這篇文章用途：
@@ -279,16 +307,14 @@ FAQ數量：約 ${style.faqCount} 個
 9. 不要輸出程式碼區塊。
 10. <div class="article-content">開始，</div>結束。
 
-【輸出格式】
-只能輸出 JSON。
-不要輸出說明文字。
+【輸出格式（非常重要，請嚴格遵守）】
+請只用下面這個純文字格式輸出，不要輸出 JSON、不要加任何說明文字：
 
-JSON 格式必須完全符合：
-
-{
-  "title": "文章標題",
-  "html": "完整HTML內容"
-}
+[TITLE]
+這裡放文章標題（純文字一行，不含 h1）
+[HTML]
+這裡放完整 HTML 內容
+[END]
 
 【title 規則】
 1. title 只放純文字。
@@ -297,54 +323,60 @@ JSON 格式必須完全符合：
 4. title 不要太正式，像部落格標題。
 `;
 
-    const groqResult = await callGroqWithRotation({
-      model: "qwen/qwen3-32b",
-      messages: [
-        {
-          role: "user",
-          content: finalPrompt,
-        },
-      ],
-      temperature: 1.2,
-      top_p: 0.95,
-      frequency_penalty: 0.6,
-      presence_penalty: 0.6,
-      max_tokens: 3000,
-      response_format: {
-        type: "json_object",
-      },
-    });
+      const groqResult = await callGroqWithRotation({
+        model: "qwen/qwen3-32b",
+        messages: [
+          {
+            role: "user",
+            content: finalPrompt,
+          },
+        ],
+        temperature: 1.2,
+        top_p: 0.95,
+        frequency_penalty: 0.6,
+        presence_penalty: 0.6,
+        max_tokens: 4096,
+      });
 
-    const data = groqResult.data;
+      if (!groqResult.ok) {
+        // Groq 整體失敗（key 用盡、額度問題等），直接中止，不重試
+        return NextResponse.json(
+          {
+            ok: false,
+            error: groqResult.data,
+            usedKeyIndex: groqResult.usedKeyIndex || null,
+          },
+          { status: groqResult.status }
+        );
+      }
 
-    if (!groqResult.ok) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: data,
-          usedKeyIndex: groqResult.usedKeyIndex || null,
-        },
-        { status: groqResult.status }
-      );
+      lastUsedKeyIndex = groqResult.usedKeyIndex || null;
+
+      const answer = groqResult.data?.choices?.[0]?.message?.content || "";
+      lastRaw = answer;
+
+      parsed = extractTitleAndHtml(answer);
+
+      if (parsed) break;
+
+      lastFailReason = "格式解析失敗，準備重試";
     }
-
-    const answer = data?.choices?.[0]?.message?.content || "{}";
-    const parsed = extractJsonObject(answer);
 
     if (!parsed) {
       return NextResponse.json(
         {
           ok: false,
-          error: "AI 回傳不是合法 JSON",
-          raw: answer,
-          usedKeyIndex: groqResult.usedKeyIndex || null,
+          error: "AI 回傳格式無法解析（已重試多次）",
+          raw: lastRaw,
+          lastFailReason,
+          usedKeyIndex: lastUsedKeyIndex,
         },
         { status: 500 }
       );
     }
 
-    const title = String(parsed.title || "").trim();
-    let html = String(parsed.html || "").trim();
+    const title = parsed.title;
+    let html = parsed.html;
 
     html = removeAllLinks(html);
 
@@ -354,23 +386,11 @@ JSON 格式必須完全符合：
 
       const linkHtml = `<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
 
-      if (html.includes("</div>")) {
-        html = html.replace("</div>", linkHtml + "\n</div>");
+      if (/<\/div>\s*$/.test(html)) {
+        html = html.replace(/<\/div>\s*$/, linkHtml + "\n</div>");
       } else {
         html += "\n" + linkHtml;
       }
-    }
-
-    if (!title || !html) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "AI 回傳缺少 title 或 html",
-          raw: parsed,
-          usedKeyIndex: groqResult.usedKeyIndex || null,
-        },
-        { status: 500 }
-      );
     }
 
     if (hasBadText(title) || hasBadText(html)) {
@@ -380,7 +400,7 @@ JSON 格式必須完全符合：
           error: "內容含有疑似亂碼",
           title,
           html,
-          usedKeyIndex: groqResult.usedKeyIndex || null,
+          usedKeyIndex: lastUsedKeyIndex,
           titleBase64: toBase64Utf8(title),
           htmlBase64: toBase64Utf8(html),
         },
@@ -394,7 +414,7 @@ JSON 格式必須完全符合：
       title,
       html,
 
-      usedKeyIndex: groqResult.usedKeyIndex || null,
+      usedKeyIndex: lastUsedKeyIndex,
 
       titleBase64: toBase64Utf8(title),
       htmlBase64: toBase64Utf8(html),
