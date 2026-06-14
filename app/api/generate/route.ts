@@ -176,7 +176,7 @@ function makeWritingStyle() {
     ]),
     h2Count: rand(2, 4),
     faqCount: rand(1, 2),
-    wordTarget: rand(600, 1200),
+    wordTarget: rand(500, 900),
     linkText: pick([
       "可以參考這篇整理",
       "這裡有更完整的介紹",
