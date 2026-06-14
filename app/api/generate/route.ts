@@ -171,7 +171,7 @@ function makeWritingStyle() {
     ]),
     h2Count: rand(3, 5),
     faqCount: rand(2, 3),
-    wordTarget: rand(800, 1600),
+    wordTarget: rand(800, 1200),
     linkText: pick([
       "可以參考這篇整理",
       "這裡有更完整的介紹",
@@ -335,7 +335,7 @@ FAQ數量：約 ${style.faqCount} 個
         top_p: 0.95,
         frequency_penalty: 0.6,
         presence_penalty: 0.6,
-        max_tokens: 3600,
+        max_tokens: 3200,
       });
 
       if (!groqResult.ok) {
