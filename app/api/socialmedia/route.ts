@@ -24,7 +24,7 @@ function toBase64Utf8(value: string) {
 
 function hasBadText(value: string) {
   return (
-    value.includes("") ||
+    value.includes("\uFFFD") ||
     value.includes("????") ||
     value.includes("???")
   );
@@ -109,7 +109,6 @@ function makeSocialStyle(platform: Platform) {
   const isThreads = platform === "threads";
 
   return {
-    // 演算法喜歡的開頭鉤子類型
     hook: pick([
       "用一個反直覺的問題開場",
       "用讓人意外的數字或事實開場",
@@ -118,8 +117,6 @@ function makeSocialStyle(platform: Platform) {
       "用情境代入感開場（你是不是也…）",
       "用挑戰常識的說法開場",
     ]),
-
-    // 內容角度
     angle: pick([
       "踩雷提醒",
       "冷知識分享",
@@ -129,8 +126,6 @@ function makeSocialStyle(platform: Platform) {
       "常見迷思破解",
       "實用小技巧",
     ]),
-
-    // 語氣
     tone: pick([
       "像朋友聊天，輕鬆隨性",
       "簡短有力，直接講重點",
@@ -138,8 +133,6 @@ function makeSocialStyle(platform: Platform) {
       "親切分享感，沒有距離感",
       "略帶個人主觀觀點",
     ]),
-
-    // 結尾互動方式（演算法喜歡留言互動）
     cta: pick([
       "最後用一個開放問題邀請留言",
       "最後問讀者有沒有類似經驗",
@@ -147,36 +140,20 @@ function makeSocialStyle(platform: Platform) {
       "最後說歡迎分享給有需要的人",
       "最後問大家同不同意這個觀點",
     ]),
-
-    // 段落結構
     structure: pick([
       "一段鉤子 + 兩三個重點 + 互動結尾",
       "情境代入 + 核心資訊 + 呼籲互動",
       "問題拋出 + 解答 + 延伸思考",
       "短句堆疊製造節奏感",
     ]),
-
-    // Hashtag 數量（Threads 少、FB 可略多）
     hashtagCount: isThreads ? rand(3, 5) : rand(4, 7),
-
-    // 字數上限
     maxWords: isThreads ? rand(120, 200) : rand(180, 280),
-
-    // 是否使用 emoji（社群必備）
     emojiDensity: pick(["適度使用 2～4 個 emoji 增加視覺節奏", "每個重點前放一個 emoji"]),
   };
 }
 
 // ─── 輸出格式解析 ─────────────────────────────────────────────────────────────
 
-/**
- * 預期模型輸出格式：
- * [POST]
- * ...貼文內容（純文字含換行與 emoji）...
- * [HASHTAGS]
- * ...hashtag 們（空白或換行分隔）...
- * [END]
- */
 function extractPostAndHashtags(
   text: string
 ): { post: string; hashtags: string } | null {
@@ -210,7 +187,7 @@ export async function POST(req: Request) {
       keyword,
       sourceText,
       officialUrl,
-      platform = "fb", // "fb" | "threads"，預設 fb
+      platform = "fb",
     } = await req.json();
 
     const finalKeyword = keyword || prompt || "";
@@ -238,13 +215,11 @@ export async function POST(req: Request) {
     let lastUsedKeyIndex: number | null = null;
     let lastFailReason: any = null;
 
-    const MAX_ATTEMPTS = 3;
+    const MAX_ATTEMPTS = 5; // 亂碼重試也算在內，拉高到 5 次
 
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       const style = makeSocialStyle(finalPlatform);
-
-      const platformLabel =
-        finalPlatform === "threads" ? "Threads" : "Facebook";
+      const platformLabel = finalPlatform === "threads" ? "Threads" : "Facebook";
 
       const finalPrompt = `
 你是一位擅長經營 ${platformLabel} 的社群小編。
@@ -276,7 +251,7 @@ Emoji 使用：${style.emojiDensity}
 4. 不可照抄原文句子，用自己的話說。
 5. 不要虛構任何價格、數據、法規、療效、保證或優惠。
 6. 不要在貼文內容裡自行放網址（網址會由程式另外加入）。
-7. 不要輸出 ???、????、亂碼或無意義字元。
+7. 絕對不要輸出 ???、????、亂碼、替代符號（如 □ 或 \uFFFD）或無意義字元。
 8. 資料不足時請保守描述，不要硬補內容。
 9. 貼文長度要精準控制在 ${style.maxWords} 字以內，不要超過。
 
@@ -305,6 +280,7 @@ Emoji 使用：${style.emojiDensity}
         max_tokens: 1000,
       });
 
+      // Groq 整體失敗（key 用盡等），直接中止不重試
       if (!groqResult.ok) {
         return NextResponse.json(
           {
@@ -323,22 +299,32 @@ Emoji 使用：${style.emojiDensity}
 
       const result = extractPostAndHashtags(answer);
 
-      if (result) {
-        parsed = {
-          post: toTaiwanTraditional(result.post),
-          hashtags: toTaiwanTraditional(result.hashtags),
-        };
-        break;
+      if (!result) {
+        lastFailReason = `第 ${attempt + 1} 次：格式解析失敗，重試`;
+        continue;
       }
 
-      lastFailReason = "格式解析失敗，準備重試";
+      const convertedPost = toTaiwanTraditional(result.post);
+      const convertedHashtags = toTaiwanTraditional(result.hashtags);
+
+      // 亂碼檢查：有問題就繼續下一次重試，不直接回傳 500
+      if (hasBadText(convertedPost) || hasBadText(convertedHashtags)) {
+        lastFailReason = `第 ${attempt + 1} 次：內容含亂碼，重試`;
+        continue;
+      }
+
+      parsed = {
+        post: convertedPost,
+        hashtags: convertedHashtags,
+      };
+      break;
     }
 
     if (!parsed) {
       return NextResponse.json(
         {
           ok: false,
-          error: "AI 回傳格式無法解析（已重試多次）",
+          error: "AI 回傳格式無法解析或含亂碼（已重試多次）",
           raw: lastRaw,
           lastFailReason,
           usedKeyIndex: lastUsedKeyIndex,
@@ -358,35 +344,16 @@ Emoji 使用：${style.emojiDensity}
       fullPost += `\n\n${parsed.hashtags}`;
     }
 
-    if (hasBadText(fullPost)) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "內容含有疑似亂碼",
-          post: parsed.post,
-          hashtags: parsed.hashtags,
-          fullPost,
-          usedKeyIndex: lastUsedKeyIndex,
-          fullPostBase64: toBase64Utf8(fullPost),
-        },
-        { status: 500 }
-      );
-    }
-
     return NextResponse.json({
       ok: true,
       platform: finalPlatform,
 
-      // 分開欄位，方便前端各自使用
       post: parsed.post,
       hashtags: parsed.hashtags,
-
-      // 一次組好的完整貼文（含連結與 hashtag）
       fullPost,
 
       usedKeyIndex: lastUsedKeyIndex,
 
-      // Base64 備用（Big5 環境或複製貼上問題）
       postBase64: toBase64Utf8(parsed.post),
       hashtagsBase64: toBase64Utf8(parsed.hashtags),
       fullPostBase64: toBase64Utf8(fullPost),
