@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { Converter } from "opencc-js";
 
 export const dynamic = "force-dynamic";
+
+// 簡體 -> 台灣繁體（含詞彙轉換，例如 网络 -> 網路、信息 -> 訊息）
+// 模組層級建立一次即可重複使用
+const toTaiwanTraditional = Converter({ from: "cn", to: "twp" });
 
 function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -10,7 +15,7 @@ function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function limitText(text: string, maxLength = 3000) {
+function limitText(text: string, maxLength = 1800) {
   if (!text) return "";
   return text.length > maxLength ? text.substring(0, maxLength) : text;
 }
@@ -169,9 +174,9 @@ function makeWritingStyle() {
       "簡單心得開場",
       "問題切入開場",
     ]),
-    h2Count: rand(3, 5),
-    faqCount: rand(2, 3),
-    wordTarget: rand(800, 1200),
+    h2Count: rand(2, 4),
+    faqCount: rand(1, 2),
+    wordTarget: rand(600, 1200),
     linkText: pick([
       "可以參考這篇整理",
       "這裡有更完整的介紹",
@@ -238,7 +243,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const safeSourceText = limitText(sourceText, 2400);
+    const safeSourceText = limitText(sourceText, 1800);
 
     let parsed: { title: string; html: string } | null = null;
     let lastRaw = "";
@@ -259,6 +264,9 @@ export async function POST(req: Request) {
 發在外部部落格、生活網站、心得型文章平台，用來自然介紹主題，輔助官網 SEO / AEO。
 
 請根據關鍵字與原文資料，寫一篇「輕鬆、自然、像真人分享」的短篇部落格文章。
+
+【語言規則（非常重要）】
+請全程使用繁體中文（台灣用語、正體字），絕對不要使用任何簡體字或大陸用語。
 
 【關鍵字】
 ${finalKeyword}
@@ -287,12 +295,10 @@ FAQ數量：約 ${style.faqCount} 個
 5. 保留原文重點，但要重新用自己的話寫。
 6. 不可照抄原文句子。
 7. 不要虛構價格、數據、法規、療效、保證或優惠。
-8. 不要用太多專業術語。
-9. 不要過度推銷。
-10. 不要自行產生任何網址。
-11. 不要輸出任何 <a> 連結，外部連結會由程式自動加入。
-12. 不要輸出 ???、????、亂碼、替代符號或無意義字元。
-13. 如果資料不足，請保守描述，不要硬補。
+8. 不要用太多專業術語，不要過度推銷。
+9. 不要自行產生任何網址，也不要輸出任何 <a> 連結，外部連結會由程式自動加入。
+10. 不要輸出 ???、????、亂碼、替代符號或無意義字元。
+11. 如果資料不足，請保守描述，不要硬補。
 
 【HTML規則】
 1. html 不要包含 h1。
@@ -335,7 +341,7 @@ FAQ數量：約 ${style.faqCount} 個
         top_p: 0.95,
         frequency_penalty: 0.6,
         presence_penalty: 0.6,
-        max_tokens: 3200,
+        max_tokens: 2500,
       });
 
       if (!groqResult.ok) {
@@ -355,9 +361,17 @@ FAQ數量：約 ${style.faqCount} 個
       const answer = groqResult.data?.choices?.[0]?.message?.content || "";
       lastRaw = answer;
 
-      parsed = extractTitleAndHtml(answer);
+      const result = extractTitleAndHtml(answer);
 
-      if (parsed) break;
+      if (result) {
+        // 不管模型輸出簡體還是繁體，統一轉成台灣繁體，
+        // 避免下游（剪貼簿 Big5 轉換等）出現遺失字元
+        parsed = {
+          title: toTaiwanTraditional(result.title),
+          html: toTaiwanTraditional(result.html),
+        };
+        break;
+      }
 
       lastFailReason = "格式解析失敗，準備重試";
     }
