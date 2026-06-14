@@ -335,7 +335,7 @@ FAQ數量：約 ${style.faqCount} 個
         top_p: 0.95,
         frequency_penalty: 0.6,
         presence_penalty: 0.6,
-        max_tokens: 4096,
+        max_tokens: 3600,
       });
 
       if (!groqResult.ok) {
