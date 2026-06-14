@@ -238,7 +238,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const safeSourceText = limitText(sourceText, 3000);
+    const safeSourceText = limitText(sourceText, 2400);
 
     let parsed: { title: string; html: string } | null = null;
     let lastRaw = "";
