@@ -22,7 +22,8 @@ function handleAnchorClick(
   const [path, hash] = href.split("#")
   const targetId = hash
 
-  if (path === "" || path === "/" || path === pathname) {
+  // 比較目前 pathname 與連結的 path，相同才是同頁
+  if (pathname === (path || "/")) {
     e.preventDefault()
     setTimeout(() => {
       const el = document.getElementById(targetId)
@@ -33,11 +34,11 @@ function handleAnchorClick(
     return
   }
 
-  // 在其他頁，先跳頁再捲動
+  // 不同頁，先跳頁再捲動
   e.preventDefault()
   sessionStorage.setItem("scrollTo", targetId)
   router.push(path || "/")
-} // ← 這個 } 原本遺漏了
+}
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
