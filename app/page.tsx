@@ -104,9 +104,7 @@ export default function Home() {
         </section>
 
         {/* 聯絡我們 */}
-        <div id="contact">
-          <ContactSection />
-        </div>
+<ContactSection />
 
       </main>
 
