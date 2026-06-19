@@ -17,7 +17,7 @@ export default function Home() {
       setTimeout(() => {
         const el = document.getElementById(target)
         if (el) el.scrollIntoView({ behavior: "smooth" })
-      }, 100)
+      }, 500)
     }
   }, [])
 
