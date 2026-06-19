@@ -24,14 +24,16 @@ function handleAnchorClick(
   const targetId = hash
 
   // 已在同一頁，直接捲動
-  if (path === "" || path === "/" || path === pathname) {
-    e.preventDefault()
+if (path === "" || path === "/" || path === pathname) {
+  e.preventDefault()
+  setTimeout(() => {
     const el = document.getElementById(targetId)
     if (el) {
       el.scrollIntoView({ behavior: "smooth" })
     }
-    return
-  }
+  }, 50)
+  return
+}
 
   // 在其他頁，先跳頁再捲動
   e.preventDefault()
