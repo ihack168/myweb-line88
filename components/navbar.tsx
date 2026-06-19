@@ -11,40 +11,33 @@ const navLinks = [
   { label: "聯絡我們", href: "/#contact" },
 ]
 
-// 點擊錨點連結時，手動捲動到對應的 section
 function handleAnchorClick(
   e: React.MouseEvent<HTMLAnchorElement>,
   href: string,
   pathname: string,
   router: ReturnType<typeof useRouter>
 ) {
-  if (!href.includes("#")) return // 沒有錨點，不處理
+  if (!href.includes("#")) return
 
   const [path, hash] = href.split("#")
   const targetId = hash
 
-  // 已在同一頁，直接捲動
-if (path === "" || path === "/" || path === pathname) {
-  e.preventDefault()
-  setTimeout(() => {
-    const el = document.getElementById(targetId)
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" })
-    }
-  }, 50)
-  return
-}
+  if (path === "" || path === "/" || path === pathname) {
+    e.preventDefault()
+    setTimeout(() => {
+      const el = document.getElementById(targetId)
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" })
+      }
+    }, 50)
+    return
+  }
 
   // 在其他頁，先跳頁再捲動
   e.preventDefault()
-  router.push(href)
-  setTimeout(() => {
-    const el = document.getElementById(targetId)
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" })
-    }
-  }, 400)
-}
+  sessionStorage.setItem("scrollTo", targetId)
+  router.push(path || "/")
+} // ← 這個 } 原本遺漏了
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
