@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 const navLinks = [
   { label: "首頁", href: "/" },
@@ -11,10 +11,44 @@ const navLinks = [
   { label: "聯絡我們", href: "/#contact" },
 ]
 
+// 點擊錨點連結時，手動捲動到對應的 section
+function handleAnchorClick(
+  e: React.MouseEvent<HTMLAnchorElement>,
+  href: string,
+  pathname: string,
+  router: ReturnType<typeof useRouter>
+) {
+  if (!href.includes("#")) return // 沒有錨點，不處理
+
+  const [path, hash] = href.split("#")
+  const targetId = hash
+
+  // 已在同一頁，直接捲動
+  if (path === "" || path === "/" || path === pathname) {
+    e.preventDefault()
+    const el = document.getElementById(targetId)
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" })
+    }
+    return
+  }
+
+  // 在其他頁，先跳頁再捲動
+  e.preventDefault()
+  router.push(href)
+  setTimeout(() => {
+    const el = document.getElementById(targetId)
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" })
+    }
+  }, 400)
+}
+
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -61,6 +95,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={(e) => handleAnchorClick(e, link.href, pathname, router)}
                 className="text-lg font-black tracking-widest text-gray-200 hover:text-[#ff8800] transition-colors relative group"
               >
                 {link.label}
@@ -111,7 +146,8 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  onClick={() => {
+                  onClick={(e) => {
+                    handleAnchorClick(e, link.href, pathname, router)
                     setMobileOpen(false)
                     document.body.style.overflow = "unset"
                   }}
