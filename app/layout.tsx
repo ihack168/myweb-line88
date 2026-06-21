@@ -36,13 +36,6 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
   },
 
   openGraph: {
@@ -65,17 +58,21 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
-    <html lang="zh-Hant" className={`${notoSansTC.variable} ${geistMono.variable}`}>
+    <html
+      lang="zh-Hant"
+      className={`${notoSansTC.variable} ${geistMono.variable}`}
+    >
       <body className="font-sans antialiased bg-[#0a0a0a] text-white">
+
+        {/* Google Analytics */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-2X29DPN458"
           strategy="afterInteractive"
         />
-        <script defer src="https://cloud.umami.is/script.js" data-website-id="febf1b62-e4ea-449e-af9b-dd91619e1116"></script>
 
         <Script id="google-analytics" strategy="afterInteractive">
           {`
@@ -87,6 +84,20 @@ export default function RootLayout({
             });
           `}
         </Script>
+
+        {/* Umami Analytics */}
+        <Script
+          src="https://cloud.umami.is/script.js"
+          data-website-id="febf1b62-e4ea-449e-af9b-dd91619e1116"
+          strategy="afterInteractive"
+        />
+
+        {/* Cloudflare Web Analytics */}
+        <Script
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token":"9fec8e6d90b447db9c6726ce57ddbbad"}'
+          strategy="afterInteractive"
+        />
 
         {children}
       </body>
