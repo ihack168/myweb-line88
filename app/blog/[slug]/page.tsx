@@ -3,7 +3,6 @@ import imageUrlBuilder from "@sanity/image-url";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ShareBar } from "@/components/share-bar";
-import { ContactCtaButton } from "@/components/contact-cta-button";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -21,7 +20,6 @@ function extractFirstImage(html?: unknown) {
   if (typeof html !== "string") return null;
 
   const match = html.match(/<img[^>]+src="([^"]+)"/);
-
   return match?.[1] || null;
 }
 
@@ -32,12 +30,7 @@ function optimizeSanityImages(html?: string) {
     /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
     (url) => {
       if (url.includes("auto=format")) return url;
-
-      return (
-        url +
-        (url.includes("?") ? "&" : "?") +
-        "auto=format"
-      );
+      return url + (url.includes("?") ? "&" : "?") + "auto=format";
     }
   );
 }
@@ -101,9 +94,7 @@ export async function generateMetadata({
 
 /* ---------------- Page ---------------- */
 
-export default async function PostPage({
-  params,
-}: PageProps) {
+export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
 
   const post = await client.fetch(
@@ -139,10 +130,7 @@ export default async function PostPage({
     description: post.description || post.title,
     datePublished: post.publishedAt,
     image: post.mainImage
-      ? urlFor(post.mainImage)
-          .width(1200)
-          .auto("format")
-          .url()
+      ? urlFor(post.mainImage).width(1200).auto("format").url()
       : undefined,
   };
 
@@ -157,16 +145,14 @@ export default async function PostPage({
 
       <Navbar />
 
-      <main className="mx-auto max-w-4xl px-6 pb-20 pt-32">
+      <main className="mx-auto max-w-4xl px-6 pb-20 pt-36">
         <h1 className="mb-6 text-4xl font-black text-[#ff8800]">
           {post.title}
         </h1>
 
         {post.mainImage && (
           <img
-            src={urlFor(post.mainImage)
-              .auto("format")
-              .url()}
+            src={urlFor(post.mainImage).auto("format").url()}
             alt={post.title}
             className="mb-10 w-full rounded-2xl"
           />
