@@ -4,8 +4,8 @@ import { PortableText } from "@portabletext/react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ShareBar } from "@/components/share-bar";
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 export const revalidate = 0;
@@ -19,7 +19,7 @@ function urlFor(source: any) {
 }
 
 /**
- * 👉 抓 HTML 第一張圖（OG fallback）
+ * 👉 抓第一張圖（OG fallback）
  */
 function extractFirstImage(html?: string) {
   if (!html) return null;
@@ -43,7 +43,7 @@ function optimizeSanityImages(html?: string) {
 }
 
 /**
- * PortableText image renderer
+ * PortableText image
  */
 const ptComponents = {
   types: {
@@ -95,13 +95,13 @@ export async function generateMetadata({
     : firstImage;
 
   return {
-    title: `${post.title} | 洛克希德黑克斯`,
+    title: `${post.title}`,
     description: post.description || post.title,
     openGraph: {
       title: post.title,
       description: post.description || post.title,
       url: `https://www.line88.tw/blog/${slug}`,
-      siteName: "洛克希德黑克斯",
+      siteName: "網站",
       images: ogImage ? [{ url: ogImage }] : [],
       locale: "zh_TW",
       type: "article",
@@ -120,7 +120,6 @@ export default async function PostPage({
     `*[_type == "post" && slug.current == $slug][0]{
       title,
       description,
-      "slug": slug.current,
       publishedAt,
       mainImage,
       body,
@@ -135,11 +134,7 @@ export default async function PostPage({
   if (!post) notFound();
 
   const publishedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("zh-TW", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      })
+    ? new Date(post.publishedAt).toLocaleDateString("zh-TW")
     : null;
 
   const optimizedHtml = optimizeSanityImages(post.htmlContent);
@@ -149,17 +144,7 @@ export default async function PostPage({
     "@type": "Article",
     headline: post.title,
     description: post.description || post.title,
-    author: {
-      "@type": "Person",
-      name: post.authorName || "洛克希德黑克斯",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "洛克希德黑克斯",
-      url: "https://www.line88.tw",
-    },
     datePublished: post.publishedAt,
-    url: `https://www.line88.tw/blog/${slug}`,
     image: post.mainImage
       ? urlFor(post.mainImage).width(1200).auto("format").url()
       : undefined,
@@ -174,25 +159,15 @@ export default async function PostPage({
 
       <Navbar />
 
-      <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
-        <nav className="flex items-center gap-2 text-sm text-gray-600 mb-10 font-mono">
-          <Link href="/">首頁</Link>
-          <span>/</span>
-          <Link href="/blog">最新文章</Link>
-        </nav>
-
-        <h1 className="text-4xl md:text-6xl font-black mb-6 text-[#ff8800]">
+      <main className="mx-auto max-w-4xl px-6 pt-32 pb-20">
+        <h1 className="text-4xl font-black text-[#ff8800] mb-6">
           {post.title}
         </h1>
-
-        <div className="text-gray-400 mb-10 text-sm">
-          {publishedDate}
-        </div>
 
         {post.mainImage && (
           <img
             src={urlFor(post.mainImage).auto("format").url()}
-            className="w-full mb-10 rounded-2xl"
+            className="mb-10 w-full rounded-2xl"
           />
         )}
 
@@ -202,8 +177,16 @@ export default async function PostPage({
         />
       </main>
 
-      {/* 🔥 SHARE BAR（你已做好的） */}
+      {/* 🔥 SHARE BAR（你已做好） */}
       <ShareBar />
+
+      {/* 🔥 原本浮動「與我聯絡」按鈕（已補回） */}
+      <Link
+        href="/#contact"
+        className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 rounded-full bg-[#ff8800] px-6 py-4 text-black font-black shadow-[0_0_35px_rgba(255,136,0,0.6)] hover:scale-110 transition"
+      >
+        與我聯絡 →
+      </Link>
 
       <Footer />
     </div>
