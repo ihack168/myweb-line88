@@ -59,8 +59,15 @@ export function ShareBar() {
 
   return (
     <div className="fixed bottom-6 left-1/2 z-[9999] -translate-x-1/2">
-      <div className="flex items-center gap-2 rounded-full border border-white/10 bg-black/80 px-4 py-3 text-white shadow-2xl backdrop-blur">
-        <span className="pr-1 text-xs font-bold text-gray-400">
+      <div
+        className="
+          flex items-center gap-1 md:gap-2
+          rounded-full border border-white/10
+          bg-black/80 px-2 py-2 md:px-4 md:py-3
+          text-white shadow-2xl backdrop-blur
+        "
+      >
+        <span className="hidden md:block pr-1 text-xs font-bold text-gray-400 whitespace-nowrap">
           分享
         </span>
 
@@ -68,7 +75,7 @@ export function ShareBar() {
           href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold transition hover:opacity-90"
+          className="whitespace-nowrap rounded-full bg-blue-600 px-2 md:px-4 py-2 text-[11px] md:text-xs font-bold transition hover:opacity-90"
         >
           FB
         </a>
@@ -77,7 +84,7 @@ export function ShareBar() {
           href={`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full bg-green-500 px-4 py-2 text-xs font-bold transition hover:opacity-90"
+          className="whitespace-nowrap rounded-full bg-green-500 px-2 md:px-4 py-2 text-[11px] md:text-xs font-bold transition hover:opacity-90"
         >
           LINE
         </a>
@@ -85,7 +92,7 @@ export function ShareBar() {
         <button
           onClick={handleCopy}
           disabled={!url}
-          className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="whitespace-nowrap rounded-full bg-white/10 px-2 md:px-4 py-2 text-[11px] md:text-xs font-bold transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {copied ? "已複製！" : "COPY"}
         </button>
@@ -94,7 +101,7 @@ export function ShareBar() {
 
         <button
           onClick={handleContact}
-          className="rounded-full bg-[#ff8800] px-4 py-2 text-xs font-black text-black transition hover:scale-105"
+          className="whitespace-nowrap rounded-full bg-[#ff8800] px-2 md:px-4 py-2 text-[11px] md:text-xs font-black text-black transition hover:scale-105"
         >
           聯絡我 →
         </button>
