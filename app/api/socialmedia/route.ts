@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { Converter } from "opencc-js";
+import { Redis } from "@upstash/redis";
 
 export const dynamic = "force-dynamic";
+
+const redis = Redis.fromEnv();
 
 // ✔ 簡體 → 台灣繁體
 const toTaiwanTraditional = Converter({ from: "cn", to: "twp" });
@@ -99,10 +102,6 @@ async function callGroqWithRotation(body: any) {
   };
 }
 
-// ─────────────────────────────────────────────
-// ✔ 社群風格生成（完整保留你的系統）
-// ─────────────────────────────────────────────
-
 function makeSocialStyle(platform: "fb" | "threads") {
   const isThreads = platform === "threads";
 
@@ -115,7 +114,6 @@ function makeSocialStyle(platform: "fb" | "threads") {
       "用情境代入感開場（你是不是也…）",
       "用挑戰常識的說法開場",
     ]),
-
     angle: pick([
       "踩雷提醒",
       "冷知識分享",
@@ -125,7 +123,6 @@ function makeSocialStyle(platform: "fb" | "threads") {
       "常見迷思破解",
       "實用小技巧",
     ]),
-
     tone: pick([
       "像朋友聊天，輕鬆隨性",
       "簡短有力，直接講重點",
@@ -133,7 +130,6 @@ function makeSocialStyle(platform: "fb" | "threads") {
       "親切分享感，沒有距離感",
       "略帶個人主觀觀點",
     ]),
-
     cta: pick([
       "最後用一個開放問題邀請留言",
       "最後問讀者有沒有類似經驗",
@@ -141,27 +137,20 @@ function makeSocialStyle(platform: "fb" | "threads") {
       "最後說歡迎分享給有需要的人",
       "最後問大家同不同意這個觀點",
     ]),
-
     structure: pick([
       "一段鉤子 + 兩三個重點 + 互動結尾",
       "情境代入 + 核心資訊 + 呼籲互動",
       "問題拋出 + 解答 + 延伸思考",
       "短句堆疊製造節奏感",
     ]),
-
     emojiDensity: pick([
       "適度使用 2～4 個 emoji 增加視覺節奏",
       "每個重點前放一個 emoji",
     ]),
-
     hashtagCount: isThreads ? rand(2, 3) : rand(2, 3),
     maxWords: isThreads ? rand(120, 200) : rand(180, 280),
   };
 }
-
-// ─────────────────────────────────────────────
-// ✔ 解析器（加強容錯）
-// ─────────────────────────────────────────────
 
 function extractPostAndHashtags(text: string) {
   if (!text) return null;
@@ -182,14 +171,9 @@ function extractPostAndHashtags(text: string) {
   };
 }
 
-// ✔ 清掉 hashtag 混入 post
 function removeHashtagsFromPost(text: string) {
   return text.replace(/#[\p{L}0-9_]+/gu, "").trim();
 }
-
-// ─────────────────────────────────────────────
-// ✔ API
-// ─────────────────────────────────────────────
 
 export async function POST(req: Request) {
   try {
@@ -291,6 +275,9 @@ emoji：${style.emojiDensity}
       parsed.post +
       (officialUrl ? `\n\n${officialUrl}` : "") +
       (parsed.hashtags ? `\n\n${parsed.hashtags}` : "");
+
+    // ✔ 存入 Redis
+    await redis.set("latest_post", fullPost);
 
     return NextResponse.json({
       ok: true,
