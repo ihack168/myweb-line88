@@ -1,81 +1,39 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { useState, useEffect } from "react"
-import { usePathname, useRouter } from "next/navigation"
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 const navLinks = [
   { label: "首頁", href: "/" },
   { label: "服務介紹", href: "/#services" },
   { label: "最新文章", href: "/blog" },
   { label: "聯絡我們", href: "/#contact" },
-]
-
-function scrollToElement(id: string) {
-  const el = document.getElementById(id)
-  if (!el) return
-  const y = el.getBoundingClientRect().top + window.scrollY - 90
-  window.scrollTo({ top: y, behavior: "smooth" })
-}
-
-function handleAnchorClick(
-  e: React.MouseEvent<HTMLAnchorElement>,
-  href: string,
-  pathname: string,
-  router: ReturnType<typeof useRouter>
-) {
-  if (!href.includes("#")) return
-
-  e.preventDefault()
-
-  const [path, hash] = href.split("#")
-  const targetId = hash
-
-  if (pathname === (path || "/")) {
-    requestAnimationFrame(() => scrollToElement(targetId))
-    return
-  }
-
-  sessionStorage.setItem("scrollTo", targetId)
-  router.push(path || "/")
-}
+];
 
 export function Navbar() {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const pathname = usePathname()
-  const router = useRouter()
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
-
-  // 跨頁捲動：等首頁 render 完再捲
-  useEffect(() => {
-    const targetId = sessionStorage.getItem("scrollTo")
-    if (!targetId) return
-
-    sessionStorage.removeItem("scrollTo")
-
-    const timer = setTimeout(() => {
-      scrollToElement(targetId)
-    }, 600) // 給首頁足夠時間 render
-
-    return () => clearTimeout(timer)
-  }, [pathname])
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
-    setMobileOpen(false)
-    document.body.style.overflow = "unset"
-  }, [pathname])
+    setMobileOpen(false);
+    document.body.style.overflow = "unset";
+  }, [pathname]);
 
   const toggleMenu = () => {
-    const next = !mobileOpen
-    setMobileOpen(next)
-    document.body.style.overflow = next ? "hidden" : "unset"
-  }
+    const next = !mobileOpen;
+    setMobileOpen(next);
+    document.body.style.overflow = next ? "hidden" : "unset";
+  };
 
   return (
     <>
@@ -83,9 +41,10 @@ export function Navbar() {
         <div
           className={`
             flex items-center justify-between px-5 md:px-8 transition-all duration-500 pointer-events-auto
-            ${scrolled
-              ? "w-[92%] md:w-[85%] max-w-6xl h-16 mt-4 bg-black/80 border border-white/20 rounded-full shadow-2xl backdrop-blur-md"
-              : "w-full h-20 bg-black/50 backdrop-blur-sm border-b border-white/5"
+            ${
+              scrolled
+                ? "w-[92%] md:w-[85%] max-w-6xl h-16 mt-4 bg-black/80 border border-white/20 rounded-full shadow-2xl backdrop-blur-md"
+                : "w-full h-20 bg-black/50 backdrop-blur-sm border-b border-white/5"
             }
           `}
         >
@@ -100,13 +59,12 @@ export function Navbar() {
             </span>
           </Link>
 
+          {/* Desktop */}
           <div className="hidden md:flex items-center gap-10">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                scroll={false}
-                onClick={(e) => handleAnchorClick(e, link.href, pathname, router)}
                 className="text-lg font-black tracking-widest text-gray-200 hover:text-[#ff8800] transition-colors relative group"
               >
                 {link.label}
@@ -115,6 +73,7 @@ export function Navbar() {
             ))}
           </div>
 
+          {/* Mobile button */}
           <button
             onClick={toggleMenu}
             aria-label="開啟選單"
@@ -127,6 +86,7 @@ export function Navbar() {
         </div>
       </nav>
 
+      {/* Mobile menu */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[100] md:hidden">
           <div
@@ -144,8 +104,7 @@ export function Navbar() {
               </div>
               <button
                 onClick={toggleMenu}
-                aria-label="關閉選單"
-                className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center active:scale-95 transition"
+                className="w-11 h-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center"
               >
                 <span className="text-2xl text-[#ff8800] leading-none">×</span>
               </button>
@@ -156,19 +115,21 @@ export function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  scroll={false}
-                  onClick={(e) => {
-                    handleAnchorClick(e, link.href, pathname, router)
-                    setMobileOpen(false)
-                    document.body.style.overflow = "unset"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    document.body.style.overflow = "unset";
                   }}
                   className="flex items-center justify-between px-5 py-4 rounded-2xl text-lg font-black tracking-wider text-gray-100 hover:bg-white/5 active:bg-[#ff8800]/10 transition group"
                 >
                   <span className="flex items-center gap-3">
-                    <span className="text-sm text-[#ff8800]/70">0{index + 1}</span>
+                    <span className="text-sm text-[#ff8800]/70">
+                      0{index + 1}
+                    </span>
                     {link.label}
                   </span>
-                  <span className="text-[#ff8800] group-active:translate-x-1 transition">→</span>
+                  <span className="text-[#ff8800] group-active:translate-x-1 transition">
+                    →
+                  </span>
                 </Link>
               ))}
             </div>
@@ -182,5 +143,5 @@ export function Navbar() {
         </div>
       )}
     </>
-  )
+  );
 }

@@ -1,15 +1,13 @@
 "use client";
 
-import { Navbar } from "@/components/navbar"
-import { HeroSection } from "@/components/hero-section"
-import { ServicesSection } from "@/components/services-section"
-import { LatestPostsSection } from "@/components/latest-posts-section"
-import { ContactSection } from "@/components/contact-section"
-import { Footer } from "@/components/footer"
+import { Navbar } from "@/components/navbar";
+import { HeroSection } from "@/components/hero-section";
+import { ServicesSection } from "@/components/services-section";
+import { LatestPostsSection } from "@/components/latest-posts-section";
+import { ContactSection } from "@/components/contact-section";
+import { Footer } from "@/components/footer";
 
 export default function Home() {
-
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -25,8 +23,8 @@ export default function Home() {
           "@type": "Service",
           "name": "網路投票買票灌票服務",
           "description":
-            "提供 LINE、Facebook、Google 表單與各類網路票選活動投票支援。"
-        }
+            "提供 LINE、Facebook、Google 表單與各類網路票選活動投票支援。",
+        },
       },
       {
         "@type": "Offer",
@@ -34,8 +32,8 @@ export default function Home() {
           "@type": "Service",
           "name": "社群流量增長服務",
           "description":
-            "提供 Facebook、Instagram、Threads 按讚、追蹤、留言與曝光提升服務。"
-        }
+            "提供 Facebook、Instagram、Threads 按讚、追蹤、留言與曝光提升服務。",
+        },
       },
       {
         "@type": "Offer",
@@ -43,8 +41,8 @@ export default function Home() {
           "@type": "Service",
           "name": "AEO SEO 關鍵字優化服務",
           "description":
-            "提供 AI 搜尋優化、SEO 內容規劃與關鍵字策略服務。"
-        }
+            "提供 AI 搜尋優化、SEO 內容規劃與關鍵字策略服務。",
+        },
       },
       {
         "@type": "Offer",
@@ -52,24 +50,25 @@ export default function Home() {
           "@type": "Service",
           "name": "Line 官方帳號 AI 客服串接",
           "description":
-            "提供 Line 官方帳號串接 ChatGPT、Gemini 與 RAG 知識庫的 AI 客服建置服務。"
-        }
-      }
-    ]
+            "提供 Line 官方帳號串接 ChatGPT、Gemini 與 RAG 知識庫的 AI 客服建置服務。",
+        },
+      },
+    ],
   };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-foreground selection:bg-[#00ff00]/30">
-
+      
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
       />
 
       <Navbar />
 
       <main>
-
         {/* Hero */}
         <div className="pt-24 md:pt-40 pb-10">
           <HeroSection />
@@ -104,12 +103,16 @@ export default function Home() {
           </p>
         </section>
 
-        {/* 聯絡我們 */}
-        <ContactSection />
-
+        {/* 🔥 關鍵修正：加 id */}
+        <section
+          id="contact"
+          className="scroll-mt-40 pb-40"
+        >
+          <ContactSection />
+        </section>
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }
