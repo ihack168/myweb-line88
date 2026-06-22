@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export function ShareBar() {
   const [url, setUrl] = useState("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const current = window.location.href;
@@ -11,19 +12,27 @@ export function ShareBar() {
       current +
       (current.includes("?") ? "&" : "?") +
       "utm_source=share&utm_medium=social";
-
     setUrl(utmUrl);
   }, []);
 
   const encodedUrl = encodeURIComponent(url);
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
-    <div className="fixed bottom-6 left-1/2 z-[9999] -translate-x-1/2">
-      <div className="flex gap-2 rounded-full bg-black/80 px-4 py-3 text-white backdrop-blur border border-white/10">
+    <div className="fixed bottom-24 md:bottom-6 left-1/2 z-[9999] -translate-x-1/2">
+      <div className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-3 text-white backdrop-blur border border-white/10">
+
+        <span className="text-xs font-bold text-gray-400 pr-1">分享</span>
 
         <a
           href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
           target="_blank"
+          rel="noopener noreferrer"
           className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold"
         >
           FB
@@ -32,16 +41,17 @@ export function ShareBar() {
         <a
           href={`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`}
           target="_blank"
+          rel="noopener noreferrer"
           className="rounded-full bg-green-500 px-4 py-2 text-xs font-bold"
         >
           LINE
         </a>
 
         <button
-          onClick={() => navigator.clipboard.writeText(url)}
-          className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold"
+          onClick={handleCopy}
+          className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold transition"
         >
-          COPY
+          {copied ? "已複製！" : "COPY"}
         </button>
 
       </div>
