@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function FloatingBar() {
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const current = window.location.href;
@@ -24,8 +26,10 @@ export function FloatingBar() {
   };
 
   const handleContact = () => {
-    sessionStorage.setItem("scrollTo", "contact")
-    window.location.href = "/"
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("scrollTo", "contact");
+    }
+    router.push("/");
   };
 
   return (
@@ -34,7 +38,7 @@ export function FloatingBar() {
 
         <span className="text-xs font-bold text-gray-400 pr-1">分享</span>
 
-        <a
+        
           href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
           target="_blank"
           rel="noopener noreferrer"
@@ -43,7 +47,7 @@ export function FloatingBar() {
           FB
         </a>
 
-        <a
+        
           href={`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`}
           target="_blank"
           rel="noopener noreferrer"
