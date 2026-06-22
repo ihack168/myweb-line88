@@ -28,33 +28,17 @@ export function ShareBar() {
 
       setCopied(true);
 
-      const timer = setTimeout(() => {
+      setTimeout(() => {
         setCopied(false);
       }, 2000);
-
-      return () => clearTimeout(timer);
     } catch (error) {
       console.error("Copy failed:", error);
     }
   };
 
+  // ✅ 統一改這裡（關鍵）
   const handleContact = () => {
-    if (typeof window === "undefined") return;
-
-    if (window.location.pathname === "/") {
-      const contactSection = document.getElementById("contact");
-
-      if (contactSection) {
-        contactSection.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        return;
-      }
-    }
-
-    sessionStorage.setItem("scrollTo", "contact");
-    router.push("/");
+    router.push("/#contact");
   };
 
   return (
