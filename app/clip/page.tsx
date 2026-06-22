@@ -62,33 +62,52 @@ export default function ClipPage() {
   };
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: 40, textAlign: "center" }}>
-      <div style={{ fontSize: 32, marginBottom: 24 }}>{msg}</div>
+    <div style={{
+      minHeight: "100vh",
+      background: "#0a0a0a",
+      fontFamily: "sans-serif",
+      padding: 40,
+      textAlign: "center",
+      color: "#ffffff",
+    }}>
+      <div style={{ fontSize: 28, marginBottom: 8, fontWeight: "bold" }}>
+        📋 剪貼簿助手
+      </div>
+      <div style={{
+        fontSize: 18,
+        marginBottom: 32,
+        color: msg.startsWith("✅") ? "#4ade80" : msg.startsWith("❌") ? "#f87171" : "#facc15",
+      }}>
+        {msg}
+      </div>
       <pre style={{
-        background: "#f5f5f5",
+        background: "#1a1a1a",
+        border: "1px solid #333",
         padding: 20,
-        borderRadius: 8,
+        borderRadius: 12,
         textAlign: "left",
         whiteSpace: "pre-wrap",
         wordBreak: "break-word",
-        fontSize: 16,
-        marginBottom: 24,
-        maxWidth: 600,
-        margin: "0 auto 24px",
+        fontSize: 15,
+        lineHeight: 1.7,
+        color: "#e5e5e5",
+        maxWidth: 640,
+        margin: "0 auto 32px",
       }}>{content || "（尚無內容）"}</pre>
       <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
         <button
           onClick={handleGenerate}
           disabled={generating}
           style={{
-            background: "#0066cc",
+            background: generating ? "#333" : "#1d4ed8",
             color: "#fff",
             border: "none",
             borderRadius: 8,
             padding: "12px 32px",
-            fontSize: 18,
+            fontSize: 16,
             cursor: generating ? "not-allowed" : "pointer",
             opacity: generating ? 0.6 : 1,
+            transition: "all 0.2s",
           }}
         >
           {generating ? "產生中..." : "產生測試貼文"}
@@ -97,11 +116,12 @@ export default function ClipPage() {
           onClick={handleCopy}
           style={{
             background: "#ff8800",
-            color: "#fff",
+            color: "#000",
             border: "none",
             borderRadius: 8,
             padding: "12px 32px",
-            fontSize: 18,
+            fontSize: 16,
+            fontWeight: "bold",
             cursor: "pointer",
           }}
         >
