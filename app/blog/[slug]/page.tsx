@@ -181,7 +181,6 @@ export default async function PostPage({
       </main>
 
       <ShareBar />
-      <ContactCtaButton />
       <Footer />
     </div>
   );

@@ -96,7 +96,7 @@ export function ShareBar() {
           onClick={handleContact}
           className="rounded-full bg-[#ff8800] px-4 py-2 text-xs font-black text-black transition hover:scale-105"
         >
-          與我聯絡 →
+          聯絡我 →
         </button>
       </div>
     </div>
