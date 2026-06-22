@@ -39,16 +39,15 @@ export function FloatingBar() {
         <span className="text-xs font-bold text-gray-400 pr-1">分享</span>
 
         
-          href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+          <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold"
         >
           FB
         </a>
-
         
-          href={`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`}
+          <a shref={`https://social-plugins.line.me/lineit/share?url=${encodedUrl}`}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-full bg-green-500 px-4 py-2 text-xs font-bold"
