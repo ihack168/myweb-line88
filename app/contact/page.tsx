@@ -1,91 +1,78 @@
 "use client";
 
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
-import { ContactSection } from "@/components/contact-section";
+import Link from "next/link";
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
-      <Navbar />
+    <div className="min-h-screen bg-[#0a0a0a] text-white px-6 py-24">
+      
+      {/* HERO */}
+      <div className="max-w-3xl mx-auto text-center">
+        <h1 className="text-4xl md:text-5xl font-black text-[#ff8800] mb-6">
+          立即聯絡我們
+        </h1>
 
-      <main className="pt-28 pb-20 px-6 max-w-5xl mx-auto">
-        {/* HERO */}
-        <section className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-black text-[#ff8800] mb-6">
-            聯絡我們
-          </h1>
+        <p className="text-gray-300 text-lg leading-relaxed">
+          提供 LINE / Email / Facebook 即時聯絡方式，
+          我們會在最短時間內回覆你的需求。
+        </p>
+      </div>
 
-          <p className="text-gray-300 text-lg leading-relaxed max-w-2xl mx-auto">
-            提供 LINE / Facebook / Email 多種聯絡方式。
-            <br />
-            如果你有網路行銷、投票系統或 AI 客服相關需求，可以直接聯絡我們。
-          </p>
-        </section>
+      {/* CTA CARDS */}
+      <div className="max-w-4xl mx-auto mt-16 grid gap-6 md:grid-cols-3">
 
-        {/* CONTACT CARDS */}
-        <section className="mb-20">
-          <ContactSection />
-        </section>
-
-        {/* FAQ */}
-        <section className="mb-20">
-          <h2 className="text-2xl md:text-3xl font-black mb-8 text-center">
-            常見問題
-          </h2>
-
-          <div className="space-y-4 max-w-3xl mx-auto">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <h3 className="font-bold text-[#ff8800] mb-2">
-                回覆時間多久？
-              </h3>
-              <p className="text-gray-300 text-sm">
-                通常 LINE 與 Email 會在 24 小時內回覆。
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <h3 className="font-bold text-[#ff8800] mb-2">
-                可以做哪些服務？
-              </h3>
-              <p className="text-gray-300 text-sm">
-                網路投票系統、社群流量優化、SEO / AEO 優化、AI 客服串接等。
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-xl p-5">
-              <h3 className="font-bold text-[#ff8800] mb-2">
-                是否提供客製化？
-              </h3>
-              <p className="text-gray-300 text-sm">
-                可以，會依照需求提供技術方案與報價。
-              </p>
-            </div>
+        {/* LINE */}
+        <a
+          href="https://line.me/R/ti/p/~line88.tw"
+          target="_blank"
+          className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-green-400 transition"
+        >
+          <div className="text-green-400 text-xl font-black mb-2">
+            LINE 即時諮詢
           </div>
-        </section>
-
-        {/* FINAL CTA */}
-        <section className="text-center">
-          <h2 className="text-2xl md:text-3xl font-black mb-4">
-            現在就開始聯絡
-          </h2>
-
-          <p className="text-gray-400 mb-8">
-            選擇你最方便的方式，我們會盡快回覆你
+          <p className="text-gray-400 text-sm">
+            點擊加入 LINE 立即對話
           </p>
+        </a>
 
-          <a
-            href="https://line.me/R/ti/p/~line88.tw"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-[#ff8800] text-black font-black px-8 py-4 rounded-full hover:scale-105 transition"
-          >
-            立即加入 LINE
-          </a>
-        </section>
-      </main>
+        {/* EMAIL */}
+        <a
+          href="mailto:ihack168@gmail.com"
+          className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-blue-400 transition"
+        >
+          <div className="text-blue-400 text-xl font-black mb-2">
+            Email 聯絡
+          </div>
+          <p className="text-gray-400 text-sm">
+            發送需求到信箱
+          </p>
+        </a>
 
-      <Footer />
+        {/* FACEBOOK */}
+        <a
+          href="https://www.facebook.com/lockheadhex"
+          target="_blank"
+          className="rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-[#ff8800] transition"
+        >
+          <div className="text-[#ff8800] text-xl font-black mb-2">
+            Facebook 粉專
+          </div>
+          <p className="text-gray-400 text-sm">
+            透過 FB 私訊我們
+          </p>
+        </a>
+
+      </div>
+
+      {/* BACK HOME */}
+      <div className="text-center mt-16">
+        <Link
+          href="/"
+          className="text-gray-400 hover:text-white transition"
+        >
+          ← 返回首頁
+        </Link>
+      </div>
     </div>
   );
 }
