@@ -3,6 +3,8 @@ import { Noto_Sans_TC, Geist_Mono } from 'next/font/google'
 import Script from 'next/script'
 import './globals.css'
 
+import { Navbar } from '@/components/navbar' // ✅ 只加這行
+
 const notoSansTC = Noto_Sans_TC({
   subsets: ['latin'],
   weight: ['400', '500', '700', '900'],
@@ -67,6 +69,9 @@ export default function RootLayout({
       className={`${notoSansTC.variable} ${geistMono.variable}`}
     >
       <body className="font-sans antialiased bg-[#0a0a0a] text-white">
+
+        {/* ✅ Navbar 加在這裡（全站共用） */}
+        <Navbar />
 
         {/* Google Analytics */}
         <Script
