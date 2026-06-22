@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-export function useAnchorScroll(offset = 80) {
+export function useAnchorScroll(offset = 120) {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -12,31 +12,30 @@ export function useAnchorScroll(offset = 80) {
 
     const id = hash.replace("#", "");
 
-    const tryScroll = () => {
+    let rafId: number;
+
+    const scrollToElement = () => {
       const el = document.getElementById(id);
-      if (!el) return false;
+      if (!el) {
+        rafId = requestAnimationFrame(scrollToElement);
+        return;
+      }
+
+      const rect = el.getBoundingClientRect();
 
       const top =
-        el.getBoundingClientRect().top + window.scrollY - offset;
+        rect.top +
+        window.scrollY -
+        offset;
 
       window.scrollTo({
         top,
         behavior: "smooth",
       });
-
-      return true;
     };
 
-    let attempts = 0;
+    rafId = requestAnimationFrame(scrollToElement);
 
-    const timer = setInterval(() => {
-      attempts++;
-
-      if (tryScroll() || attempts > 10) {
-        clearInterval(timer);
-      }
-    }, 100);
-
-    return () => clearInterval(timer);
+    return () => cancelAnimationFrame(rafId);
   }, [pathname, offset]);
 }
