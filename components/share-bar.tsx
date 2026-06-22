@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function FloatingBar() {
+export function ShareBar() {
   const [url, setUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
 
