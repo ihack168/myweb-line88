@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export function ShareBar() {
+export function FloatingBar() {
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
@@ -23,9 +23,14 @@ export function ShareBar() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleContact = () => {
+    sessionStorage.setItem("scrollTo", "contact")
+    window.location.href = "/"
+  };
+
   return (
-    <div className="fixed bottom-24 md:bottom-6 left-1/2 z-[9999] -translate-x-1/2">
-      <div className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-3 text-white backdrop-blur border border-white/10">
+    <div className="fixed bottom-6 left-1/2 z-[9999] -translate-x-1/2">
+      <div className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-3 text-white backdrop-blur border border-white/10 shadow-2xl">
 
         <span className="text-xs font-bold text-gray-400 pr-1">分享</span>
 
@@ -52,6 +57,15 @@ export function ShareBar() {
           className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold transition"
         >
           {copied ? "已複製！" : "COPY"}
+        </button>
+
+        <div className="w-px h-5 bg-white/20 mx-1" />
+
+        <button
+          onClick={handleContact}
+          className="rounded-full bg-[#ff8800] px-4 py-2 text-xs font-black text-black transition hover:scale-105"
+        >
+          與我聯絡 →
         </button>
 
       </div>
