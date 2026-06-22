@@ -17,6 +17,18 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
+/**
+ * 👉 抓 HTML 第一張圖片（用於 OG fallback）
+ */
+function extractFirstImage(html?: string) {
+  if (!html) return null;
+  const match = html.match(/<img[^>]+src="([^"]+)"/);
+  return match?.[1] || null;
+}
+
+/**
+ * 👉 你的 HTML 優化
+ */
 function optimizeSanityImages(html?: string) {
   if (!html) return "";
 
@@ -24,16 +36,15 @@ function optimizeSanityImages(html?: string) {
     /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
     (url) => {
       if (url.includes("auto=format")) return url;
-
-      if (url.includes("?")) {
-        return url + "&auto=format";
-      }
-
+      if (url.includes("?")) return url + "&auto=format";
       return url + "?auto=format";
     }
   );
 }
 
+/**
+ * PortableText image renderer
+ */
 const ptComponents = {
   types: {
     image: ({ value }: any) => {
@@ -47,7 +58,6 @@ const ptComponents = {
             className="w-full rounded-2xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
             loading="lazy"
           />
-
           {value.caption && (
             <figcaption className="mt-3 text-sm text-gray-500 italic text-center">
               {value.caption}
@@ -70,13 +80,18 @@ export async function generateMetadata({
     `*[_type == "post" && slug.current == $slug][0]{
       title,
       description,
-      mainImage
+      mainImage,
+      htmlContent
     }`,
     { slug }
   );
 
   if (!post) return {};
 
+  // 👉 先抓 body 第一張圖
+  const firstBodyImage = extractFirstImage(post.htmlContent);
+
+  // 👉 OG image 邏輯
   const ogImage = post.mainImage
     ? urlFor(post.mainImage)
         .width(1200)
@@ -84,7 +99,7 @@ export async function generateMetadata({
         .fit("crop")
         .auto("format")
         .url()
-    : undefined;
+    : firstBodyImage;
 
   return {
     title: `${post.title} | 洛克希德黑克斯`,
@@ -106,8 +121,7 @@ export default async function PostPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const resolvedParams = await params;
-  const slug = resolvedParams.slug;
+  const { slug } = await params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
@@ -173,10 +187,7 @@ export default async function PostPage({
             首頁
           </Link>
           <span>/</span>
-          <Link
-            href="/blog"
-            className="hover:text-[#ff8800] transition-colors"
-          >
+          <Link href="/blog" className="hover:text-[#ff8800] transition-colors">
             最新文章
           </Link>
           <span>/</span>
@@ -218,58 +229,10 @@ export default async function PostPage({
         )}
 
         <article
-          className="
-          prose prose-invert prose-orange max-w-none
-          prose-lg md:prose-xl
-          prose-p:text-gray-300 prose-p:leading-[1.9] prose-p:mb-4
-          prose-headings:text-[#ff8800] prose-headings:font-black prose-headings:italic
-          prose-h2:text-3xl prose-h2:border-l-8 prose-h2:border-[#ff8800] prose-h2:pl-6 prose-h2:mt-12 prose-h2:mb-6
-          prose-h3:text-2xl prose-h3:mt-8
-          prose-strong:text-[#ff8800] prose-strong:font-bold
-          prose-ul:bg-white/5 prose-ul:p-8 prose-ul:rounded-2xl prose-ul:border prose-ul:border-white/10
-          prose-li:marker:text-[#ff8800] prose-li:text-gray-300
-          prose-table:border-collapse prose-table:my-10 prose-table:block prose-table:overflow-x-auto
-          prose-thead:bg-[#ff8800]/20 prose-th:text-[#ff8800] prose-th:p-4 prose-th:border prose-th:border-white/10
-          prose-td:p-4 prose-td:border prose-td:border-white/10 prose-td:text-gray-300
-          prose-img:rounded-2xl prose-img:border prose-img:border-white/10
-          prose-blockquote:border-l-[#ff8800] prose-blockquote:bg-white/5 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:italic
-        "
+          className="prose prose-invert prose-orange max-w-none prose-lg md:prose-xl"
         >
           {post.htmlContent ? (
             <div
-              className="
-                [&_tr]:!bg-transparent
-                [&_th]:!bg-[#ff8800]/20
-                [&_table]:!w-full
-                [&_td]:!border
-                [&_td]:!border-white/20
-                [&_th]:!border
-                [&_th]:!border-white/20
-                [&_table]:!border-collapse
-                [&_table]:!border
-                [&_table]:!border-white/20
-                [&_img]:rounded-2xl
-                [&_img]:border
-                [&_img]:border-white/10
-                [&_img]:shadow-lg
-                [&_img]:my-8
-                [&_img]:mx-auto
-                [&_img]:block
-                [&_p]:mb-4
-                [&_p]:leading-[1.9]
-                [&_p]:text-gray-300
-                [&_h2]:text-3xl
-                [&_h2]:font-black
-                [&_h2]:italic
-                [&_h2]:text-[#ff8800]
-                [&_h2]:border-l-8
-                [&_h2]:border-[#ff8800]
-                [&_h2]:pl-6
-                [&_h2]:mt-12
-                [&_h2]:mb-6
-                [&_li]:text-gray-300
-                [&_li]:mb-1
-              "
               dangerouslySetInnerHTML={{ __html: optimizedHtml }}
             />
           ) : (
@@ -295,17 +258,6 @@ export default async function PostPage({
           </Link>
         </div>
       </main>
-
-      <Link
-        href="/#contact"
-        className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 rounded-full bg-[#ff8800] px-6 py-4 text-black font-black text-base shadow-[0_0_35px_rgba(255,136,0,0.75)] hover:scale-110 hover:bg-[#ffaa33] transition-all duration-300 border border-white/20"
-      >
-        <span className="relative flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full rounded-full bg-black opacity-40 animate-ping"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-black"></span>
-        </span>
-        免費諮詢 →
-      </Link>
 
       <Footer />
     </div>
