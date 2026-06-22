@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 export function ShareBar() {
   const [url, setUrl] = useState<string>("");
   const [copied, setCopied] = useState<boolean>(false);
-
-  const router = useRouter();
 
   useEffect(() => {
     const current = window.location.href;
@@ -36,9 +33,9 @@ export function ShareBar() {
     }
   };
 
-  // ✅ 統一改這裡（關鍵）
+  // ✅ 完全交給 router + stable scroll system
   const handleContact = () => {
-    router.push("/#contact");
+    window.location.href = "/#contact";
   };
 
   return (

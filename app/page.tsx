@@ -1,5 +1,7 @@
 "use client";
 
+import { useStableAnchorScroll } from "@/hooks/useStableAnchorScroll";
+
 import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
 import { ServicesSection } from "@/components/services-section";
@@ -8,6 +10,9 @@ import { ContactSection } from "@/components/contact-section";
 import { Footer } from "@/components/footer";
 
 export default function Home() {
+  // 🔥 核心：穩定 scroll system
+  useStableAnchorScroll(140);
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -103,7 +108,7 @@ export default function Home() {
           </p>
         </section>
 
-        {/* 🔥 關鍵修正：加 id */}
+        {/* 🔥 contact anchor */}
         <section
           id="contact"
           className="scroll-mt-40 pb-40"
