@@ -1,5 +1,5 @@
 import { client } from "@/lib/sanity";
-import { createImageUrlBuilder } from "@sanity/image-url";
+import imageUrlBuilder from "@sanity/image-url";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ShareBar } from "@/components/share-bar";
@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
-const builder = createImageUrlBuilder(client);
+const builder = imageUrlBuilder(client);
 
 function urlFor(source: any) {
   if (!source) return { url: () => "" };
@@ -34,30 +34,14 @@ function optimizeSanityImages(html?: string) {
   );
 }
 
-const ptComponents = {
-  types: {
-    image: ({ value }: any) => {
-      if (!value?.asset?._ref) return null;
-      return (
-        <figure className="my-10 flex flex-col items-center">
-          <img
-            src={urlFor(value).auto("format").url()}
-            alt={value.alt || "文章圖片"}
-            className="w-full rounded-2xl border border-white/10"
-            loading="lazy"
-          />
-        </figure>
-      );
-    },
-  },
-};
+/* ---------------- Metadata ---------------- */
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug } = params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
@@ -83,7 +67,7 @@ export async function generateMetadata({
     : firstImage;
 
   return {
-    title: `${post.title}`,
+    title: post.title,
     description: post.description || post.title,
     openGraph: {
       title: post.title,
@@ -97,12 +81,14 @@ export async function generateMetadata({
   };
 }
 
+/* ---------------- Page ---------------- */
+
 export default async function PostPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: { slug: string };
 }) {
-  const { slug } = await params;
+  const { slug } = params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
@@ -121,7 +107,10 @@ export default async function PostPage({
 
   if (!post) notFound();
 
-  const optimizedHtml = optimizeSanityImages(post.htmlContent);
+  const optimizedHtml =
+    typeof post.htmlContent === "string"
+      ? optimizeSanityImages(post.htmlContent)
+      : "";
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -138,19 +127,22 @@ export default async function PostPage({
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
       />
 
       <Navbar />
 
       <main className="mx-auto max-w-4xl px-6 pt-32 pb-20">
-        <h1 className="text-4xl font-black text-[#ff8800] mb-6">
+        <h1 className="mb-6 text-4xl font-black text-[#ff8800]">
           {post.title}
         </h1>
 
         {post.mainImage && (
           <img
             src={urlFor(post.mainImage).auto("format").url()}
+            alt={post.title}
             className="mb-10 w-full rounded-2xl"
           />
         )}
@@ -162,17 +154,18 @@ export default async function PostPage({
       </main>
 
       <ShareBar />
-
       <ContactCtaButton />
-
       <Footer />
     </div>
   );
 }
 
+/* ---------------- Static Params ---------------- */
+
 export async function generateStaticParams() {
   const posts = await client.fetch(
     `*[_type == "post"]{ "slug": slug.current }`
   );
+
   return posts?.map((p: any) => ({ slug: p.slug })) || [];
 }
