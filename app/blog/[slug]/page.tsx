@@ -1,10 +1,9 @@
 import { client } from "@/lib/sanity";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import { PortableText } from "@portabletext/react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ShareBar } from "@/components/share-bar";
-import Link from "next/link";
+import { ContactCtaButton } from "@/components/contact-cta-button";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
@@ -18,21 +17,14 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
-/**
- * 👉 抓第一張圖（OG fallback）
- */
 function extractFirstImage(html?: string) {
   if (!html) return null;
   const match = html.match(/<img[^>]+src="([^"]+)"/);
   return match?.[1] || null;
 }
 
-/**
- * 👉 optimize images
- */
 function optimizeSanityImages(html?: string) {
   if (!html) return "";
-
   return html.replace(
     /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
     (url) => {
@@ -42,14 +34,10 @@ function optimizeSanityImages(html?: string) {
   );
 }
 
-/**
- * PortableText image
- */
 const ptComponents = {
   types: {
     image: ({ value }: any) => {
       if (!value?.asset?._ref) return null;
-
       return (
         <figure className="my-10 flex flex-col items-center">
           <img
@@ -133,10 +121,6 @@ export default async function PostPage({
 
   if (!post) notFound();
 
-  const publishedDate = post.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("zh-TW")
-    : null;
-
   const optimizedHtml = optimizeSanityImages(post.htmlContent);
 
   const jsonLd = {
@@ -177,16 +161,9 @@ export default async function PostPage({
         />
       </main>
 
-      {/* 🔥 SHARE BAR（你已做好） */}
       <ShareBar />
 
-      {/* 🔥 原本浮動「與我聯絡」按鈕（已補回） */}
-      <Link
-        href="/#contact"
-        className="fixed bottom-6 right-6 z-[9999] flex items-center gap-2 rounded-full bg-[#ff8800] px-6 py-4 text-black font-black shadow-[0_0_35px_rgba(255,136,0,0.6)] hover:scale-110 transition"
-      >
-        與我聯絡 →
-      </Link>
+      <ContactCtaButton />
 
       <Footer />
     </div>
@@ -197,6 +174,5 @@ export async function generateStaticParams() {
   const posts = await client.fetch(
     `*[_type == "post"]{ "slug": slug.current }`
   );
-
   return posts?.map((p: any) => ({ slug: p.slug })) || [];
 }
