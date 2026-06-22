@@ -17,31 +17,43 @@ function urlFor(source: any) {
   return builder.image(source);
 }
 
-function extractFirstImage(html?: string) {
-  if (!html) return null;
+function extractFirstImage(html?: unknown) {
+  if (typeof html !== "string") return null;
+
   const match = html.match(/<img[^>]+src="([^"]+)"/);
+
   return match?.[1] || null;
 }
 
 function optimizeSanityImages(html?: string) {
   if (!html) return "";
+
   return html.replace(
     /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
     (url) => {
       if (url.includes("auto=format")) return url;
-      return url + (url.includes("?") ? "&" : "?") + "auto=format";
+
+      return (
+        url +
+        (url.includes("?") ? "&" : "?") +
+        "auto=format"
+      );
     }
   );
 }
+
+type PageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
 
 /* ---------------- Metadata ---------------- */
 
 export async function generateMetadata({
   params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const { slug } = params;
+}: PageProps): Promise<Metadata> {
+  const { slug } = await params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
@@ -57,14 +69,20 @@ export async function generateMetadata({
 
   const firstImage = extractFirstImage(post.htmlContent);
 
-  const ogImage = post.mainImage
-    ? urlFor(post.mainImage)
-        .width(1200)
-        .height(630)
-        .fit("crop")
-        .auto("format")
-        .url()
-    : firstImage;
+  let ogImage: string | null = null;
+
+  try {
+    ogImage = post.mainImage
+      ? urlFor(post.mainImage)
+          .width(1200)
+          .height(630)
+          .fit("crop")
+          .auto("format")
+          .url()
+      : firstImage;
+  } catch {
+    ogImage = firstImage;
+  }
 
   return {
     title: post.title,
@@ -85,10 +103,8 @@ export async function generateMetadata({
 
 export default async function PostPage({
   params,
-}: {
-  params: { slug: string };
-}) {
-  const { slug } = params;
+}: PageProps) {
+  const { slug } = await params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
@@ -102,10 +118,14 @@ export default async function PostPage({
       "tags": categories[]->title
     }`,
     { slug },
-    { cache: "no-store" }
+    {
+      cache: "no-store",
+    }
   );
 
-  if (!post) notFound();
+  if (!post) {
+    notFound();
+  }
 
   const optimizedHtml =
     typeof post.htmlContent === "string"
@@ -119,7 +139,10 @@ export default async function PostPage({
     description: post.description || post.title,
     datePublished: post.publishedAt,
     image: post.mainImage
-      ? urlFor(post.mainImage).width(1200).auto("format").url()
+      ? urlFor(post.mainImage)
+          .width(1200)
+          .auto("format")
+          .url()
       : undefined,
   };
 
@@ -134,14 +157,16 @@ export default async function PostPage({
 
       <Navbar />
 
-      <main className="mx-auto max-w-4xl px-6 pt-32 pb-20">
+      <main className="mx-auto max-w-4xl px-6 pb-20 pt-32">
         <h1 className="mb-6 text-4xl font-black text-[#ff8800]">
           {post.title}
         </h1>
 
         {post.mainImage && (
           <img
-            src={urlFor(post.mainImage).auto("format").url()}
+            src={urlFor(post.mainImage)
+              .auto("format")
+              .url()}
             alt={post.title}
             className="mb-10 w-full rounded-2xl"
           />
@@ -149,7 +174,9 @@ export default async function PostPage({
 
         <article
           className="prose prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: optimizedHtml }}
+          dangerouslySetInnerHTML={{
+            __html: optimizedHtml,
+          }}
         />
       </main>
 
@@ -164,8 +191,14 @@ export default async function PostPage({
 
 export async function generateStaticParams() {
   const posts = await client.fetch(
-    `*[_type == "post"]{ "slug": slug.current }`
+    `*[_type == "post"]{
+      "slug": slug.current
+    }`
   );
 
-  return posts?.map((p: any) => ({ slug: p.slug })) || [];
+  return (
+    posts?.map((p: any) => ({
+      slug: p.slug,
+    })) || []
+  );
 }
