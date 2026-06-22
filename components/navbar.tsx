@@ -25,12 +25,20 @@ function handleAnchorClick(
   // 比較目前 pathname 與連結的 path，相同才是同頁
   if (pathname === (path || "/")) {
     e.preventDefault()
-    setTimeout(() => {
-      const el = document.getElementById(targetId)
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth" })
-      }
-    }, 50)
+setTimeout(() => {
+  requestAnimationFrame(() => {
+    const el = document.getElementById(targetId);
+
+    if (!el) return;
+
+    const y = el.getBoundingClientRect().top + window.scrollY - 80;
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth",
+    });
+  });
+}, 80);
     return
   }
 
