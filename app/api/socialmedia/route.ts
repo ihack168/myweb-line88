@@ -146,7 +146,7 @@ function makeSocialStyle(platform: Platform) {
       "問題拋出 + 解答 + 延伸思考",
       "短句堆疊製造節奏感",
     ]),
-    hashtagCount: isThreads ? rand(3, 5) : rand(4, 7),
+    hashtagCount: isThreads ? rand(2, 3) : rand(2, 3),
     maxWords: isThreads ? rand(120, 200) : rand(180, 280),
     emojiDensity: pick(["適度使用 2～4 個 emoji 增加視覺節奏", "每個重點前放一個 emoji"]),
   };
@@ -256,7 +256,7 @@ Emoji 使用：${style.emojiDensity}
 9. 貼文長度要精準控制在 ${style.maxWords} 字以內，不要超過。
 
 【Hashtag 規則】
-1. 只輸出 ${style.hashtagCount} 個 hashtag。
+1. 只輸出最重要的 ${style.hashtagCount} 個 hashtag。
 2. 選與主題高度相關、有機會被搜尋的 tag。
 3. 全部 hashtag 放在 [HASHTAGS] 區塊，不要混入貼文內容裡。
 4. 格式：每個 hashtag 用空格分隔，例如 #關鍵字 #台灣 #生活
