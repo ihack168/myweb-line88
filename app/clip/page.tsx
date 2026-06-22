@@ -75,26 +75,14 @@ export default function ClipPage() {
       </div>
       <div style={{
         fontSize: 18,
-        marginBottom: 32,
+        marginBottom: 24,
         color: msg.startsWith("✅") ? "#4ade80" : msg.startsWith("❌") ? "#f87171" : "#facc15",
       }}>
         {msg}
       </div>
-      <pre style={{
-        background: "#1a1a1a",
-        border: "1px solid #333",
-        padding: 20,
-        borderRadius: 12,
-        textAlign: "left",
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word",
-        fontSize: 15,
-        lineHeight: 1.7,
-        color: "#e5e5e5",
-        maxWidth: 640,
-        margin: "0 auto 32px",
-      }}>{content || "（尚無內容）"}</pre>
-      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+
+      {/* 按鈕區塊固定在上面 */}
+      <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 32 }}>
         <button
           onClick={handleGenerate}
           disabled={generating}
@@ -128,6 +116,22 @@ export default function ClipPage() {
           重新複製
         </button>
       </div>
+
+      {/* 內容框在下面 */}
+      <pre style={{
+        background: "#1a1a1a",
+        border: "1px solid #333",
+        padding: 20,
+        borderRadius: 12,
+        textAlign: "left",
+        whiteSpace: "pre-wrap",
+        wordBreak: "break-word",
+        fontSize: 15,
+        lineHeight: 1.7,
+        color: "#e5e5e5",
+        maxWidth: 640,
+        margin: "0 auto",
+      }}>{content || "（尚無內容）"}</pre>
     </div>
   );
 }
