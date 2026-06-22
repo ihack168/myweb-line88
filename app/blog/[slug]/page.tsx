@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { client } from "@/lib/sanity";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { PortableText } from "@portabletext/react";
@@ -18,7 +21,7 @@ function urlFor(source: any) {
 }
 
 /**
- * 👉 抓 HTML 第一張圖片（用於 OG fallback）
+ * 👉 抓第一張圖（OG fallback）
  */
 function extractFirstImage(html?: string) {
   if (!html) return null;
@@ -26,9 +29,6 @@ function extractFirstImage(html?: string) {
   return match?.[1] || null;
 }
 
-/**
- * 👉 你的 HTML 優化
- */
 function optimizeSanityImages(html?: string) {
   if (!html) return "";
 
@@ -36,14 +36,80 @@ function optimizeSanityImages(html?: string) {
     /(https:\/\/cdn\.sanity\.io\/images\/[^"' )<>]+)/g,
     (url) => {
       if (url.includes("auto=format")) return url;
-      if (url.includes("?")) return url + "&auto=format";
-      return url + "?auto=format";
+      return url + (url.includes("?") ? "&" : "?") + "auto=format";
     }
   );
 }
 
 /**
- * PortableText image renderer
+ * 🔥 Share Bar（已整合 FB / LINE / COPY + UTM）
+ */
+function ShareBar() {
+  const [url, setUrl] = useState("");
+
+  useEffect(() => {
+    const current = window.location.href;
+    const utmUrl =
+      current +
+      (current.includes("?") ? "&" : "?") +
+      "utm_source=share&utm_medium=social";
+
+    setUrl(utmUrl);
+  }, []);
+
+  const encodedUrl = encodeURIComponent(url);
+
+  const shareFB = () => {
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      "_blank"
+    );
+  };
+
+  const shareLINE = () => {
+    window.open(
+      `https://social-plugins.line.me/lineit/share?url=${encodedUrl}`,
+      "_blank"
+    );
+  };
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(url);
+    alert("已複製連結");
+  };
+
+  return (
+    <div className="fixed bottom-6 left-1/2 z-[9999] -translate-x-1/2">
+      <div className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-3 text-white backdrop-blur border border-white/10 shadow-xl">
+
+        <button
+          onClick={shareFB}
+          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold"
+        >
+          FB
+        </button>
+
+        <button
+          onClick={shareLINE}
+          className="rounded-full bg-green-500 px-4 py-2 text-xs font-bold"
+        >
+          LINE
+        </button>
+
+        <button
+          onClick={copy}
+          className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold"
+        >
+          COPY
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Portable Text image
  */
 const ptComponents = {
   types: {
@@ -55,14 +121,9 @@ const ptComponents = {
           <img
             src={urlFor(value).auto("format").url()}
             alt={value.alt || "文章圖片"}
-            className="w-full rounded-2xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+            className="w-full rounded-2xl border border-white/10"
             loading="lazy"
           />
-          {value.caption && (
-            <figcaption className="mt-3 text-sm text-gray-500 italic text-center">
-              {value.caption}
-            </figcaption>
-          )}
         </figure>
       );
     },
@@ -88,10 +149,8 @@ export async function generateMetadata({
 
   if (!post) return {};
 
-  // 👉 先抓 body 第一張圖
-  const firstBodyImage = extractFirstImage(post.htmlContent);
+  const firstImage = extractFirstImage(post.htmlContent);
 
-  // 👉 OG image 邏輯
   const ogImage = post.mainImage
     ? urlFor(post.mainImage)
         .width(1200)
@@ -99,7 +158,7 @@ export async function generateMetadata({
         .fit("crop")
         .auto("format")
         .url()
-    : firstBodyImage;
+    : firstImage;
 
   return {
     title: `${post.title} | 洛克希德黑克斯`,
@@ -183,81 +242,30 @@ export default async function PostPage({
 
       <main className="container mx-auto px-6 pt-32 pb-20 max-w-4xl">
         <nav className="flex items-center gap-2 text-sm text-gray-600 mb-10 font-mono">
-          <Link href="/" className="hover:text-[#ff8800] transition-colors">
-            首頁
-          </Link>
+          <Link href="/">首頁</Link>
           <span>/</span>
-          <Link href="/blog" className="hover:text-[#ff8800] transition-colors">
-            最新文章
-          </Link>
-          <span>/</span>
-          <span className="text-gray-400 truncate max-w-xs">
-            {post.title}
-          </span>
+          <Link href="/blog">最新文章</Link>
         </nav>
 
-        {post.tags && post.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {post.tags.map((tag: string) => (
-              <span
-                key={tag}
-                className="text-[#ff8800] bg-[#ff8800]/10 border border-[#ff8800]/20 px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        <h1 className="text-4xl md:text-6xl font-black mb-6 italic leading-tight text-[#ff8800]">
+        <h1 className="text-4xl md:text-6xl font-black mb-6 text-[#ff8800]">
           {post.title}
         </h1>
 
-        <div className="flex items-center gap-4 text-gray-400 mb-12 text-sm border-b border-white/10 pb-8">
-          <span className="text-white/20">|</span>
-          <span>{publishedDate}</span>
-        </div>
-
         {post.mainImage && (
-          <div className="relative w-full mb-16 rounded-3xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(255,136,0,0.1)]">
-            <img
-              src={urlFor(post.mainImage).auto("format").url()}
-              alt={post.title}
-              className="w-full object-cover"
-            />
-          </div>
+          <img
+            src={urlFor(post.mainImage).auto("format").url()}
+            className="w-full mb-10 rounded-2xl"
+          />
         )}
 
         <article
-          className="prose prose-invert prose-orange max-w-none prose-lg md:prose-xl"
-        >
-          {post.htmlContent ? (
-            <div
-              dangerouslySetInnerHTML={{ __html: optimizedHtml }}
-            />
-          ) : (
-            post.body && (
-              <PortableText value={post.body} components={ptComponents} />
-            )
-          )}
-        </article>
-
-        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-[#ff8800] px-6 py-3 rounded-xl transition-all text-sm font-black border border-white/10"
-          >
-            ← 返回文章列表
-          </Link>
-
-          <Link
-            href="/#contact"
-            className="inline-flex items-center gap-2 bg-[#ff8800] hover:bg-[#ff8800]/80 text-black px-6 py-3 rounded-xl transition-colors text-sm font-black shadow-[0_0_20px_rgba(255,136,0,0.3)]"
-          >
-            立即聯絡我們 →
-          </Link>
-        </div>
+          className="prose prose-invert max-w-none"
+          dangerouslySetInnerHTML={{ __html: optimizedHtml }}
+        />
       </main>
+
+      {/* 🔥 SHARE BAR */}
+      <ShareBar />
 
       <Footer />
     </div>
@@ -265,10 +273,9 @@ export default async function PostPage({
 }
 
 export async function generateStaticParams() {
-  const query = `*[_type == "post"]{ "slug": slug.current }`;
-  const posts = await client.fetch(query);
+  const posts = await client.fetch(
+    `*[_type == "post"]{ "slug": slug.current }`
+  );
 
-  if (!posts) return [];
-
-  return posts.map((post: any) => ({ slug: post.slug }));
+  return posts?.map((p: any) => ({ slug: p.slug })) || [];
 }
