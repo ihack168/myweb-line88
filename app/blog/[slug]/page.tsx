@@ -1,11 +1,9 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import { client } from "@/lib/sanity";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { PortableText } from "@portabletext/react";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { ShareBar } from "@/components/share-bar";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -21,7 +19,7 @@ function urlFor(source: any) {
 }
 
 /**
- * 👉 抓第一張圖（OG fallback）
+ * 👉 抓 HTML 第一張圖（OG fallback）
  */
 function extractFirstImage(html?: string) {
   if (!html) return null;
@@ -29,6 +27,9 @@ function extractFirstImage(html?: string) {
   return match?.[1] || null;
 }
 
+/**
+ * 👉 optimize images
+ */
 function optimizeSanityImages(html?: string) {
   if (!html) return "";
 
@@ -42,74 +43,7 @@ function optimizeSanityImages(html?: string) {
 }
 
 /**
- * 🔥 Share Bar（已整合 FB / LINE / COPY + UTM）
- */
-function ShareBar() {
-  const [url, setUrl] = useState("");
-
-  useEffect(() => {
-    const current = window.location.href;
-    const utmUrl =
-      current +
-      (current.includes("?") ? "&" : "?") +
-      "utm_source=share&utm_medium=social";
-
-    setUrl(utmUrl);
-  }, []);
-
-  const encodedUrl = encodeURIComponent(url);
-
-  const shareFB = () => {
-    window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-      "_blank"
-    );
-  };
-
-  const shareLINE = () => {
-    window.open(
-      `https://social-plugins.line.me/lineit/share?url=${encodedUrl}`,
-      "_blank"
-    );
-  };
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(url);
-    alert("已複製連結");
-  };
-
-  return (
-    <div className="fixed bottom-6 left-1/2 z-[9999] -translate-x-1/2">
-      <div className="flex items-center gap-2 rounded-full bg-black/80 px-4 py-3 text-white backdrop-blur border border-white/10 shadow-xl">
-
-        <button
-          onClick={shareFB}
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold"
-        >
-          FB
-        </button>
-
-        <button
-          onClick={shareLINE}
-          className="rounded-full bg-green-500 px-4 py-2 text-xs font-bold"
-        >
-          LINE
-        </button>
-
-        <button
-          onClick={copy}
-          className="rounded-full bg-white/10 px-4 py-2 text-xs font-bold"
-        >
-          COPY
-        </button>
-
-      </div>
-    </div>
-  );
-}
-
-/**
- * Portable Text image
+ * PortableText image renderer
  */
 const ptComponents = {
   types: {
@@ -251,6 +185,10 @@ export default async function PostPage({
           {post.title}
         </h1>
 
+        <div className="text-gray-400 mb-10 text-sm">
+          {publishedDate}
+        </div>
+
         {post.mainImage && (
           <img
             src={urlFor(post.mainImage).auto("format").url()}
@@ -264,7 +202,7 @@ export default async function PostPage({
         />
       </main>
 
-      {/* 🔥 SHARE BAR */}
+      {/* 🔥 SHARE BAR（你已做好的） */}
       <ShareBar />
 
       <Footer />
