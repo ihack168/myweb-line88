@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react"
 import { Navbar } from "@/components/navbar"
 import { HeroSection } from "@/components/hero-section"
 import { ServicesSection } from "@/components/services-section"
@@ -10,16 +9,6 @@ import { Footer } from "@/components/footer"
 
 export default function Home() {
 
-  useEffect(() => {
-    const target = sessionStorage.getItem("scrollTo")
-    if (target) {
-      sessionStorage.removeItem("scrollTo")
-      setTimeout(() => {
-        const el = document.getElementById(target)
-        if (el) el.scrollIntoView({ behavior: "smooth" })
-      }, 500)
-    }
-  }, [])
 
   const jsonLd = {
     "@context": "https://schema.org",
