@@ -43,8 +43,8 @@ export default function ClipPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        setContent(data.fullPost);
-        await navigator.clipboard.writeText(data.fullPost);
+        setContent(data.post);
+        await navigator.clipboard.writeText(data.post);
         setMsg("✅ 已產生並複製！切回去貼上");
       } else {
         setMsg("❌ 產生失敗：" + data.error);

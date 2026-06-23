@@ -277,7 +277,7 @@ emoji：${style.emojiDensity}
       (parsed.hashtags ? `\n\n${parsed.hashtags}` : "");
 
     // ✔ 存入 Redis
-    await redis.set("latest_post", fullPost);
+    await redis.set("latest_post", parsed.post);
 
     return NextResponse.json({
       ok: true,
