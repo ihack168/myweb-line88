@@ -1,3 +1,10 @@
+export async function GET() {
+  return NextResponse.json({
+    ok: true,
+    message: "api works"
+  });
+}
+
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
