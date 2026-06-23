@@ -60,7 +60,7 @@ if (!blogId || !title || !content || !account) {
     const accessToken = await getAccessToken(refreshToken);
 
     const res = await fetch(
-      `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts/`,
+      `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts`,
       {
         method: "POST",
         headers: {
@@ -76,7 +76,25 @@ if (!blogId || !title || !content || !account) {
       }
     );
 
-    const data = await res.json();
+    const text = await res.text();
+
+console.log("Blogger Response:");
+console.log(text);
+
+let data;
+
+try {
+  data = JSON.parse(text);
+} catch {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "Google 回傳非 JSON",
+      response: text.substring(0, 1000)
+    },
+    { status: 500 }
+  );
+}
 
     if (!res.ok) {
       return NextResponse.json({ ok: false, error: data }, { status: 500 });
