@@ -26,11 +26,28 @@ async function getAccessToken(refreshToken: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { blogId, title, content, labels, account } = await req.json();
+const body = await req.json();
 
-    if (!blogId || !title || !content || !account) {
-      return NextResponse.json({ ok: false, error: "缺少參數" }, { status: 400 });
-    }
+console.log("收到資料:", body);
+
+const { blogId, title, content, labels, account } = body;
+
+if (!blogId || !title || !content || !account) {
+  return NextResponse.json(
+    {
+      ok: false,
+      error: "缺少參數",
+      received: body,
+      check: {
+        blogId: !!blogId,
+        title: !!title,
+        content: !!content,
+        account: !!account,
+      }
+    },
+    { status: 400 }
+  );
+}
 
     const refreshToken = process.env[`GOOGLE_REFRESH_TOKEN_${account}`];
     if (!refreshToken) {
