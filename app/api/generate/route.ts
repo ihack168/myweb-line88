@@ -227,8 +227,12 @@ export async function POST(req: Request) {
       await req.json();
 
     const finalKeyword = keyword || prompt || "";
-    const finalOfficialUrl = String(officialUrl || "").trim();
-    console.log("officialUrl原始值:", finalOfficialUrl); 
+let finalOfficialUrl = String(officialUrl || "").trim();
+try {
+  finalOfficialUrl = decodeURIComponent(finalOfficialUrl);
+} catch {
+  // 保留原樣
+}
 
     if (!finalKeyword) {
       return NextResponse.json(
