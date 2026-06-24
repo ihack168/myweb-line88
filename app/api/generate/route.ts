@@ -228,6 +228,7 @@ export async function POST(req: Request) {
 
     const finalKeyword = keyword || prompt || "";
     const finalOfficialUrl = String(officialUrl || "").trim();
+    console.log("officialUrl原始值:", finalOfficialUrl); 
 
     if (!finalKeyword) {
       return NextResponse.json(
