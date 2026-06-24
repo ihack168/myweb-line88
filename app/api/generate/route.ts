@@ -392,9 +392,18 @@ FAQ數量：約 ${style.faqCount} 個
     const title = parsed.title;
     let html = parsed.html;
 
-    html = removeAllLinks(html);
+  html = removeAllLinks(html);
 
-    if (finalOfficialUrl) {
+// decode href 裡的中文編碼，讓按鍵精靈不用自己處理
+html = html.replace(/href="([^"]+)"/g, (match, url) => {
+  try {
+    return `href="${decodeURIComponent(url)}"`;
+  } catch {
+    return match;
+  }
+});
+
+if (finalOfficialUrl) {
       const safeUrl = escapeHtmlAttr(finalOfficialUrl);
       const safeLinkText = escapeHtmlAttr(style.linkText);
 
