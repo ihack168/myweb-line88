@@ -223,15 +223,24 @@ function removeAllLinks(html: string) {
 
 export async function POST(req: Request) {
   try {
-    const { prompt, keyword, sourceText, imageUrl, officialUrl } =
-      await req.json();
+const {
+  prompt,
+  keyword,
+  sourceText,
+  imageUrl,
+  officialUrl,
+  gsOfficialUrl
+} = await req.json();
+const finalKeyword = keyword || prompt || "";
 
-    const finalKeyword = keyword || prompt || "";
-let finalOfficialUrl = String(officialUrl || "").trim();
+let finalOfficialUrl = String(gsOfficialUrl || officialUrl || "").trim();
+
+let finalOfficialUrlDecode = "";
+
 try {
-  finalOfficialUrl = decodeURIComponent(finalOfficialUrl);
+  finalOfficialUrlDecode = decodeURIComponent(finalOfficialUrl);
 } catch {
-  // 保留原樣
+  finalOfficialUrlDecode = finalOfficialUrl;
 }
 
     if (!finalKeyword) {
@@ -437,6 +446,8 @@ if (finalOfficialUrl) {
     }
 
     return NextResponse.json({
+      gsOfficialUrl: finalOfficialUrl,
+gsOfficialUrlDecode: finalOfficialUrlDecode,
       ok: true,
 
       title,
