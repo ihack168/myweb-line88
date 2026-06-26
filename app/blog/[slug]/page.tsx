@@ -1,5 +1,5 @@
 import { client } from "@/lib/sanity";
-import imageUrlBuilder from "@sanity/image-url";
+import { createImageUrlBuilder } from "@sanity/image-url";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { ShareBar } from "@/components/share-bar";
@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
-const builder = imageUrlBuilder(client);
+const builder = createImageUrlBuilder(client);
 
 function urlFor(source: any) {
   if (!source) return null;
@@ -69,7 +69,9 @@ function beautifyHtml(html: string): string {
 
 /** Next.js App Router 正確型別 */
 type PageProps = {
-  params: { slug: string };
+  params: Promise<{
+    slug: string;
+  }>;
 };
 
 /* ================= SEO ================= */
@@ -77,7 +79,7 @@ type PageProps = {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
@@ -122,7 +124,7 @@ export async function generateMetadata({
 /* ================= PAGE ================= */
 
 export default async function PostPage({ params }: PageProps) {
-  const { slug } = params;
+  const { slug } = await params;
 
   const post = await client.fetch(
     `*[_type == "post" && slug.current == $slug][0]{
