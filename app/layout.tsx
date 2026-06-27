@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import { Noto_Sans_TC, Geist_Mono } from 'next/font/google'
-import Script from 'next/script'
 import './globals.css'
 
-import { Navbar } from '@/components/navbar' // ✅ 只加這行
+import { Navbar } from '@/components/navbar'
+import { Analytics } from '@/components/analytics'
 
 const notoSansTC = Noto_Sans_TC({
   subsets: ['latin'],
@@ -69,41 +69,8 @@ export default function RootLayout({
       className={`${notoSansTC.variable} ${geistMono.variable}`}
     >
       <body className="font-sans antialiased bg-[#0a0a0a] text-white">
-
-        {/* ✅ Navbar 加在這裡（全站共用） */}
         <Navbar />
-
-        {/* Google Analytics */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-2X29DPN458"
-          strategy="afterInteractive"
-        />
-
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-2X29DPN458', {
-              page_path: window.location.pathname,
-            });
-          `}
-        </Script>
-
-        {/* Umami Analytics */}
-        <Script
-          src="https://cloud.umami.is/script.js"
-          data-website-id="febf1b62-e4ea-449e-af9b-dd91619e1116"
-          strategy="afterInteractive"
-        />
-
-        {/* Cloudflare Web Analytics */}
-        <Script
-          src="https://static.cloudflareinsights.com/beacon.min.js"
-          data-cf-beacon='{"token":"9fec8e6d90b447db9c6726ce57ddbbad"}'
-          strategy="afterInteractive"
-        />
-
+        <Analytics />
         {children}
       </body>
     </html>
