@@ -299,7 +299,10 @@ FAQ數量：約 ${style.faqCount} 個
 1. 文章主要目標是讓讀者看完後，對官網連結產生興趣，願意點擊延伸閱讀。
 2. 開頭要先抓住讀者需求或痛點，不要一開始就像廣告。
 3. 內文要自然鋪陳「為什麼需要看更完整資訊」，但不要硬推銷。
-4. 結尾前要留下延伸閱讀的理由，例如：想看完整流程、細節、案例、注意事項，可以到官網看完整介紹。
+4. 最後一段請自然留下閱讀動機，不要直接結束文章。
+例如：
+「如果想了解完整內容、更多案例、完整流程或最新資訊，可以繼續閱讀官方整理。」
+但不要自行加入網址，也不要輸出 <a> 標籤。
 5. 文章要像部落客、消費者、一般使用者在分享。
 6. 不要寫得太像官網文、新聞稿、百科文。
 7. 內容不用太長，簡單好讀即可。
@@ -418,11 +421,11 @@ if (finalOfficialUrl) {
 const safeLinkText = escapeHtmlAttr(sourceTitle || title);
 
 const linkHtml = `
-<p>
-想了解更完整的內容與最新資訊，可以閱讀下面這篇文章：
-</p>
+<hr>
 
-<p class="read-more-link">
+<p><strong>📖 延伸閱讀</strong></p>
+
+<p>
 <a href="${safeUrl}" target="_blank" rel="nofollow noopener">
 ${safeLinkText}
 </a>
@@ -450,19 +453,20 @@ ${safeLinkText}
       );
     }
 
-    return NextResponse.json({
-      gsOfficialUrl: finalOfficialUrl,
-gsOfficialUrlDecode: finalOfficialUrlDecode,
-      ok: true,
+return NextResponse.json({
+  gsOfficialUrl: finalOfficialUrl,
+  gsOfficialUrlDecode: finalOfficialUrlDecode,
+  sourceTitle: sourceTitle || "",
+  ok: true,
 
-      title,
-      html,
+  title,
+  html,
 
-      usedKeyIndex: lastUsedKeyIndex,
+  usedKeyIndex: lastUsedKeyIndex,
 
-      titleBase64: toBase64Utf8(title),
-      htmlBase64: toBase64Utf8(html),
-    });
+  titleBase64: toBase64Utf8(title),
+  htmlBase64: toBase64Utf8(html),
+});
   } catch (error) {
     return NextResponse.json(
       {
