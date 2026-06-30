@@ -415,9 +415,18 @@ html = html.replace(/href="([^"]+)"/g, (match, url) => {
 
 if (finalOfficialUrl) {
       const safeUrl = escapeHtmlAttr(finalOfficialUrl);
-      const safeLinkText = escapeHtmlAttr(style.linkText);
+const safeLinkText = escapeHtmlAttr(sourceTitle || title);
 
-      const linkHtml = `<p><a href="${safeUrl}" target="_blank" rel="nofollow noopener">${safeLinkText}</a></p>`;
+const linkHtml = `
+<p>
+想了解更完整的內容與最新資訊，可以閱讀下面這篇文章：
+</p>
+
+<p class="read-more-link">
+<a href="${safeUrl}" target="_blank" rel="nofollow noopener">
+${safeLinkText}
+</a>
+</p>`;
 
       if (/<\/div>\s*$/.test(html)) {
         html = html.replace(/<\/div>\s*$/, linkHtml + "\n</div>");
