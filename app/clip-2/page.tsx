@@ -11,7 +11,7 @@ export default function ClipPage() {
   }, []);
 
   const fetchAndCopy = () => {
-    fetch("/api/clip")
+    fetch("/api/clip-2")
       .then((r) => r.json())
       .then((data) => {
         const text = data.content || "";
