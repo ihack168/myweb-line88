@@ -428,7 +428,7 @@ const linkHtml = `
 <p><strong>延伸閱讀</strong></p>
 
 <p>
-<a href="${safeUrl}" target="_blank" rel="nofollow noopener">
+<a href="${safeUrl}" target="_blank" rel="noopener">
 ${safeLinkText}
 </a>
 </p>`;
@@ -439,7 +439,7 @@ ${safeLinkText}
         html += "\n" + linkHtml;
       }
     }
-    
+
     await redis.set("latest_generate_post", html);
     if (hasBadText(title) || hasBadText(html)) {
       return NextResponse.json(
