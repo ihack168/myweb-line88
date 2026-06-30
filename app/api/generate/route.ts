@@ -423,7 +423,7 @@ const safeLinkText = escapeHtmlAttr(sourceTitle || title);
 const linkHtml = `
 <hr>
 
-<p><strong>📖 延伸閱讀</strong></p>
+<p><strong>延伸閱讀</strong></p>
 
 <p>
 <a href="${safeUrl}" target="_blank" rel="nofollow noopener">
