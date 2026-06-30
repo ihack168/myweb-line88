@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { Converter } from "opencc-js";
+import { Redis } from "@upstash/redis";
 
 export const dynamic = "force-dynamic";
+const redis = Redis.fromEnv();
 
 // 簡體 -> 台灣繁體（含詞彙轉換，例如 网络 -> 網路、信息 -> 訊息）
 // 模組層級建立一次即可重複使用
@@ -437,7 +439,8 @@ ${safeLinkText}
         html += "\n" + linkHtml;
       }
     }
-
+    
+    await redis.set("latest_generate_post", html);
     if (hasBadText(title) || hasBadText(html)) {
       return NextResponse.json(
         {
