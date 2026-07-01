@@ -12,7 +12,9 @@ export const dynamic = "force-dynamic";
 async function getAccessToken(refreshToken: string) {
   const res = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
     body: new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID!,
       client_secret: process.env.GOOGLE_CLIENT_SECRET!,
@@ -20,8 +22,20 @@ async function getAccessToken(refreshToken: string) {
       grant_type: "refresh_token",
     }).toString(),
   });
+
   const data = await res.json();
-  return data.access_token as string;
+
+  console.log("OAuth 回傳：", data);
+
+  if (!res.ok) {
+    throw new Error(JSON.stringify(data));
+  }
+
+  if (!data.access_token) {
+    throw new Error("沒有取得 access_token：" + JSON.stringify(data));
+  }
+
+  return data.access_token;
 }
 
 export async function POST(req: NextRequest) {
