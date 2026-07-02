@@ -230,23 +230,23 @@ export default async function PostPage({ params }: PageProps) {
         )}
 
         {/* 內容 */}
-        <article
-          className="
-            prose prose-invert max-w-none
-            prose-headings:text-[#ff8800] prose-headings:font-black
-            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
-            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
-            prose-p:text-gray-300 prose-p:leading-relaxed
-            prose-a:text-[#ff8800] hover:prose-a:underline
-            prose-strong:text-white
-            prose-code:text-[#ff8800] prose-code:bg-white/5
-            prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10
-            prose-blockquote:border-l-[#ff8800] prose-blockquote:text-gray-400
-            prose-li:text-gray-300
-            prose-hr:border-white/10
-          "
-          dangerouslySetInnerHTML={{ __html: optimizedHtml }}
-        />
+<article className="prose prose-invert max-w-none ...">
+  <div
+    className="
+      [&_h2]:!mt-10 [&_h2]:!mb-4 [&_h2]:!text-2xl [&_h2]:!text-[#ff8800] [&_h2]:!font-black
+      [&_h3]:!mt-8 [&_h3]:!text-xl [&_h3]:!text-[#ff8800]
+      [&_p]:!text-gray-300 [&_p]:!leading-relaxed
+      [&_img]:!rounded-2xl [&_img]:!my-8 [&_img]:!block [&_img]:!mx-auto [&_img]:!max-w-full
+      [&_li]:!text-gray-300
+      [&_a]:!text-[#ff8800]
+      [&_strong]:!text-white
+      [&_table]:!w-full [&_table]:!border-collapse
+      [&_th]:!bg-orange-900/20 [&_th]:!text-[#ff8800] [&_th]:!p-4 [&_th]:!border [&_th]:!border-white/10
+      [&_td]:!p-4 [&_td]:!border [&_td]:!border-white/10 [&_td]:!text-gray-300
+    "
+    dangerouslySetInnerHTML={{ __html: optimizedHtml }}
+  />
+</article>
 
         <ShareBar />
       </main>
