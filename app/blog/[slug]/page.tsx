@@ -1,7 +1,5 @@
 import { client } from "@/lib/sanity";
 import { createImageUrlBuilder } from "@sanity/image-url";
-import { Navbar } from "@/components/navbar";
-import { Footer } from "@/components/footer";
 import { ShareBar } from "@/components/share-bar";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
@@ -36,67 +34,41 @@ function optimizeSanityImages(html: string) {
 }
 
 /**
- * 🚨 去除內容開頭重複的標題與首圖
- *
- * AI 產文流程生成的 htmlContent，常常自己就包含完整的 <h1> 標題
- * 和一張首圖，但頁面模板本身也會用 post.title / post.mainImage
- * 各渲染一次，兩者疊在一起就會造成標題跟主圖在畫面上各出現兩次，
- * 對 SEO 也不利（同一頁出現兩個 H1）。
- *
- * - hasMainImage：頁面是否已經另外渲染過首圖，是的話才把內容裡的首圖拿掉
+ * 去除內容開頭重複的標題與首圖
  */
 function stripDuplicateLeadContent(html: string, hasMainImage: boolean) {
   let result = html;
-
   if (hasMainImage) {
-    // 只拿掉「內容最開頭」那張圖（可能前面夾雜空白），避免誤刪文章中段的圖
     result = result.replace(/^\s*<img[^>]*>\s*/i, "");
   }
-
-  // 拿掉內容裡第一個出現的 <h1>，頁面已經用 post.title 渲染過標題了
   result = result.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, "");
-
   return result;
 }
 
 /**
- * 🚑 防呆：AI 產文流程偶爾會漏轉 Markdown 粗體語法，
- * 導致 **文字** 直接顯示成裸露的星號而不是 <strong>。
- * 這裡在渲染前統一補一次轉換，不管 Sanity 裡的 HTML 有沒有漏轉都會生效，
- * 治標但能立即讓現有與未來文章都不再出現星號 —— 根本解法仍建議回頭
- * 修正產文 pipeline 裡 Markdown → HTML 轉換的邏輯。
+ * 修正 AI 產文漏轉的 Markdown 粗體語法
  */
 function convertLeftoverMarkdownBold(html: string) {
-  // [^*]+ 避免貪婪比對跨越多組 **...**，只吃掉單一組星號之間的內容
   return html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 }
 
 /**
- * ⚠️ 重點修正：
- * 不再包 div（dangerouslySetInnerHTML 不能破壞 DOM 結構）
- * 改成「只加 class / inline style」
+ * 美化 HTML（img / table / th / td）
  */
 function beautifyHtml(html: string): string {
   return html
-    // img
     .replace(
       /<img([^>]*)>/g,
       `<img$1 style="border-radius:1rem;max-width:100%;margin:2rem auto;display:block;box-shadow:0 4px 32px rgba(0,0,0,0.5);" />`
     )
-
-    // table（只加 style，不包 div）
     .replace(
       /<table([^>]*)>/g,
       `<table$1 style="width:100%;border-collapse:collapse;overflow-x:auto;display:block;margin:2rem 0;border-radius:0.75rem;border:1px solid rgba(255,255,255,0.1);">`
     )
-
-    // th
     .replace(
       /<th([^>]*)>/g,
       `<th$1 style="background:rgba(255,136,0,0.15);color:#ff8800;padding:0.75rem 1rem;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1);font-weight:900;">`
     )
-
-    // td
     .replace(
       /<td([^>]*)>/g,
       `<td$1 style="padding:0.75rem 1rem;border-bottom:1px solid rgba(255,255,255,0.07);vertical-align:top;">`
@@ -201,7 +173,7 @@ export default async function PostPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Navbar />
+      {/* Navbar 已在 layout.tsx 全域掛載，這裡不重複渲染 */}
 
       <main className="mx-auto max-w-4xl px-6 pb-32 pt-36">
         {/* 標題 */}
@@ -229,29 +201,33 @@ export default async function PostPage({ params }: PageProps) {
           />
         )}
 
-        {/* 內容 */}
-<article className="prose prose-invert max-w-none ...">
-  <div
-    className="
-      [&_h2]:!mt-10 [&_h2]:!mb-4 [&_h2]:!text-2xl [&_h2]:!text-[#ff8800] [&_h2]:!font-black
-      [&_h3]:!mt-8 [&_h3]:!text-xl [&_h3]:!text-[#ff8800]
-      [&_p]:!text-gray-300 [&_p]:!leading-relaxed
-      [&_img]:!rounded-2xl [&_img]:!my-8 [&_img]:!block [&_img]:!mx-auto [&_img]:!max-w-full
-      [&_li]:!text-gray-300
-      [&_a]:!text-[#ff8800]
-      [&_strong]:!text-white
-      [&_table]:!w-full [&_table]:!border-collapse
-      [&_th]:!bg-orange-900/20 [&_th]:!text-[#ff8800] [&_th]:!p-4 [&_th]:!border [&_th]:!border-white/10
-      [&_td]:!p-4 [&_td]:!border [&_td]:!border-white/10 [&_td]:!text-gray-300
-    "
-    dangerouslySetInnerHTML={{ __html: optimizedHtml }}
-  />
-</article>
+        {/* 內文 */}
+        <article className="prose prose-invert max-w-none">
+          <div
+            className="
+              [&_h2]:!text-[#ff8800] [&_h2]:!font-black [&_h2]:!text-2xl [&_h2]:!mt-10 [&_h2]:!mb-4
+              [&_h3]:!text-[#ff8800] [&_h3]:!font-black [&_h3]:!text-xl [&_h3]:!mt-8 [&_h3]:!mb-3
+              [&_p]:!text-gray-300 [&_p]:!leading-relaxed
+              [&_li]:!text-gray-300
+              [&_a]:!text-[#ff8800] [&_a:hover]:!underline
+              [&_strong]:!text-white
+              [&_code]:!text-[#ff8800] [&_code]:!bg-white/5
+              [&_pre]:!bg-white/5 [&_pre]:!border [&_pre]:!border-white/10
+              [&_blockquote]:!border-l-[#ff8800] [&_blockquote]:!text-gray-400
+              [&_hr]:!border-white/10
+              [&_img]:!rounded-2xl [&_img]:!mx-auto [&_img]:!block [&_img]:!max-w-full [&_img]:!my-8 [&_img]:!shadow-[0_4px_32px_rgba(0,0,0,0.5)]
+              [&_table]:!w-full [&_table]:!border-collapse [&_table]:!my-8 [&_table]:!rounded-xl [&_table]:!overflow-hidden [&_table]:!border [&_table]:!border-white/10
+              [&_th]:!bg-orange-900/20 [&_th]:!text-[#ff8800] [&_th]:!p-4 [&_th]:!border [&_th]:!border-white/10 [&_th]:!font-black [&_th]:!text-left
+              [&_td]:!p-4 [&_td]:!border [&_td]:!border-white/10 [&_td]:!text-gray-300 [&_td]:!align-top
+            "
+            dangerouslySetInnerHTML={{ __html: optimizedHtml }}
+          />
+        </article>
 
         <ShareBar />
       </main>
 
-      <Footer />
+      {/* Footer 已在 layout.tsx 全域掛載，這裡不重複渲染 */}
     </div>
   );
 }
