@@ -70,7 +70,7 @@ export function ShareBar() {
         {/* CONTACT */}
         <button
           onClick={handleContact}
-          className="whitespace-nowrap rounded-full bg-[#ff8800] px-2 md:px-4 py-2 text-[11px] md:text-xs font-black text-black transition hover:scale-105"
+          className="whitespace-nowrap rounded-full bg-[#06C755] px-2 md:px-4 py-2 text-[11px] md:text-xs font-black text-black transition hover:scale-105"
         >
           聯絡我 →
         </button>
