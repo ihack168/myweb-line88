@@ -36,6 +36,30 @@ function optimizeSanityImages(html: string) {
 }
 
 /**
+ * 🚨 去除內容開頭重複的標題與首圖
+ *
+ * AI 產文流程生成的 htmlContent，常常自己就包含完整的 <h1> 標題
+ * 和一張首圖，但頁面模板本身也會用 post.title / post.mainImage
+ * 各渲染一次，兩者疊在一起就會造成標題跟主圖在畫面上各出現兩次，
+ * 對 SEO 也不利（同一頁出現兩個 H1）。
+ *
+ * - hasMainImage：頁面是否已經另外渲染過首圖，是的話才把內容裡的首圖拿掉
+ */
+function stripDuplicateLeadContent(html: string, hasMainImage: boolean) {
+  let result = html;
+
+  if (hasMainImage) {
+    // 只拿掉「內容最開頭」那張圖（可能前面夾雜空白），避免誤刪文章中段的圖
+    result = result.replace(/^\s*<img[^>]*>\s*/i, "");
+  }
+
+  // 拿掉內容裡第一個出現的 <h1>，頁面已經用 post.title 渲染過標題了
+  result = result.replace(/<h1[^>]*>[\s\S]*?<\/h1>/i, "");
+
+  return result;
+}
+
+/**
  * ⚠️ 重點修正：
  * 不再包 div（dangerouslySetInnerHTML 不能破壞 DOM 結構）
  * 改成「只加 class / inline style」
@@ -143,7 +167,8 @@ export default async function PostPage({ params }: PageProps) {
       ? optimizeSanityImages(post.htmlContent)
       : "";
 
-  const optimizedHtml = beautifyHtml(rawHtml);
+  const dedupedHtml = stripDuplicateLeadContent(rawHtml, Boolean(post.mainImage));
+  const optimizedHtml = beautifyHtml(dedupedHtml);
 
   const jsonLd = {
     "@context": "https://schema.org",
