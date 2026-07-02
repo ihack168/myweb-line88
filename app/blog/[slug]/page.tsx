@@ -60,6 +60,18 @@ function stripDuplicateLeadContent(html: string, hasMainImage: boolean) {
 }
 
 /**
+ * 🚑 防呆：AI 產文流程偶爾會漏轉 Markdown 粗體語法，
+ * 導致 **文字** 直接顯示成裸露的星號而不是 <strong>。
+ * 這裡在渲染前統一補一次轉換，不管 Sanity 裡的 HTML 有沒有漏轉都會生效，
+ * 治標但能立即讓現有與未來文章都不再出現星號 —— 根本解法仍建議回頭
+ * 修正產文 pipeline 裡 Markdown → HTML 轉換的邏輯。
+ */
+function convertLeftoverMarkdownBold(html: string) {
+  // [^*]+ 避免貪婪比對跨越多組 **...**，只吃掉單一組星號之間的內容
+  return html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
+
+/**
  * ⚠️ 重點修正：
  * 不再包 div（dangerouslySetInnerHTML 不能破壞 DOM 結構）
  * 改成「只加 class / inline style」
@@ -168,7 +180,8 @@ export default async function PostPage({ params }: PageProps) {
       : "";
 
   const dedupedHtml = stripDuplicateLeadContent(rawHtml, Boolean(post.mainImage));
-  const optimizedHtml = beautifyHtml(dedupedHtml);
+  const markdownFixedHtml = convertLeftoverMarkdownBold(dedupedHtml);
+  const optimizedHtml = beautifyHtml(markdownFixedHtml);
 
   const jsonLd = {
     "@context": "https://schema.org",
