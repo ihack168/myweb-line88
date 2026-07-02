@@ -68,12 +68,12 @@ export function ShareBar() {
         <div className="mx-1 h-5 w-px bg-white/20" />
 
         {/* CONTACT */}
-        <button
-          onClick={handleContact}
-          className="whitespace-nowrap rounded-full bg-[#06C755] px-2 md:px-4 py-2 text-[11px] md:text-xs font-black text-black transition hover:scale-105"
-        >
-          聯絡我 →
-        </button>
+<button
+  onClick={handleContact}
+  className="whitespace-nowrap rounded-full bg-[#06C755] px-2 py-2 text-[11px] font-black text-white transition hover:scale-105 hover:bg-[#00E676] md:px-4 md:text-xs"
+>
+  聯絡我 →
+</button>
 
       </div>
     </div>
