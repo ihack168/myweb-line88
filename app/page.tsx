@@ -79,7 +79,7 @@ export default function Home() {
         <LatestPostsSection />
 
         {/* 聯絡我們 */}
-        <contactsection />
+        <ContactSection />
 
         {/* AEO 隱藏語意內容 */}
         <section className="sr-only">
