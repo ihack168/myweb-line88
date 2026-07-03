@@ -78,6 +78,9 @@ export default function Home() {
         {/* 最新文章 */}
         <LatestPostsSection />
 
+        {/* 聯絡我們 */}
+        <contactsection />
+
         {/* AEO 隱藏語意內容 */}
         <section className="sr-only">
           <h2>全台專業網路投票買票灌票與社群流量增長服務</h2>
