@@ -19,9 +19,9 @@ export default function ContactPage() {
               className="object-cover object-[72%_center]"
             />
 
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/20 to-black/10" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/25 to-transparent" />
-            <div className="absolute inset-0 shadow-[inset_0_0_110px_rgba(0,0,0,0.9)]" />
+<div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/40 via-black/5 to-transparent" />
+<div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
+<div className="absolute inset-0 shadow-[inset_0_0_45px_rgba(0,0,0,0.35)]" />
 
             <div className="absolute left-6 bottom-6 md:left-10 md:bottom-10">
               <h1 className="text-4xl md:text-6xl font-black text-[#ff8800] drop-shadow-2xl">
