@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/navbar";
 import { HeroSection } from "@/components/hero-section";
 import { ServicesSection } from "@/components/services-section";
 import { LatestPostsSection } from "@/components/latest-posts-section";
@@ -60,45 +59,30 @@ export default function Home() {
     <div className="min-h-screen overflow-hidden bg-[#0a0a0a] text-white selection:bg-[#ff8800]/30">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd),
-        }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="fixed inset-0 -z-10 bg-[#0a0a0a]" />
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(255,136,0,0.16),transparent_32%),radial-gradient(circle_at_70%_30%,rgba(255,255,255,0.06),transparent_28%),linear-gradient(to_bottom,#0a0a0a,#080808_45%,#0a0a0a)]" />
-
-      <Navbar />
-
-      <main className="relative">
-        <div className="mx-auto flex max-w-7xl flex-col px-4 pt-20 md:px-6 md:pt-28">
+      <main className="relative bg-[radial-gradient(circle_at_top,rgba(255,136,0,0.14),transparent_26%),linear-gradient(to_bottom,#0a0a0a,#080808_45%,#0a0a0a)]">
+        <section className="px-4 pt-24 pb-8 md:px-6 md:pt-28 md:pb-10">
           <HeroSection />
-        </div>
+        </section>
 
-        <div className="space-y-10 md:space-y-14">
-          <ServicesSection />
-
-          <LatestPostsSection />
-
-          <ContactSection />
-        </div>
+        <ServicesSection />
+        <LatestPostsSection />
+        <ContactSection />
 
         <section className="sr-only">
           <h2>全台專業網路投票買票灌票與社群流量增長服務</h2>
-
           <p>
             洛克希德黑克斯提供 LINE 投票買票、Facebook 投票灌票、
             Google 表單投票支援，以及各類網站票選活動數據優化服務。
           </p>
-
           <p>
             我們同時提供 Facebook、Instagram、Threads、
             Line 官方帳號等社群平台的大量按讚、追蹤、留言與社團人數增長服務。
           </p>
-
           <p>
-            此外也提供 AEO、SEO AI 關鍵字優化、
-            Line 官方帳號 AI 客服串接、
+            此外也提供 AEO、SEO AI 關鍵字優化、Line 官方帳號 AI 客服串接、
             ChatGPT Gemini 自動回覆系統與企業 AI 知識庫建置服務。
           </p>
         </section>

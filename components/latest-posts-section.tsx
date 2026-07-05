@@ -1,42 +1,40 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { client } from "@/lib/sanity"
-import { Sparkles } from "lucide-react"
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { client } from "@/lib/sanity";
+import { Sparkles } from "lucide-react";
 
 interface Post {
-  id: string
-  title: string
-  slug: string
-  description: string
-  thumbnail: string
-  videoId?: string
-  tags: string[]
-  publishedAt: string
-  htmlContent?: string
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  thumbnail: string;
+  videoId?: string;
+  tags: string[];
+  publishedAt: string;
+  htmlContent?: string;
 }
 
-const ORANGE = "#ff7a00"
-
 function optimizeSanityImageUrl(url?: string) {
-  if (!url) return ""
+  if (!url) return "";
 
-  if (!url.includes("cdn.sanity.io/images")) return url
+  if (!url.includes("cdn.sanity.io/images")) return url;
 
-  if (url.includes("auto=format")) return url
+  if (url.includes("auto=format")) return url;
 
-  return `${url}${url.includes("?") ? "&" : "?"}auto=format`
+  return `${url}${url.includes("?") ? "&" : "?"}auto=format`;
 }
 
 export function LatestPostsSection() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loadingPosts, setLoadingPosts] = useState(true)
-  const [activeVideo, setActiveVideo] = useState<string | null>(null)
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchLatestPosts() {
-      setLoadingPosts(true)
+      setLoadingPosts(true);
 
       try {
         const result = await client.fetch(
@@ -54,40 +52,40 @@ export function LatestPostsSection() {
           }`,
           {},
           { cache: "no-store" }
-        )
+        );
 
         const processedPosts = result.map((post: any) => {
-          let extractedImg = ""
-          let extractedDesc = post.description || ""
+          let extractedImg = "";
+          let extractedDesc = post.description || "";
 
           if (post.htmlContent) {
             const imgMatch = post.htmlContent.match(
               /<img[^>]+src="([^">]+)"/
-            )
+            );
 
             if (imgMatch && imgMatch[1]) {
-              extractedImg = optimizeSanityImageUrl(imgMatch[1])
+              extractedImg = optimizeSanityImageUrl(imgMatch[1]);
             }
 
             if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
               const pureText = post.htmlContent
                 .replace(/<[^>]*>?/gm, "")
                 .replace(/\s+/g, " ")
-                .trim()
+                .trim();
 
               extractedDesc =
-                pureText.substring(0, 100) +
-                (pureText.length > 100 ? "..." : "")
+                pureText.substring(0, 90) +
+                (pureText.length > 90 ? "..." : "");
             }
           }
 
           if (!extractedDesc) {
-            extractedDesc = "點擊閱讀詳情..."
+            extractedDesc = "點擊閱讀詳情...";
           }
 
           const youtubeThumb = post.videoId
             ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg`
-            : ""
+            : "";
 
           return {
             id: post.id,
@@ -104,62 +102,59 @@ export function LatestPostsSection() {
             tags: Array.isArray(post.tags) ? post.tags : [],
             publishedAt: post.publishedAt,
             htmlContent: post.htmlContent,
-          }
-        })
+          };
+        });
 
-        setPosts(processedPosts)
+        setPosts(processedPosts);
       } catch (err) {
-        console.error("首頁最新文章抓取失敗:", err)
+        console.error("首頁最新文章抓取失敗:", err);
       } finally {
-        setLoadingPosts(false)
+        setLoadingPosts(false);
       }
     }
 
-    fetchLatestPosts()
-  }, [])
+    fetchLatestPosts();
+  }, []);
 
   return (
-    <section className="relative overflow-hidden bg-[#0a0a0a] px-6 py-16">
-      <div className="absolute left-1/2 top-0 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-[#ff7a00]/15 blur-[120px]" />
-      <div className="absolute -right-24 bottom-10 h-[260px] w-[260px] rounded-full bg-[#ff7a00]/10 blur-[100px]" />
-
-      <div className="relative mx-auto max-w-6xl">
-        <div className="mb-12 flex flex-col gap-6 text-center md:flex-row md:items-end md:justify-between md:text-left">
+    <section className="relative px-5 py-10 md:py-14">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-7 flex flex-col gap-4 text-center md:mb-9 md:flex-row md:items-end md:justify-between md:text-left">
           <div>
-            <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-[#ff7a00]/40 bg-white/5 px-4 py-2 text-[11px] font-bold tracking-[0.2em] text-[#ff7a00] shadow-sm backdrop-blur md:mx-0">
+            <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800] md:text-sm">
               <Sparkles size={14} />
               LATEST ARTICLES
-            </div>
+            </p>
 
-            <h2 className="text-3xl font-black tracking-tight text-white md:text-5xl">
-              最新文章
+            <h2 className="text-3xl font-black italic text-white md:text-4xl">
+              <span className="text-[#ff8800]">|</span> 最新文章
             </h2>
 
-            <p className="mt-5 max-w-2xl text-base leading-8 text-white/60">
-              分享網路行銷、SEO、AEO、AI 工具、社群經營與網站技術相關文章。
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 md:text-base">
+              分享網路行銷、SEO、AEO、AI 工具、社群經營與網站技術文章。
             </p>
           </div>
 
           <Link
             href="/blog"
-            className="inline-flex justify-center rounded-full border border-[#ff7a00]/40 bg-white/5 px-7 py-3 text-sm font-bold text-[#ff7a00] backdrop-blur transition-all duration-300 hover:-translate-y-0.5 hover:border-[#ff7a00]/70 hover:bg-[#ff7a00] hover:text-black"
+            className="inline-flex justify-center rounded-full border border-[#ff8800]/40 bg-white/5 px-5 py-2.5 text-sm font-bold text-[#ff8800] backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-[#ff8800]/70 hover:bg-[#ff8800] hover:text-black"
           >
             查看全部文章 →
           </Link>
         </div>
 
         {loadingPosts ? (
-          <div className="flex justify-center py-16">
-            <div className="h-12 w-12 animate-spin rounded-full border-2 border-[#ff7a00]/20 border-t-[#ff7a00]" />
+          <div className="flex justify-center py-10">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#ff8800]/20 border-t-[#ff8800]" />
           </div>
         ) : posts.length > 0 ? (
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
             {posts.map((post) => (
               <article
                 key={post.id}
-                className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.03] shadow-[0_12px_40px_rgba(255,122,0,0.08)] backdrop-blur transition-all duration-500 hover:-translate-y-1.5 hover:border-[#ff7a00]/50 hover:bg-white/[0.06] hover:shadow-[0_24px_70px_rgba(255,122,0,0.16)]"
+                className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.055] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/60 hover:shadow-[0_0_34px_rgba(255,136,0,0.18)]"
               >
-                <div className="relative h-[200px] w-full overflow-hidden bg-black md:h-[220px]">
+                <div className="relative h-[160px] w-full overflow-hidden bg-black md:h-[175px]">
                   {activeVideo === post.id && post.videoId ? (
                     <iframe
                       src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`}
@@ -177,7 +172,7 @@ export function LatestPostsSection() {
                           <img
                             src={post.thumbnail}
                             alt={post.title}
-                            className="h-full w-full object-contain transition-all duration-700 group-hover:scale-105 md:object-cover"
+                            className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                             loading="lazy"
                           />
                         ) : (
@@ -187,33 +182,33 @@ export function LatestPostsSection() {
                         )}
                       </Link>
 
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-white/5" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-white/5" />
 
                       {post.videoId && (
-                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                          <div
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              setActiveVideo(post.id)
-                            }}
-                            className="pointer-events-auto flex h-12 w-16 cursor-pointer items-center justify-center rounded-2xl bg-white/90 shadow-xl backdrop-blur transition-transform duration-300 group-hover:scale-110"
-                          >
-                            <div className="ml-1 border-y-[10px] border-l-[16px] border-y-transparent border-l-[#ff7a00]" />
-                          </div>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setActiveVideo(post.id);
+                          }}
+                          className="absolute inset-0 m-auto flex h-11 w-14 items-center justify-center rounded-2xl bg-white/90 shadow-xl backdrop-blur transition duration-300 group-hover:scale-110"
+                          aria-label="播放影片"
+                        >
+                          <span className="ml-1 border-y-[9px] border-l-[15px] border-y-transparent border-l-[#ff8800]" />
+                        </button>
                       )}
                     </div>
                   )}
                 </div>
 
-                <div className="flex min-h-[270px] flex-col p-6">
-                  <div className="mb-4 flex flex-wrap gap-2">
-                    {post.tags?.slice(0, 3).map((tag) => (
+                <div className="flex min-h-[210px] flex-col p-5">
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    {post.tags?.slice(0, 2).map((tag) => (
                       <Link
                         key={tag}
                         href={`/blog?tag=${encodeURIComponent(tag)}`}
-                        className="rounded-full border border-[#ff7a00]/30 bg-[#ff7a00]/10 px-3 py-1 text-xs font-bold text-[#ff7a00] transition-all hover:bg-[#ff7a00] hover:text-black"
+                        className="rounded-full border border-[#ff8800]/25 bg-[#ff8800]/10 px-2.5 py-1 text-xs font-bold text-[#ff8800] transition hover:bg-[#ff8800] hover:text-black"
                       >
                         #{tag}
                       </Link>
@@ -221,22 +216,22 @@ export function LatestPostsSection() {
                   </div>
 
                   <Link href={`/blog/${post.slug}`}>
-                    <h3 className="line-clamp-2 text-xl font-black leading-snug text-white transition-colors group-hover:text-[#ff7a00]">
+                    <h3 className="line-clamp-2 text-lg font-black leading-snug text-white transition group-hover:text-[#ff8800]">
                       {post.title}
                     </h3>
                   </Link>
 
-                  <p className="mt-4 line-clamp-3 text-sm leading-7 text-white/60">
+                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-400">
                     {post.description}
                   </p>
 
-                  <div className="mt-auto pt-6">
+                  <div className="mt-auto pt-4">
                     <Link
                       href={`/blog/${post.slug}`}
-                      className="inline-flex items-center text-sm font-bold text-[#ff7a00]"
+                      className="inline-flex items-center text-sm font-bold text-[#ff8800]"
                     >
                       閱讀文章
-                      <span className="ml-2 transition-transform group-hover:translate-x-1">
+                      <span className="ml-2 transition group-hover:translate-x-1">
                         →
                       </span>
                     </Link>
@@ -246,17 +241,15 @@ export function LatestPostsSection() {
             ))}
           </div>
         ) : (
-          <div className="rounded-[2.5rem] border border-dashed border-[#ff7a00]/30 bg-white/[0.03] px-6 py-16 text-center shadow-[0_18px_50px_rgba(255,122,0,0.08)] backdrop-blur">
-            <p className="text-xl font-black text-white">
-              暫時沒有最新文章
-            </p>
+          <div className="rounded-3xl border border-dashed border-[#ff8800]/30 bg-white/[0.055] px-6 py-10 text-center backdrop-blur-xl">
+            <p className="text-xl font-black text-white">暫時沒有最新文章</p>
 
-            <p className="mt-3 text-sm text-white/50">
+            <p className="mt-3 text-sm text-gray-400">
               之後會陸續分享 SEO、AEO、AI 與網路行銷相關內容。
             </p>
           </div>
         )}
       </div>
     </section>
-  )
+  );
 }
