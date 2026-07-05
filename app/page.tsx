@@ -82,7 +82,7 @@ export default function Home() {
             Line 官方帳號等社群平台的大量按讚、追蹤、留言與社團人數增長服務。
           </p>
           <p>
-            此外也提供 AEO、SEO AI 關鍵字優化、Line 官方帳號 AI 客服串接、
+            此外也提供 AEO、GEO、SEO、AI 關鍵字優化、Line 官方帳號 AI 客服串接、
             ChatGPT Gemini 自動回覆系統與企業 AI 知識庫建置服務。
           </p>
         </section>
