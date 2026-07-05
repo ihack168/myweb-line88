@@ -1,5 +1,16 @@
 import React from "react";
 import Link from "next/link";
+import {
+  Vote,
+  ThumbsUp,
+  BadgeCheck,
+  TrendingUp,
+  Instagram,
+  MessageCircleMore,
+  AtSign,
+  Bot,
+  Sparkles,
+} from "lucide-react";
 
 interface ServiceItem {
   title: string;
@@ -13,51 +24,51 @@ const services: ServiceItem[] = [
     title: "Line 帳號投票服務",
     description: "Line 帳號大量投票、買票、灌票",
     link: "/content/line-vote-services",
-    icon: <span className="text-3xl">🗳️</span>,
+    icon: <Vote size={30} />,
   },
   {
     title: "Facebook 帳號投票服務",
     description: "FB 帳號大量投票、買票、灌票",
-    icon: <span className="text-3xl">👍</span>,
+    icon: <ThumbsUp size={30} />,
   },
   {
     title: "Google 帳號投票服務",
     description: "Google 帳號大量投票、買票、灌票",
-    icon: <span className="text-3xl">✅</span>,
+    icon: <BadgeCheck size={30} />,
   },
   {
     title: "Facebook 臉書灌水服務",
     description: "FB 大量按讚、粉專追蹤、社團人數、留言推文",
     link: "/content/facebook-services",
-    icon: <span className="text-3xl">📈</span>,
+    icon: <TrendingUp size={30} />,
   },
   {
     title: "Instagram IG 灌水服務",
     description: "IG 大量按愛心、追蹤、留言推文",
     link: "/content/instagram-services",
-    icon: <span className="text-3xl">📸</span>,
+    icon: <Instagram size={30} />,
   },
   {
     title: "Line@ 官方帳號灌水服務",
     description: "Line@ 官方帳號追蹤人數灌水",
-    icon: <span className="text-3xl">💬</span>,
+    icon: <MessageCircleMore size={30} />,
   },
   {
     title: "Threads@ 灌水服務",
     description: "Threads 大量按愛心、追蹤、留言推文",
     link: "/content/threads-services",
-    icon: <span className="text-3xl">🧵</span>,
+    icon: <AtSign size={30} />,
   },
   {
     title: "AI網路行銷優化",
     description: "AEO、GEO、SEO AI優化",
-    icon: <span className="text-3xl">🤖</span>,
+    icon: <Bot size={30} />,
   },
   {
     title: "Line@官方帳號AI客服串接建置",
     description: "Line@官方帳號串接 AI（Gemini、ChatGPT）",
     link: "/content/line-ai-services",
-    icon: <span className="text-3xl">✨</span>,
+    icon: <Sparkles size={30} />,
   },
 ];
 
@@ -85,7 +96,7 @@ export function ServicesSection() {
           {services.map((service) => {
             const CardContent = (
               <div
-                className={`group relative flex h-full min-h-[170px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition duration-300 ${
+                className={`group relative flex h-full min-h-[165px] flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition duration-300 ${
                   service.link
                     ? "cursor-pointer hover:-translate-y-1 hover:border-[#ff8800]/70 hover:shadow-[0_0_40px_rgba(255,136,0,0.22)]"
                     : "opacity-90"
@@ -93,7 +104,7 @@ export function ServicesSection() {
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 transition group-hover:opacity-100" />
 
-                <div className="relative mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/35 shadow-inner transition duration-300 group-hover:scale-110 group-hover:border-[#ff8800]/50 group-hover:bg-[#ff8800]/10">
+                <div className="relative mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-black/35 text-[#ff8800] shadow-inner transition duration-300 group-hover:scale-110 group-hover:border-[#ff8800]/50 group-hover:bg-[#ff8800]/10">
                   {service.icon}
                 </div>
 
@@ -117,7 +128,11 @@ export function ServicesSection() {
 
             if (service.link) {
               return (
-                <Link href={service.link} key={service.title} className="block h-full">
+                <Link
+                  href={service.link}
+                  key={service.title}
+                  className="block h-full"
+                >
                   {CardContent}
                 </Link>
               );
