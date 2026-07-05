@@ -114,11 +114,7 @@ export function ServicesSection() {
                     {service.description}
                   </p>
 
-                  {service.link && (
-                    <div className="mt-3 text-sm font-bold text-[#ff8800] opacity-80 transition group-hover:translate-x-1 group-hover:opacity-100">
-                      了解更多 →
-                    </div>
-                  )}
+
                 </div>
               </div>
             );
