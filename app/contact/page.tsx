@@ -16,7 +16,7 @@ export default function ContactPage() {
               fill
               priority
               sizes="(max-width: 768px) 100vw, 1200px"
-              className="object-cover object-center scale-105"
+              className="object-contain object-center scale-105"
             />
 
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-black/45 to-black/10" />
