@@ -65,8 +65,8 @@ const services: ServiceItem[] = [
     icon: <Bot size={28} />,
   },
   {
-    title: "Line@官方帳號AI客服串接建置",
-    description: "Line@官方帳號串接 AI（Gemini、ChatGPT）",
+    title: "Line@官方帳號AI客服串接",
+    description: "Line串接AI（Gemini、ChatGPT）",
     link: "/content/line-ai-services",
     icon: <Sparkles size={28} />,
   },
