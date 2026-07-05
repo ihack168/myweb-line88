@@ -1,93 +1,82 @@
 export function ContactSection() {
   const contacts = [
     {
-      label: "Line",
-      description: "加入 Line 與我聯絡",
+      label: "LINE 即時諮詢",
+      description: "加入 LINE 官方帳號立即對話",
       href: "https://line.me/R/ti/p/~line88.tw",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      ),
+      color: "green",
+      icon: "💬",
     },
     {
-      label: "Email",
+      label: "Email 聯絡",
       description: "ihack168@gmail.com",
       href: "mailto:ihack168@gmail.com",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect width="20" height="16" x="2" y="4" rx="2" />
-          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-        </svg>
-      ),
+      color: "blue",
+      icon: "✉️",
     },
     {
-      label: "Facebook",
-      description: "透過 Facebook 粉絲專頁聯絡",
+      label: "Facebook 粉專",
+      description: "透過 Facebook 私訊我們",
       href: "https://www.facebook.com/lockheadhex",
-      icon: (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="currentColor"
-        >
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </svg>
-      ),
+      color: "orange",
+      icon: "🔥",
     },
   ];
 
   return (
-    <section id="contact" className="px-6 py-20 scroll-mt-40 isolate">
-      <h2 className="text-3xl md:text-4xl font-black text-center text-white mb-12 italic">
-        <span className="text-[#ff8800]">|</span> 聯絡我們
-      </h2>
+    <section id="contact" className="px-5 py-16 md:py-24 scroll-mt-40 isolate">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-10 md:mb-14">
+          <p className="text-sm md:text-base font-bold tracking-[0.25em] text-[#ff8800] uppercase mb-3">
+            CONTACT
+          </p>
 
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-6 max-w-6xl mx-auto">
-        {contacts.map((contact) => (
-          <a
-            key={contact.label}
-            href={contact.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-5 w-full lg:w-auto rounded-2xl border border-white/10 bg-white/5 px-8 py-5 hover:border-[#ff8800]/50 hover:bg-[#ff8800]/5 transition-all duration-300 group"
-          >
-            <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 rounded-xl bg-[#ff8800]/10 text-[#ff8800] group-hover:scale-110 transition-transform">
-              {contact.icon}
-            </div>
+          <h2 className="text-3xl md:text-5xl font-black text-white italic">
+            <span className="text-[#ff8800]">|</span> 聯絡我們
+          </h2>
+        </div>
 
-            <div>
-              <p className="text-xl font-black text-white mb-1">
-                {contact.label}
-              </p>
-              <p className="text-sm text-gray-400 font-medium group-hover:text-gray-200 transition-colors">
-                {contact.description}
-              </p>
-            </div>
-          </a>
-        ))}
+        <div className="grid gap-4 md:gap-6 md:grid-cols-3">
+          {contacts.map((contact) => {
+            const colorClass =
+              contact.color === "green"
+                ? "text-green-400 bg-green-400/10 hover:border-green-400 hover:shadow-[0_0_40px_rgba(74,222,128,0.22)]"
+                : contact.color === "blue"
+                ? "text-blue-400 bg-blue-400/10 hover:border-blue-400 hover:shadow-[0_0_40px_rgba(96,165,250,0.22)]"
+                : "text-[#ff8800] bg-[#ff8800]/10 hover:border-[#ff8800] hover:shadow-[0_0_40px_rgba(255,136,0,0.25)]";
+
+            return (
+              <a
+                key={contact.label}
+                href={contact.href}
+                target={contact.href.startsWith("mailto:") ? undefined : "_blank"}
+                rel={
+                  contact.href.startsWith("mailto:")
+                    ? undefined
+                    : "noopener noreferrer"
+                }
+                className={`group relative overflow-hidden flex items-center gap-4 rounded-3xl border border-white/10 bg-white/5 p-5 md:p-7 backdrop-blur-xl transition duration-300 hover:-translate-y-1 ${colorClass}`}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
+
+                <div
+                  className={`relative flex h-12 w-12 md:h-14 md:w-14 shrink-0 items-center justify-center rounded-2xl text-2xl ${colorClass}`}
+                >
+                  {contact.icon}
+                </div>
+
+                <div className="relative">
+                  <p className="text-lg md:text-2xl font-black text-white mb-1">
+                    {contact.label}
+                  </p>
+                  <p className="text-sm md:text-base text-gray-400 group-hover:text-gray-200 transition">
+                    {contact.description}
+                  </p>
+                </div>
+              </a>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
