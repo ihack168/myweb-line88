@@ -114,19 +114,28 @@ export async function generateMetadata({
     ogImage = firstImage;
   }
 
-  return {
+return {
+  title: post.title,
+  description: post.description || post.title,
+  alternates: {
+    canonical: `/blog/${slug}`,
+  },
+  openGraph: {
     title: post.title,
     description: post.description || post.title,
-    openGraph: {
-      title: post.title,
-      description: post.description || post.title,
-      url: `https://www.line88.tw/blog/${slug}`,
-      siteName: "網站",
-      images: ogImage ? [{ url: ogImage }] : [],
-      locale: "zh_TW",
-      type: "article",
-    },
-  };
+    url: `https://www.line88.tw/blog/${slug}`,
+    siteName: "洛克希德黑克斯",
+    images: ogImage ? [{ url: ogImage }] : [],
+    locale: "zh_TW",
+    type: "article",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: post.title,
+    description: post.description || post.title,
+    images: ogImage ? [ogImage] : [],
+  },
+};
 }
 
 /* ================= PAGE ================= */
