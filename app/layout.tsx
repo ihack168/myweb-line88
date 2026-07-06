@@ -27,9 +27,9 @@ export const metadata: Metadata = {
 
   metadataBase: new URL('https://www.line88.tw'),
 
-  alternates: {
-    canonical: 'https://www.line88.tw',
-  },
+alternates: {
+  canonical: '/',
+},
 
   icons: {
     icon: '/images/logo.png',

@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { client } from "@/lib/sanity";
-import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import Link from "next/link";
 
@@ -214,7 +213,7 @@ function BlogPageContent() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans">
-      <Navbar />
+
 
       <main className="container mx-auto px-6 pt-32 pb-20">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
