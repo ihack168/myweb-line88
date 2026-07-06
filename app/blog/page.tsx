@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { client } from "@/lib/sanity";
 import { Navbar } from "@/components/navbar";
@@ -17,6 +17,11 @@ interface Post {
   tags: string[];
   publishedAt: string;
   htmlContent?: string;
+}
+
+interface TagItem {
+  name: string;
+  count: number;
 }
 
 function optimizeSanityImageUrl(url?: string) {
@@ -36,6 +41,7 @@ function BlogPageContent() {
   const selectedTag = searchParams.get("tag") || "全部";
 
   const [posts, setPosts] = useState<Post[]>([]);
+  const [allTags, setAllTags] = useState<TagItem[]>([]);
   const [totalPosts, setTotalPosts] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -43,9 +49,64 @@ function BlogPageContent() {
 
   const postsPerPage = 15;
 
+  // 文章快 200 篇了，首頁上方 tag 不要太多。
+  // 1 個「全部」+ 熱門前 12 個 tag，對 SEO / AEO / GEO 比較乾淨。
+  const topTagLimit = 12;
+
+  const topTags = allTags.filter((tag) => tag.name !== "全部").slice(0, topTagLimit);
+
+  const selectedTagItem =
+    selectedTag !== "全部" &&
+    !topTags.some((tag) => tag.name === selectedTag)
+      ? allTags.find((tag) => tag.name === selectedTag)
+      : null;
+
+  const visibleTags: TagItem[] = [
+    ...allTags.filter((tag) => tag.name === "全部"),
+    ...topTags,
+    ...(selectedTagItem ? [selectedTagItem] : []),
+  ];
+
   useEffect(() => {
     setPage(1);
   }, [selectedTag]);
+
+  useEffect(() => {
+    async function fetchAllTags() {
+      try {
+        const result = await client.fetch(
+          `*[_type == "post"] {
+            tags
+          }`,
+          {},
+          { cache: "no-store" }
+        );
+
+        const tagCountMap = new Map<string, number>();
+
+        result.forEach((post: { tags?: string[] }) => {
+          if (!Array.isArray(post.tags)) return;
+
+          post.tags.forEach((tag) => {
+            const cleanTag = String(tag || "").trim();
+            if (!cleanTag) return;
+
+            tagCountMap.set(cleanTag, (tagCountMap.get(cleanTag) || 0) + 1);
+          });
+        });
+
+        const sortedTags = Array.from(tagCountMap.entries())
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+        setAllTags([{ name: "全部", count: result.length }, ...sortedTags]);
+      } catch (err) {
+        console.error("Sanity 標籤抓取失敗:", err);
+      }
+    }
+
+    fetchAllTags();
+  }, []);
 
   useEffect(() => {
     async function fetchSanityPosts() {
@@ -55,19 +116,18 @@ function BlogPageContent() {
         const start = (page - 1) * postsPerPage;
         const end = start + postsPerPage;
 
-        const tagFilter =
-          selectedTag !== "全部" ? `&& "${selectedTag}" in tags` : "";
+        const tagFilter = selectedTag !== "全部" ? `&& $selectedTag in tags` : "";
 
         const count = await client.fetch(
           `count(*[_type == "post" ${tagFilter}])`,
-          {},
+          { selectedTag },
           { cache: "no-store" }
         );
 
         setTotalPosts(count);
 
         const result = await client.fetch(
-          `*[_type == "post" ${tagFilter}] | order(_createdAt desc) [$start...$end] {
+          `*[_type == "post" ${tagFilter}] | order(coalesce(publishedAt, _createdAt) desc) [$start...$end] {
             "id": _id,
             title,
             "slug": slug.current,
@@ -79,7 +139,7 @@ function BlogPageContent() {
             "tags": tags,
             "publishedAt": coalesce(publishedAt, _createdAt)
           }`,
-          { start, end },
+          { start, end, selectedTag },
           { cache: "no-store" }
         );
 
@@ -139,11 +199,6 @@ function BlogPageContent() {
     }
   }, [page, selectedTag]);
 
-  const allTags = useMemo(() => {
-    const tags = posts.flatMap((post) => post.tags || []);
-    return ["全部", ...Array.from(new Set(tags))];
-  }, [posts]);
-
   const totalPages = Math.ceil(totalPosts / postsPerPage) || 1;
 
   const handleTagClick = (tag: string) => {
@@ -180,20 +235,35 @@ function BlogPageContent() {
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-12">
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => handleTagClick(tag)}
-              className={`text-xs md:text-sm font-bold px-4 py-2 rounded-full border transition-all ${
-                selectedTag === tag
-                  ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.35)]"
-                  : "bg-white/5 text-gray-300 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
-              }`}
-            >
-              #{tag}
-            </button>
-          ))}
+        <div className="mb-12">
+          <div className="flex flex-wrap gap-3">
+            {visibleTags.map((tag) => (
+              <button
+                key={tag.name}
+                onClick={() => handleTagClick(tag.name)}
+                className={`text-xs md:text-sm font-bold px-4 py-2 rounded-full border transition-all ${
+                  selectedTag === tag.name
+                    ? "bg-[#ff8800] text-black border-[#ff8800] shadow-[0_0_20px_rgba(255,136,0,0.35)]"
+                    : "bg-white/5 text-gray-300 border-white/10 hover:border-[#ff8800]/50 hover:text-[#ff8800]"
+                }`}
+              >
+                #{tag.name}
+                <span
+                  className={`ml-1 text-[10px] ${
+                    selectedTag === tag.name ? "text-black/60" : "text-gray-500"
+                  }`}
+                >
+                  {tag.count}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {allTags.length > topTagLimit + 1 && (
+            <p className="mt-4 text-xs text-gray-600">
+              已依全站文章標籤數量排序，顯示熱門前 {topTagLimit} 個主題。
+            </p>
+          )}
         </div>
 
         {loading ? (
