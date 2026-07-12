@@ -60,7 +60,7 @@ export default function Home() {
       name: "Taiwan",
     },
     knowsAbout: [
-      "網路投票協助",
+      "網路投票協助、幫助",
       "AEO 答案引擎優化",
       "GEO 生成式引擎優化",
       "SEO 搜尋引擎優化",

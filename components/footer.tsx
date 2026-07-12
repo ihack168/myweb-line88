@@ -44,7 +44,7 @@ export function Footer() {
           </p>
 
           <p className="text-xs text-gray-600">
-            © 2016-{currentYear} 洛克希德黑克斯 Lockheed Hex. All rights
+            © 2016-{currentYear} 洛克希德黑克斯 Lockhead Hex. All rights
             reserved.
           </p>
         </div>
