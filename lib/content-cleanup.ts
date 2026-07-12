@@ -1,7 +1,12 @@
 /**
  * 去除 htmlContent 開頭跟頁面自己渲染的標題/主圖重複的部分
+ * @param hasMainImage 頁面上方是否已經渲染過 mainImage 主圖 —— 只有在有主圖時,才砍掉內文開頭的圖片
  */
-export function stripDuplicateLeadContent(html: string, title: string): string {
+export function stripDuplicateLeadContent(
+  html: string,
+  title: string,
+  hasMainImage: boolean
+): string {
   if (!html) return html;
 
   let result = html.trim();
@@ -15,7 +20,7 @@ export function stripDuplicateLeadContent(html: string, title: string): string {
   // 1) 開頭如果是 <h1>...</h1>,且文字跟 title 相同或高度相似 -> 砍掉
   const h1Match = result.match(/^\s*<h1[^>]*>([\s\S]*?)<\/h1>\s*/i);
   if (h1Match) {
-    const h1Text = h1Match[1].replace(/<[^>]+>/g, ""); // 去掉內層標籤取純文字
+    const h1Text = h1Match[1].replace(/<[^>]+>/g, "");
     const normalizedH1 = normalize(h1Text);
     if (
       normalizedTitle &&
@@ -27,22 +32,23 @@ export function stripDuplicateLeadContent(html: string, title: string): string {
     }
   }
 
-  // 2) 開頭如果緊接著是圖片(<img> 或 <figure><img>...</figure>) -> 砍掉
-  //    因為主圖 mainImage 已經在頁面上方渲染過一次
-  const figureMatch = result.match(/^\s*<figure[^>]*>[\s\S]*?<\/figure>\s*/i);
-  if (figureMatch) {
-    result = result.slice(figureMatch[0].length).trim();
-  } else {
-    const imgMatch = result.match(/^\s*<img[^>]*\/?>\s*/i);
-    if (imgMatch) {
-      result = result.slice(imgMatch[0].length).trim();
+  // 2) 只有「頁面上方確實有渲染主圖」時,才砍掉內文開頭重複的圖片
+  //    沒有主圖的文章,內文開頭的圖片是需要保留的內容,不能砍
+  if (hasMainImage) {
+    const figureMatch = result.match(/^\s*<figure[^>]*>[\s\S]*?<\/figure>\s*/i);
+    if (figureMatch) {
+      result = result.slice(figureMatch[0].length).trim();
+    } else {
+      const imgMatch = result.match(/^\s*<img[^>]*\/?>\s*/i);
+      if (imgMatch) {
+        result = result.slice(imgMatch[0].length).trim();
+      }
     }
-  }
 
-  // 3) 有些 AI 產文會把 <p><img ...></p> 當作第一段,也一併處理
-  const pWrappedImgMatch = result.match(/^\s*<p>\s*<img[^>]*\/?>\s*<\/p>\s*/i);
-  if (pWrappedImgMatch) {
-    result = result.slice(pWrappedImgMatch[0].length).trim();
+    const pWrappedImgMatch = result.match(/^\s*<p>\s*<img[^>]*\/?>\s*<\/p>\s*/i);
+    if (pWrappedImgMatch) {
+      result = result.slice(pWrappedImgMatch[0].length).trim();
+    }
   }
 
   return result;
@@ -69,15 +75,12 @@ export function demoteLeadingH1(html: string): string {
 export function convertLeftoverMarkdownBold(html: string): string {
   if (!html) return html;
 
-  // 用標籤切開字串,只處理非標籤片段(index 為偶數的部分是純文字)
   const parts = html.split(/(<[^>]+>)/);
 
   return parts
     .map((part, i) => {
       const isTag = i % 2 === 1;
       if (isTag) return part;
-
-      // 純文字節點:轉換 **text** -> <strong>text</strong>
       return part.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     })
     .join("");
@@ -85,11 +88,16 @@ export function convertLeftoverMarkdownBold(html: string): string {
 
 /**
  * 整合處理:清洗完整的 htmlContent
+ * @param hasMainImage 頁面上方是否已渲染主圖,決定要不要砍內文開頭的重複圖片
  */
-export function sanitizePostHtml(html: string, title: string): string {
+export function sanitizePostHtml(
+  html: string,
+  title: string,
+  hasMainImage: boolean
+): string {
   if (!html) return html;
-  let result = stripDuplicateLeadContent(html, title); // 標題文字相同 → 整段砍掉
-  result = demoteLeadingH1(result);                    // 標題文字不同 → 降級成 <h2>,避免雙 H1
+  let result = stripDuplicateLeadContent(html, title, hasMainImage);
+  result = demoteLeadingH1(result);
   result = convertLeftoverMarkdownBold(result);
   return result;
 }
