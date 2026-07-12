@@ -373,7 +373,6 @@ export default async function BlogPage({
         )}
       </main>
 
-      <Footer />
     </div>
   );
 }
