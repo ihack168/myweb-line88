@@ -16,20 +16,25 @@ const geistMono = Geist_Mono({
   variable: '--font-geist-mono',
 })
 
+const SITE_TITLE =
+  '洛克希德黑克斯｜網路投票、社群流量、AEO GEO SEO 與 AI數位網路行銷資訊站'
+
+const SITE_DESCRIPTION =
+  '洛克希德黑克斯提供網路投票支援、Facebook/Instagram/Threads 社群流量增長、AEO SEO 關鍵字優化與 Line 官方帳號 AI 客服串接服務。'
+
 export const metadata: Metadata = {
   verification: {
     google: 'nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM',
   },
-  title: '洛克希德黑克斯｜網路投票、社群流量、AEO GEO SEO 與 AI數位網路行銷資訊站',
+  title: SITE_TITLE,
 
-  description:
-    '洛克希德黑克斯提供網路投票支援、Facebook/Instagram/Threads 社群流量增長、AEO SEO 關鍵字優化與 Line 官方帳號 AI 客服串接服務。',
+  description: SITE_DESCRIPTION,
 
   metadataBase: new URL('https://www.line88.tw'),
 
-alternates: {
-  canonical: '/',
-},
+  alternates: {
+    canonical: '/',
+  },
 
   icons: {
     icon: '/images/logo.png',
@@ -41,9 +46,9 @@ alternates: {
   },
 
   openGraph: {
-    title: '洛克希德黑克斯｜網路投票、社群流量與 AI 自動化服務',
-    description:
-      '提供 LINE/FB/Google 投票支援、社群流量增長、AEO SEO 優化與 Line AI 客服建置服務。',
+    // 跟 <title> 統一，避免 Google 搜尋結果標題跟 LINE/FB 分享卡片標題不一致
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     url: 'https://www.line88.tw',
     siteName: '洛克希德黑克斯',
     locale: 'zh_TW',
@@ -52,9 +57,9 @@ alternates: {
 
   twitter: {
     card: 'summary',
-    title: '洛克希德黑克斯｜網路投票、社群流量與 AI 自動化服務',
-    description:
-      '投票支援、社群流量增長、AEO SEO 與 Line AI 客服建置服務。',
+    // 同上，統一使用 SITE_TITLE / SITE_DESCRIPTION
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
   },
 }
 
