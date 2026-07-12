@@ -3,6 +3,7 @@ import { Noto_Sans_TC, Geist_Mono } from 'next/font/google'
 import './globals.css'
 
 import { Navbar } from '@/components/navbar'
+import { Footer } from '@/components/footer'
 import { Analytics } from '@/components/analytics'
 
 const notoSansTC = Noto_Sans_TC({
@@ -26,6 +27,7 @@ export const metadata: Metadata = {
   verification: {
     google: 'nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM',
   },
+
   title: SITE_TITLE,
 
   description: SITE_DESCRIPTION,
@@ -46,7 +48,6 @@ export const metadata: Metadata = {
   },
 
   openGraph: {
-    // 跟 <title> 統一，避免 Google 搜尋結果標題跟 LINE/FB 分享卡片標題不一致
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
     url: 'https://www.line88.tw',
@@ -57,7 +58,6 @@ export const metadata: Metadata = {
 
   twitter: {
     card: 'summary',
-    // 同上，統一使用 SITE_TITLE / SITE_DESCRIPTION
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
@@ -74,9 +74,17 @@ export default function RootLayout({
       className={`${notoSansTC.variable} ${geistMono.variable}`}
     >
       <body className="font-sans antialiased bg-[#0a0a0a] text-white">
-        <Navbar />
-        <Analytics />
-        {children}
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+
+          <Analytics />
+
+          <div className="flex-1">
+            {children}
+          </div>
+
+          <Footer />
+        </div>
       </body>
     </html>
   )
