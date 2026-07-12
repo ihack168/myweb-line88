@@ -1,137 +1,181 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { client } from "@/lib/sanity";
 import { Sparkles } from "lucide-react";
+import { client } from "@/lib/sanity";
+import {
+  LatestPostCard,
+  type LatestPost,
+} from "@/components/latest-post-card";
 
-interface Post {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  thumbnail: string;
-  videoId?: string;
-  tags: string[];
-  publishedAt: string;
+interface SanityPost {
+  id?: string;
+  title?: string;
+  slug?: string;
+  description?: string;
+  imageUrl?: string;
+  mainImage?: string;
   htmlContent?: string;
+  videoId?: string;
+  tags?: string[];
+  publishedAt?: string;
 }
 
 function optimizeSanityImageUrl(url?: string) {
-  if (!url) return "";
+  if (!url) {
+    return "";
+  }
 
-  if (!url.includes("cdn.sanity.io/images")) return url;
+  if (!url.includes("cdn.sanity.io/images")) {
+    return url;
+  }
 
-  if (url.includes("auto=format")) return url;
+  if (url.includes("auto=format")) {
+    return url;
+  }
 
   return `${url}${url.includes("?") ? "&" : "?"}auto=format`;
 }
 
-export function LatestPostsSection() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loadingPosts, setLoadingPosts] = useState(true);
-  const [activeVideo, setActiveVideo] = useState<string | null>(null);
+function extractImageFromHtml(htmlContent?: string) {
+  if (!htmlContent || typeof htmlContent !== "string") {
+    return "";
+  }
 
-  useEffect(() => {
-    async function fetchLatestPosts() {
-      setLoadingPosts(true);
+  const imageMatch = htmlContent.match(
+    /<img[^>]+src=["']([^"']+)["']/i
+  );
 
-      try {
-        const result = await client.fetch(
-          `*[_type == "post"] | order(coalesce(publishedAt, _createdAt) desc) [0...6] {
-            "id": _id,
-            title,
-            "slug": slug.current,
-            description,
-            "imageUrl": imageUrl,
-            "mainImage": mainImage.asset->url,
-            htmlContent,
-            "videoId": youtubeVideoId,
-            "tags": tags,
-            "publishedAt": coalesce(publishedAt, _createdAt)
-          }`,
-          {},
-          { cache: "no-store" }
-        );
+  return imageMatch?.[1]
+    ? optimizeSanityImageUrl(imageMatch[1])
+    : "";
+}
 
-        const processedPosts = result.map((post: any) => {
-          let extractedImg = "";
-          let extractedDesc = post.description || "";
+function extractDescriptionFromHtml(htmlContent?: string) {
+  if (!htmlContent || typeof htmlContent !== "string") {
+    return "";
+  }
 
-          if (post.htmlContent) {
-            const imgMatch = post.htmlContent.match(
-              /<img[^>]+src="([^">]+)"/
-            );
+  const plainText = htmlContent
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, " ")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
 
-            if (imgMatch && imgMatch[1]) {
-              extractedImg = optimizeSanityImageUrl(imgMatch[1]);
-            }
+  if (!plainText) {
+    return "";
+  }
 
-            if (!extractedDesc || extractedDesc === "點擊閱讀詳情...") {
-              const pureText = post.htmlContent
-                .replace(/<[^>]*>?/gm, "")
-                .replace(/\s+/g, " ")
-                .trim();
+  return `${plainText.slice(0, 90)}${plainText.length > 90 ? "..." : ""}`;
+}
 
-              extractedDesc =
-                pureText.substring(0, 90) +
-                (pureText.length > 90 ? "..." : "");
-            }
-          }
-
-          if (!extractedDesc) {
-            extractedDesc = "點擊閱讀詳情...";
-          }
-
-          const youtubeThumb = post.videoId
-            ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg`
-            : "";
-
-          return {
-            id: post.id,
-            title: post.title || "未命名文章",
-            slug: post.slug,
-            description: extractedDesc,
-            thumbnail:
-              extractedImg ||
-              youtubeThumb ||
-              optimizeSanityImageUrl(post.imageUrl) ||
-              optimizeSanityImageUrl(post.mainImage) ||
-              "",
-            videoId: post.videoId,
-            tags: Array.isArray(post.tags) ? post.tags : [],
-            publishedAt: post.publishedAt,
-            htmlContent: post.htmlContent,
-          };
-        });
-
-        setPosts(processedPosts);
-      } catch (err) {
-        console.error("首頁最新文章抓取失敗:", err);
-      } finally {
-        setLoadingPosts(false);
+async function getLatestPosts(): Promise<LatestPost[]> {
+  try {
+    const result = await client.fetch<SanityPost[]>(
+      `*[
+        _type == "post" &&
+        defined(slug.current)
+      ]
+      | order(coalesce(publishedAt, _createdAt) desc)
+      [0...6] {
+        "id": _id,
+        title,
+        "slug": slug.current,
+        description,
+        imageUrl,
+        "mainImage": mainImage.asset->url,
+        htmlContent,
+        "videoId": youtubeVideoId,
+        tags,
+        "publishedAt": coalesce(publishedAt, _createdAt)
+      }`,
+      {},
+      {
+        next: {
+          revalidate: 300,
+        },
       }
-    }
+    );
 
-    fetchLatestPosts();
-  }, []);
+    return result
+      .filter((post) => Boolean(post.id && post.slug))
+      .map((post) => {
+        const extractedImage = extractImageFromHtml(post.htmlContent);
+
+        let description = post.description?.trim() || "";
+
+        if (
+          !description ||
+          description === "點擊閱讀詳情..."
+        ) {
+          description = extractDescriptionFromHtml(post.htmlContent);
+        }
+
+        if (!description) {
+          description = "閱讀完整文章，了解更多相關內容。";
+        }
+
+        const youtubeThumbnail = post.videoId
+          ? `https://img.youtube.com/vi/${post.videoId}/maxresdefault.jpg`
+          : "";
+
+        return {
+          id: post.id as string,
+          title: post.title?.trim() || "未命名文章",
+          slug: post.slug as string,
+          description,
+          thumbnail:
+            extractedImage ||
+            youtubeThumbnail ||
+            optimizeSanityImageUrl(post.imageUrl) ||
+            optimizeSanityImageUrl(post.mainImage) ||
+            "",
+          videoId: post.videoId || undefined,
+          tags: Array.isArray(post.tags)
+            ? post.tags.filter(
+                (tag): tag is string =>
+                  typeof tag === "string" && Boolean(tag.trim())
+              )
+            : [],
+          publishedAt: post.publishedAt || "",
+        };
+      });
+  } catch (error) {
+    console.error("首頁最新文章伺服器端抓取失敗：", error);
+
+    return [];
+  }
+}
+
+export async function LatestPostsSection() {
+  const posts = await getLatestPosts();
 
   return (
-    <section className="relative px-5 py-10 md:py-14">
+    <section
+      className="relative px-5 py-10 md:py-14"
+      aria-labelledby="latest-posts-title"
+    >
       <div className="mx-auto max-w-6xl">
         <div className="mb-7 flex flex-col gap-4 text-center md:mb-9 md:flex-row md:items-end md:justify-between md:text-left">
           <div>
             <p className="mb-2 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800] md:text-sm">
-              <Sparkles size={14} />
+              <Sparkles size={14} aria-hidden="true" />
               LATEST ARTICLES
             </p>
 
-            <h2 className="text-3xl font-black italic text-white md:text-4xl">
+            <h2
+              id="latest-posts-title"
+              className="text-3xl font-black italic text-white md:text-4xl"
+            >
               <span className="text-[#ff8800]">|</span> 最新文章
             </h2>
 
             <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-400 md:text-base">
-              分享網路行銷、SEO、AEO、AI 工具、社群經營與網站技術文章。
+              分享網路行銷、SEO、AEO、GEO、AI
+              工具、社群經營與網站技術文章。
             </p>
           </div>
 
@@ -143,109 +187,21 @@ export function LatestPostsSection() {
           </Link>
         </div>
 
-        {loadingPosts ? (
-          <div className="flex justify-center py-10">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#ff8800]/20 border-t-[#ff8800]" />
-          </div>
-        ) : posts.length > 0 ? (
+        {posts.length > 0 ? (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-5">
             {posts.map((post) => (
-              <article
-                key={post.id}
-                className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.055] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/60 hover:shadow-[0_0_34px_rgba(255,136,0,0.18)]"
-              >
-                <div className="relative h-[160px] w-full overflow-hidden bg-black md:h-[175px]">
-                  {activeVideo === post.id && post.videoId ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${post.videoId}?autoplay=1`}
-                      className="h-full w-full border-none"
-                      allow="autoplay; encrypted-media"
-                      allowFullScreen
-                    />
-                  ) : (
-                    <div className="relative h-full w-full">
-                      <Link
-                        href={`/blog/${post.slug}`}
-                        className="block h-full w-full overflow-hidden"
-                      >
-                        {post.thumbnail ? (
-                          <img
-                            src={post.thumbnail}
-                            alt={post.title}
-                            className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-white/5 text-sm text-white/40">
-                            暫無圖片
-                          </div>
-                        )}
-                      </Link>
-
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-white/5" />
-
-                      {post.videoId && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setActiveVideo(post.id);
-                          }}
-                          className="absolute inset-0 m-auto flex h-11 w-14 items-center justify-center rounded-2xl bg-white/90 shadow-xl backdrop-blur transition duration-300 group-hover:scale-110"
-                          aria-label="播放影片"
-                        >
-                          <span className="ml-1 border-y-[9px] border-l-[15px] border-y-transparent border-l-[#ff8800]" />
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex min-h-[210px] flex-col p-5">
-                  <div className="mb-3 flex flex-wrap gap-2">
-                    {post.tags?.slice(0, 2).map((tag) => (
-                      <Link
-                        key={tag}
-                        href={`/blog?tag=${encodeURIComponent(tag)}`}
-                        className="rounded-full border border-[#ff8800]/25 bg-[#ff8800]/10 px-2.5 py-1 text-xs font-bold text-[#ff8800] transition hover:bg-[#ff8800] hover:text-black"
-                      >
-                        #{tag}
-                      </Link>
-                    ))}
-                  </div>
-
-                  <Link href={`/blog/${post.slug}`}>
-                    <h3 className="line-clamp-2 text-lg font-black leading-snug text-white transition group-hover:text-[#ff8800]">
-                      {post.title}
-                    </h3>
-                  </Link>
-
-                  <p className="mt-2 line-clamp-2 text-sm leading-6 text-gray-400">
-                    {post.description}
-                  </p>
-
-                  <div className="mt-auto pt-4">
-                    <Link
-                      href={`/blog/${post.slug}`}
-                      className="inline-flex items-center text-sm font-bold text-[#ff8800]"
-                    >
-                      閱讀文章
-                      <span className="ml-2 transition group-hover:translate-x-1">
-                        →
-                      </span>
-                    </Link>
-                  </div>
-                </div>
-              </article>
+              <LatestPostCard key={post.id} post={post} />
             ))}
           </div>
         ) : (
           <div className="rounded-3xl border border-dashed border-[#ff8800]/30 bg-white/[0.055] px-6 py-10 text-center backdrop-blur-xl">
-            <p className="text-xl font-black text-white">暫時沒有最新文章</p>
+            <p className="text-xl font-black text-white">
+              暫時沒有最新文章
+            </p>
 
             <p className="mt-3 text-sm text-gray-400">
-              之後會陸續分享 SEO、AEO、AI 與網路行銷相關內容。
+              之後會陸續分享 SEO、AEO、GEO、AI
+              與網路行銷相關內容。
             </p>
           </div>
         )}
