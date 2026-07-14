@@ -1,18 +1,15 @@
-import { MetadataRoute } from "next"
+import type { MetadataRoute } from "next"
 import { client } from "@/lib/sanity"
 
 export const revalidate = 3600
-export const dynamic = "force-dynamic"
 
-const siteUrl = "https://www.line88.tw"
+const SITE_URL = "https://www.line88.tw"
 
-// /content/[slug] 這幾頁是服務介紹頁，不是從 Sanity 抓的，是專案裡固定的路由，
-// 所以用靜態陣列列出來。之後在 app/content 底下新增頁面時，記得也把 slug 加進來，
-// 不然新頁面一樣不會出現在 sitemap 裡，等於藏起來讓搜尋引擎/AI 找不到。
 const CONTENT_PAGE_SLUGS = [
   "line-vote-services",
   "facebook-services",
-  "google-services",
+  // 確認有 page.tsx 後再加入
+  // "google-services",
   "instagram-services",
   "threads-services",
   "line-ai-services",
@@ -26,55 +23,75 @@ type SanityPost = {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const posts = await client.fetch<SanityPost[]>(
-    `*[_type == "post" && defined(slug.current)] | order(publishedAt desc){
+    `*[
+      _type == "post" &&
+      defined(slug.current)
+    ] | order(coalesce(publishedAt, _createdAt) desc) {
       "slug": slug.current,
       publishedAt,
       "updatedAt": _updatedAt
     }`,
     {},
-    { cache: "no-store" }
+    {
+      next: {
+        revalidate: 3600,
+      },
+    }
   )
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
-      url: siteUrl,
-      lastModified: new Date(),
+      url: SITE_URL,
       changeFrequency: "daily",
       priority: 1,
     },
     {
-      url: `${siteUrl}/blog`,
-      lastModified: new Date(),
+      url: `${SITE_URL}/blog`,
       changeFrequency: "daily",
       priority: 0.8,
     },
     {
-      url: `${siteUrl}/contact`,
-      lastModified: new Date(),
+      url: `${SITE_URL}/about`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${SITE_URL}/contact`,
       changeFrequency: "monthly",
       priority: 0.5,
     },
+    {
+      url: `${SITE_URL}/privacy`,
+      changeFrequency: "yearly",
+      priority: 0.3,
+    },
   ]
 
-  const contentRoutes: MetadataRoute.Sitemap = CONTENT_PAGE_SLUGS.map(
-    (slug) => ({
-      url: `${siteUrl}/content/${slug}`,
-      lastModified: new Date(),
+  const contentRoutes: MetadataRoute.Sitemap =
+    CONTENT_PAGE_SLUGS.map((slug) => ({
+      url: `${SITE_URL}/content/${slug}`,
       changeFrequency: "monthly",
       priority: 0.9,
-    })
-  )
+    }))
 
-  const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => ({
-    url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: post.updatedAt
-      ? new Date(post.updatedAt)
-      : post.publishedAt
-        ? new Date(post.publishedAt)
-        : new Date(),
-    changeFrequency: "weekly",
-    priority: 0.7,
-  }))
+  const blogRoutes: MetadataRoute.Sitemap = posts.map((post) => {
+    const modifiedDate = post.updatedAt || post.publishedAt
 
-  return [...staticRoutes, ...contentRoutes, ...blogRoutes]
+    return {
+      url: `${SITE_URL}/blog/${post.slug}`,
+      ...(modifiedDate
+        ? {
+            lastModified: new Date(modifiedDate),
+          }
+        : {}),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    }
+  })
+
+  return [
+    ...staticRoutes,
+    ...contentRoutes,
+    ...blogRoutes,
+  ]
 }
