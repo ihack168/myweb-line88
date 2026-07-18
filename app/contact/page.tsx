@@ -1,5 +1,51 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
 
+const SITE_URL = "https://www.line88.tw";
+
+const PAGE_TITLE = "聯絡我們｜洛克希德黑克斯";
+
+const PAGE_DESCRIPTION =
+  "聯絡洛克希德黑克斯，諮詢網路投票協助、AEO、GEO、SEO、LINE 官方帳號 AI 串接，以及 Facebook、Instagram、Threads 社群行銷服務。";
+
+export const metadata: Metadata = {
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
+
+  alternates: {
+    canonical: "/contact",
+  },
+
+  openGraph: {
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    url: `${SITE_URL}/contact`,
+    siteName: "洛克希德黑克斯",
+    locale: "zh_TW",
+    type: "website",
+    images: [
+      {
+        url: "/images/contact.png",
+        alt: "聯絡洛克希德黑克斯",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: PAGE_TITLE,
+    description: PAGE_DESCRIPTION,
+    images: ["/images/contact.png"],
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export default function ContactPage() {
 import Link from "next/link";
 import Image from "next/image";
 
