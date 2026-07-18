@@ -32,11 +32,40 @@ export const metadata: Metadata = {
 
   description: SITE_DESCRIPTION,
 
+export const metadata: Metadata = {
+  verification: {
+    google: 'nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM',
+  },
+
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+
   metadataBase: new URL('https://www.line88.tw'),
 
-  alternates: {
-    canonical: '/',
+  icons: {
+    icon: '/images/logo.png',
   },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  openGraph: {
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: 'https://www.line88.tw',
+    siteName: '洛克希德黑克斯',
+    locale: 'zh_TW',
+    type: 'website',
+  },
+
+  twitter: {
+    card: 'summary',
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+}
 
   icons: {
     icon: '/images/logo.png',
