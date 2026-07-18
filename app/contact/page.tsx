@@ -46,13 +46,9 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-import Link from "next/link";
-import Image from "next/image";
-
-export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white overflow-hidden">
-      <main className="min-h-screen max-w-6xl mx-auto px-4 py-4 md:px-6 md:py-10 flex flex-col justify-center">
+    <div className="min-h-screen overflow-hidden bg-[#0a0a0a] text-white">
+      <main className="mx-auto flex min-h-screen max-w-6xl flex-col justify-center px-4 py-4 md:px-6 md:py-10">
         {/* HERO */}
         <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl">
           <div className="relative h-[30vh] min-h-[190px] max-h-[330px] md:h-[460px] md:max-h-[460px]">
@@ -65,12 +61,12 @@ export default function ContactPage() {
               className="object-cover object-[72%_center]"
             />
 
-<div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/40 via-black/5 to-transparent" />
-<div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
-<div className="absolute inset-0 shadow-[inset_0_0_45px_rgba(0,0,0,0.35)]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a]/40 via-black/5 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
+            <div className="absolute inset-0 shadow-[inset_0_0_45px_rgba(0,0,0,0.35)]" />
 
-            <div className="absolute left-6 bottom-6 md:left-10 md:bottom-10">
-              <h1 className="text-4xl md:text-6xl font-black text-[#ff8800] drop-shadow-2xl">
+            <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
+              <h1 className="text-4xl font-black text-[#ff8800] drop-shadow-2xl md:text-6xl">
                 聯絡我們
               </h1>
             </div>
@@ -78,22 +74,22 @@ export default function ContactPage() {
         </section>
 
         {/* CTA CARDS */}
-        <section className="mt-4 md:mt-8 grid gap-3 md:gap-8 md:grid-cols-3">
+        <section className="mt-4 grid gap-3 md:mt-8 md:grid-cols-3 md:gap-8">
           <a
             href="https://line.me/R/ti/p/~line88.tw"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-4 rounded-2xl md:rounded-3xl border border-white/10 bg-white/5 p-3.5 md:p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-green-400 hover:shadow-[0_0_40px_rgba(74,222,128,0.22)]"
+            className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-green-400 hover:shadow-[0_0_40px_rgba(74,222,128,0.22)] md:rounded-3xl md:p-8"
           >
-            <div className="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-2xl bg-green-400/10 text-xl md:text-2xl">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-green-400/10 text-xl md:h-12 md:w-12 md:text-2xl">
               💬
             </div>
 
             <div>
-              <div className="text-base md:text-2xl font-black text-green-400">
+              <div className="text-base font-black text-green-400 md:text-2xl">
                 LINE 即時諮詢
               </div>
-              <p className="text-xs md:text-base text-gray-400 mt-0.5 md:mt-1">
+              <p className="mt-0.5 text-xs text-gray-400 md:mt-1 md:text-base">
                 加入 LINE 立即對話
               </p>
             </div>
@@ -101,17 +97,17 @@ export default function ContactPage() {
 
           <a
             href="mailto:ihack168@gmail.com"
-            className="group flex items-center gap-4 rounded-2xl md:rounded-3xl border border-white/10 bg-white/5 p-3.5 md:p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-blue-400 hover:shadow-[0_0_40px_rgba(96,165,250,0.22)]"
+            className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-blue-400 hover:shadow-[0_0_40px_rgba(96,165,250,0.22)] md:rounded-3xl md:p-8"
           >
-            <div className="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-400/10 text-xl md:text-2xl">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-blue-400/10 text-xl md:h-12 md:w-12 md:text-2xl">
               ✉️
             </div>
 
             <div>
-              <div className="text-base md:text-2xl font-black text-blue-400">
+              <div className="text-base font-black text-blue-400 md:text-2xl">
                 Email 聯絡
               </div>
-              <p className="text-xs md:text-base text-gray-400 mt-0.5 md:mt-1">
+              <p className="mt-0.5 text-xs text-gray-400 md:mt-1 md:text-base">
                 發送需求到信箱
               </p>
             </div>
@@ -121,17 +117,17 @@ export default function ContactPage() {
             href="https://www.facebook.com/lockheadhex"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex items-center gap-4 rounded-2xl md:rounded-3xl border border-white/10 bg-white/5 p-3.5 md:p-8 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#ff8800] hover:shadow-[0_0_40px_rgba(255,136,0,0.25)]"
+            className="group flex items-center gap-4 rounded-2xl border border-white/10 bg-white/5 p-3.5 backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-[#ff8800] hover:shadow-[0_0_40px_rgba(255,136,0,0.25)] md:rounded-3xl md:p-8"
           >
-            <div className="flex h-10 w-10 md:h-12 md:w-12 shrink-0 items-center justify-center rounded-2xl bg-[#ff8800]/10 text-xl md:text-2xl">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#ff8800]/10 text-xl md:h-12 md:w-12 md:text-2xl">
               🔥
             </div>
 
             <div>
-              <div className="text-base md:text-2xl font-black text-[#ff8800]">
+              <div className="text-base font-black text-[#ff8800] md:text-2xl">
                 Facebook 粉專
               </div>
-              <p className="text-xs md:text-base text-gray-400 mt-0.5 md:mt-1">
+              <p className="mt-0.5 text-xs text-gray-400 md:mt-1 md:text-base">
                 透過 FB 私訊我們
               </p>
             </div>
@@ -139,10 +135,10 @@ export default function ContactPage() {
         </section>
 
         {/* BACK HOME */}
-        <div className="text-center mt-4 md:mt-8">
+        <div className="mt-4 text-center md:mt-8">
           <Link
             href="/"
-            className="inline-flex items-center rounded-full border border-white/10 px-5 py-2 text-sm md:text-base text-gray-300 transition hover:border-[#ff8800] hover:text-white hover:shadow-[0_0_30px_rgba(255,136,0,0.2)]"
+            className="inline-flex items-center rounded-full border border-white/10 px-5 py-2 text-sm text-gray-300 transition hover:border-[#ff8800] hover:text-white hover:shadow-[0_0_30px_rgba(255,136,0,0.2)] md:text-base"
           >
             ← 返回首頁
           </Link>
