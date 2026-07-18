@@ -85,6 +85,56 @@ function beautifyHtml(html: string): string {
     );
 }
 
+
+/** HTML 屬性安全轉義 */
+function escapeHtmlAttribute(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+/** 將空間圖片插入指定 H2 標題後方 */
+function insertImageAfterHeading(
+  html: string,
+  headingText: string,
+  imageUrl?: string,
+  alt?: string
+) {
+  if (!html || !imageUrl) return html;
+
+  const escapedHeading = headingText.replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&"
+  );
+
+  const headingRegex = new RegExp(
+    `(<h2\\b[^>]*>\\s*${escapedHeading}\\s*<\\/h2>)`,
+    "i"
+  );
+
+  if (!headingRegex.test(html)) {
+    return html;
+  }
+
+  const safeUrl = escapeHtmlAttribute(imageUrl);
+  const safeAlt = escapeHtmlAttribute(alt || headingText);
+
+  return html.replace(
+    headingRegex,
+    `$1
+<figure class="article-space-image">
+  <img
+    src="${safeUrl}"
+    alt="${safeAlt}"
+    loading="lazy"
+    decoding="async"
+  />
+</figure>`
+  );
+}
+
 /** 格式化日期 */
 function formatDate(date?: string) {
   if (!date) return null;
@@ -203,6 +253,10 @@ export default async function PostPage({ params }: PageProps) {
       publishedAt,
       _updatedAt,
       mainImage,
+      livingRoomImage,
+      diningRoomImage,
+      masterBedroomImage,
+      secondBedroomImage,
       htmlContent,
       "tags": categories[]->title
     }`,
@@ -224,6 +278,52 @@ export default async function PostPage({ params }: PageProps) {
 
   const markdownFixedHtml = convertLeftoverMarkdownBold(dedupedHtml);
   const optimizedHtml = beautifyHtml(markdownFixedHtml);
+
+  const livingRoomImageUrl = post.livingRoomImage
+    ? urlFor(post.livingRoomImage)?.width(1600)?.fit("max")?.auto("format")?.url()
+    : undefined;
+
+  const diningRoomImageUrl = post.diningRoomImage
+    ? urlFor(post.diningRoomImage)?.width(1600)?.fit("max")?.auto("format")?.url()
+    : undefined;
+
+  const masterBedroomImageUrl = post.masterBedroomImage
+    ? urlFor(post.masterBedroomImage)?.width(1600)?.fit("max")?.auto("format")?.url()
+    : undefined;
+
+  const secondBedroomImageUrl = post.secondBedroomImage
+    ? urlFor(post.secondBedroomImage)?.width(1600)?.fit("max")?.auto("format")?.url()
+    : undefined;
+
+  let finalHtml = optimizedHtml;
+
+  finalHtml = insertImageAfterHeading(
+    finalHtml,
+    "客廳設計",
+    livingRoomImageUrl,
+    post.livingRoomImage?.alt || `${post.title}-客廳`
+  );
+
+  finalHtml = insertImageAfterHeading(
+    finalHtml,
+    "餐廳設計",
+    diningRoomImageUrl,
+    post.diningRoomImage?.alt || `${post.title}-餐廳`
+  );
+
+  finalHtml = insertImageAfterHeading(
+    finalHtml,
+    "主臥設計",
+    masterBedroomImageUrl,
+    post.masterBedroomImage?.alt || `${post.title}-主臥`
+  );
+
+  finalHtml = insertImageAfterHeading(
+    finalHtml,
+    "次臥設計",
+    secondBedroomImageUrl,
+    post.secondBedroomImage?.alt || `${post.title}-次臥`
+  );
 
   const articleUrl = `${SITE_URL}/blog/${slug}`;
 
@@ -359,7 +459,7 @@ export default async function PostPage({ params }: PageProps) {
               [&_th]:!border [&_th]:!border-white/10 [&_th]:!bg-orange-900/20 [&_th]:!p-4 [&_th]:!text-left [&_th]:!font-black [&_th]:!text-[#ff8800]
               [&_td]:!border [&_td]:!border-white/10 [&_td]:!p-4 [&_td]:!align-top [&_td]:!text-gray-300
             "
-            dangerouslySetInnerHTML={{ __html: optimizedHtml }}
+            dangerouslySetInnerHTML={{ __html: finalHtml }}
           />
         </article>
 
