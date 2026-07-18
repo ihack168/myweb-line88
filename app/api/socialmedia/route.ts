@@ -43,6 +43,16 @@ function getGroqApiKeys() {
     .filter(Boolean);
 }
 
+// ✔ 隨機模型池
+const MODEL_POOL = [
+  "openai/gpt-oss-120b",
+  "llama-3.3-70b-versatile",
+];
+
+function pickModel() {
+  return pick(MODEL_POOL);
+}
+
 // ✔ Groq fallback
 async function callGroqWithRotation(body: any) {
   const keys = getGroqApiKeys();
@@ -58,19 +68,25 @@ async function callGroqWithRotation(body: any) {
 
   const startIndex = Math.floor(Math.random() * keys.length);
 
+  let lastError: any = null;
+  let lastStatus = 500;
+
   for (let i = 0; i < keys.length; i++) {
     const keyIndex = (startIndex + i) % keys.length;
     const apiKey = keys[keyIndex];
 
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json; charset=utf-8",
-        },
-        body: JSON.stringify(body),
-      });
+      const res = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json; charset=utf-8",
+          },
+          body: JSON.stringify(body),
+        }
+      );
 
       const data = await res.json().catch(() => ({}));
 
@@ -83,21 +99,33 @@ async function callGroqWithRotation(body: any) {
         };
       }
 
-      if (![401, 403, 429, 500, 502, 503, 504].includes(res.status)) {
-        return {
-          ok: false,
-          status: res.status,
-          data,
-          usedKeyIndex: keyIndex + 1,
-        };
+      lastError = data;
+      lastStatus = res.status;
+
+      if ([400, 401, 403, 404, 429, 500, 502, 503, 504].includes(res.status)) {
+        continue;
       }
-    } catch {}
+
+      return {
+        ok: false,
+        status: res.status,
+        data,
+        usedKeyIndex: keyIndex + 1,
+      };
+    } catch (error) {
+      lastError = String(error);
+      lastStatus = 500;
+    }
   }
 
   return {
     ok: false,
-    status: 500,
-    data: { ok: false, error: "所有 GROQ API KEY 都失敗" },
+    status: lastStatus,
+    data: {
+      ok: false,
+      error: "所有 GROQ API KEY 都失敗",
+      lastError,
+    },
     usedKeyIndex: null,
   };
 }
@@ -161,7 +189,9 @@ function extractPostAndHashtags(text: string) {
     .replace(/```\s*$/m, "");
 
   const postMatch = cleaned.match(/\[POST\]([\s\S]*?)(\[HASHTAGS\]|$)/i);
-  const hashtagsMatch = cleaned.match(/\[HASHTAGS\]([\s\S]*?)(\[END\]|$)/i);
+  const hashtagsMatch = cleaned.match(
+    /\[HASHTAGS\]([\s\S]*?)(\[END\]|$)/i
+  );
 
   if (!postMatch) return null;
 
@@ -196,11 +226,16 @@ export async function POST(req: Request) {
 
     let parsed: any = null;
     let lastRaw = "";
+    let lastFailReason: any = null;
+    let lastUsedKeyIndex: number | null = null;
+    let lastUsedModel = "";
 
     const MAX_ATTEMPTS = 5;
 
     for (let i = 0; i < MAX_ATTEMPTS; i++) {
       const style = makeSocialStyle(finalPlatform);
+      const model = pickModel();
+      lastUsedModel = model;
 
       const prompt = `
 你是社群小編（Facebook / Threads）。
@@ -236,7 +271,7 @@ emoji：${style.emojiDensity}
 `;
 
       const res = await callGroqWithRotation({
-        model: "qwen/qwen3-32b",
+        model,
         messages: [{ role: "user", content: prompt }],
         temperature: 1.1,
         top_p: 0.95,
@@ -244,21 +279,31 @@ emoji：${style.emojiDensity}
       });
 
       if (!res.ok) {
-        return NextResponse.json(res, { status: 500 });
+        lastFailReason = res.data;
+        continue;
       }
+
+      lastUsedKeyIndex = res.usedKeyIndex || null;
 
       const answer = res.data?.choices?.[0]?.message?.content || "";
       lastRaw = answer;
 
       const result = extractPostAndHashtags(answer);
-      if (!result) continue;
+
+      if (!result) {
+        lastFailReason = "格式解析失敗";
+        continue;
+      }
 
       let post = toTaiwanTraditional(result.post);
       let hashtags = toTaiwanTraditional(result.hashtags);
 
       post = removeHashtagsFromPost(post);
 
-      if (hasBadText(post) || hasBadText(hashtags)) continue;
+      if (hasBadText(post) || hasBadText(hashtags)) {
+        lastFailReason = "偵測到亂碼";
+        continue;
+      }
 
       parsed = { post, hashtags };
       break;
@@ -266,7 +311,14 @@ emoji：${style.emojiDensity}
 
     if (!parsed) {
       return NextResponse.json(
-        { ok: false, error: "解析失敗", raw: lastRaw },
+        {
+          ok: false,
+          error: "解析失敗",
+          raw: lastRaw,
+          lastFailReason,
+          usedModel: lastUsedModel,
+          usedKeyIndex: lastUsedKeyIndex,
+        },
         { status: 500 }
       );
     }
@@ -276,7 +328,6 @@ emoji：${style.emojiDensity}
       (officialUrl ? `\n\n${officialUrl}` : "") +
       (parsed.hashtags ? `\n\n${parsed.hashtags}` : "");
 
-    // ✔ 存入 Redis
     await redis.set("latest_post", parsed.post);
 
     return NextResponse.json({
@@ -284,6 +335,8 @@ emoji：${style.emojiDensity}
       post: parsed.post,
       hashtags: parsed.hashtags,
       fullPost,
+      usedModel: lastUsedModel,
+      usedKeyIndex: lastUsedKeyIndex,
       postBase64: toBase64Utf8(parsed.post),
       hashtagsBase64: toBase64Utf8(parsed.hashtags),
       fullPostBase64: toBase64Utf8(fullPost),
