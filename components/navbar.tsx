@@ -72,7 +72,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-xl lg:text-2xl font-black tracking-wider text-gray-200 hover:text-[#ff8800] transition"
+                className="text-2xl lg:text-2xl font-black tracking-wider text-gray-200 hover:text-[#ff8800] transition"
               >
                 {link.label}
               </Link>
