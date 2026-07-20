@@ -1,80 +1,254 @@
-import type { Metadata } from 'next'
-import { Noto_Sans_TC, Geist_Mono } from 'next/font/google'
-import './globals.css'
+import type { Metadata } from "next"
+import { Geist_Mono, Noto_Sans_TC } from "next/font/google"
+import Script from "next/script"
 
-import { Navbar } from '@/components/navbar'
-import { Footer } from '@/components/footer'
-import { Analytics } from '@/components/analytics'
+import { Footer } from "@/components/footer"
+import { Navbar } from "@/components/navbar"
+
+import "./globals.css"
+
+const siteUrl = "https://www.line88.tw"
+const siteName = "洛克希德黑克斯"
+const shortSiteName = "lockhead"
+
+const defaultTitle =
+  "洛克希德黑克斯｜網路投票、社群流量、AEO GEO SEO 與 AI 數位行銷"
+
+const siteDescription =
+  "洛克希德黑克斯提供網路活動推廣、社群流量成長、Facebook、Instagram、Threads 行銷、AEO GEO SEO 關鍵字優化，以及 LINE 官方帳號 AI 客服串接相關資訊與服務。"
 
 const notoSansTC = Noto_Sans_TC({
-  subsets: ['latin'],
-  weight: ['400', '500', '700', '900'],
-  variable: '--font-noto-sans',
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "900"],
+  variable: "--font-noto-sans",
+  display: "swap",
 })
 
 const geistMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-geist-mono',
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+  display: "swap",
 })
 
-const SITE_TITLE =
-  '洛克希德黑克斯｜網路投票、社群流量、AEO GEO SEO 與 AI數位網路行銷資訊站'
-
-const SITE_DESCRIPTION =
-  '洛克希德黑克斯提供網路投票支援、買票、灌票、Facebook/Instagram/Threads 社群流量增長、AEO GEO SEO 關鍵字優化與 Line 官方帳號 AI 客服串接服務。'
-
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+
+  applicationName: siteName,
+
   verification: {
-    google: 'nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM',
+    google: "nU4axksZUmOI-MZr0WLspqPAY4elIf9NNx_zg89tfsM",
   },
 
-  title: SITE_TITLE,
-  description: SITE_DESCRIPTION,
+  title: {
+    default: defaultTitle,
+    template: `%s｜${siteName}`,
+  },
 
-  metadataBase: new URL('https://www.line88.tw'),
+  description: siteDescription,
+
+  keywords: [
+    "洛克希德黑克斯",
+    "lockhead",
+    "網路投票",
+    "網路活動推廣",
+    "社群行銷",
+    "社群流量",
+    "Facebook行銷",
+    "Instagram行銷",
+    "Threads行銷",
+    "AEO",
+    "GEO",
+    "SEO",
+    "AI數位行銷",
+    "LINE AI客服",
+    "LINE官方帳號",
+  ],
+
+  creator: siteName,
+  publisher: siteName,
+
+  category: "數位行銷與人工智慧應用",
+
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+
+  alternates: {
+    canonical: "/",
+  },
 
   icons: {
-    icon: '/images/logo.png',
+    icon: [
+      {
+        url: "/images/logo.png",
+        type: "image/png",
+      },
+    ],
+    shortcut: "/images/logo.png",
+    apple: "/images/logo.png",
   },
 
   robots: {
     index: true,
     follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 
   openGraph: {
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    url: 'https://www.line88.tw',
-    siteName: '洛克希德黑克斯',
-    locale: 'zh_TW',
-    type: 'website',
+    title: defaultTitle,
+    description: siteDescription,
+    url: siteUrl,
+    siteName,
+    locale: "zh_TW",
+    type: "website",
+    images: [
+      {
+        url: "/images/og-home.jpg",
+        width: 1200,
+        height: 630,
+        alt: "洛克希德黑克斯－網路行銷、AEO GEO SEO 與 AI 數位行銷",
+      },
+    ],
   },
 
   twitter: {
-    card: 'summary',
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: siteDescription,
+    images: ["/images/og-home.jpg"],
   },
 }
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
+}>) {
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
+    name: siteName,
+    alternateName: shortSiteName,
+    url: siteUrl,
+    logo: {
+      "@type": "ImageObject",
+      "@id": `${siteUrl}/#logo`,
+      url: `${siteUrl}/images/logo.png`,
+      contentUrl: `${siteUrl}/images/logo.png`,
+      caption: siteName,
+    },
+    image: {
+      "@id": `${siteUrl}/#logo`,
+    },
+    description: siteDescription,
+    areaServed: {
+      "@type": "Country",
+      name: "Taiwan",
+    },
+    knowsAbout: [
+      "網路活動行銷",
+      "社群媒體行銷",
+      "Facebook行銷",
+      "Instagram行銷",
+      "Threads行銷",
+      "搜尋引擎最佳化",
+      "AEO答案引擎最佳化",
+      "GEO生成式引擎最佳化",
+      "LINE官方帳號",
+      "AI客服系統",
+      "數位行銷",
+    ],
+    makesOffer: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "網路活動與投票推廣",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "社群媒體流量與行銷優化",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "AEO、GEO 與 SEO 優化",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "LINE 官方帳號 AI 客服串接",
+        },
+      },
+    ],
+  }
+
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": `${siteUrl}/#website`,
+    url: `${siteUrl}/`,
+    name: siteName,
+    alternateName: shortSiteName,
+    description: siteDescription,
+    inLanguage: "zh-Hant-TW",
+    publisher: {
+      "@id": `${siteUrl}/#organization`,
+    },
+  }
+
   return (
     <html
-      lang="zh-Hant"
+      lang="zh-Hant-TW"
       className={`${notoSansTC.variable} ${geistMono.variable}`}
     >
-      <body className="font-sans antialiased bg-[#0a0a0a] text-white">
+      <body className="min-h-screen bg-[#0a0a0a] font-sans text-white antialiased">
         <div className="flex min-h-screen flex-col">
           <Navbar />
 
-          <Analytics />
+          <script
+            id="organization-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(organizationJsonLd),
+            }}
+          />
 
-          <div className="flex-1">{children}</div>
+          <script
+            id="website-jsonld"
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify(websiteJsonLd),
+            }}
+          />
+
+          <Script
+            id="umami-analytics"
+            src="https://ana.line88.tw/script.js"
+            data-website-id="57526b7c-888b-45b0-b521-8d66d656fb67"
+            strategy="afterInteractive"
+          />
+
+          <main className="flex-1">
+            {children}
+          </main>
 
           <Footer />
         </div>
