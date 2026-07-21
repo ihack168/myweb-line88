@@ -6,28 +6,48 @@ export const dynamic = "force-dynamic";
 
 const redis = Redis.fromEnv();
 
-// ✔ 簡體 → 台灣繁體
+// 簡體中文轉台灣繁體中文
 const toTaiwanTraditional = Converter({ from: "cn", to: "twp" });
+
+const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
+const GROQ_MODEL =
+  process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b";
+
+const MAX_ATTEMPTS = 5;
+const SOURCE_TEXT_MAX_LENGTH = 1800;
+const MAX_COMPLETION_TOKENS = 2400;
+
+type Platform = "fb" | "threads";
+
+type GroqCallResult = {
+  ok: boolean;
+  status: number;
+  data: any;
+  usedKeyIndex: number | null;
+};
+
+type GeneratedPost = {
+  post: string;
+  hashtags: string;
+};
 
 function rand(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function pick<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
+function pick<T>(items: T[]): T {
+  return items[Math.floor(Math.random() * items.length)];
 }
 
-function limitText(text: string, maxLength = 1800) {
+function limitText(text: string, maxLength = SOURCE_TEXT_MAX_LENGTH) {
   if (!text) return "";
-  return text.length > maxLength ? text.substring(0, maxLength) : text;
+  return text.length > maxLength ? text.slice(0, maxLength) : text;
 }
 
-// ✔ base64
 function toBase64Utf8(value: string) {
   return Buffer.from(value || "", "utf8").toString("base64");
 }
 
-// ✔ 亂碼檢測（加強版）
 function hasBadText(value: string) {
   return (
     value.includes("\uFFFD") ||
@@ -37,100 +57,19 @@ function hasBadText(value: string) {
 }
 
 function getGroqApiKeys() {
-  return String(process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || "")
+  return String(
+    process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || ""
+  )
     .split(",")
-    .map((v) => v.trim())
+    .map((value) => value.trim())
     .filter(Boolean);
 }
 
-// ✔ 隨機模型池
-const MODEL_POOL = [
-  "openai/gpt-oss-120b",
-  "llama-3.3-70b-versatile",
-];
-
-function pickModel() {
-  return pick(MODEL_POOL);
+function normalizePlatform(value: unknown): Platform {
+  return value === "threads" ? "threads" : "fb";
 }
 
-// ✔ Groq fallback
-async function callGroqWithRotation(body: any) {
-  const keys = getGroqApiKeys();
-
-  if (!keys.length) {
-    return {
-      ok: false,
-      status: 500,
-      data: { ok: false, error: "缺少 GROQ API KEY" },
-      usedKeyIndex: null,
-    };
-  }
-
-  const startIndex = Math.floor(Math.random() * keys.length);
-
-  let lastError: any = null;
-  let lastStatus = 500;
-
-  for (let i = 0; i < keys.length; i++) {
-    const keyIndex = (startIndex + i) % keys.length;
-    const apiKey = keys[keyIndex];
-
-    try {
-      const res = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json; charset=utf-8",
-          },
-          body: JSON.stringify(body),
-        }
-      );
-
-      const data = await res.json().catch(() => ({}));
-
-      if (res.ok) {
-        return {
-          ok: true,
-          status: res.status,
-          data,
-          usedKeyIndex: keyIndex + 1,
-        };
-      }
-
-      lastError = data;
-      lastStatus = res.status;
-
-      if ([400, 401, 403, 404, 429, 500, 502, 503, 504].includes(res.status)) {
-        continue;
-      }
-
-      return {
-        ok: false,
-        status: res.status,
-        data,
-        usedKeyIndex: keyIndex + 1,
-      };
-    } catch (error) {
-      lastError = String(error);
-      lastStatus = 500;
-    }
-  }
-
-  return {
-    ok: false,
-    status: lastStatus,
-    data: {
-      ok: false,
-      error: "所有 GROQ API KEY 都失敗",
-      lastError,
-    },
-    usedKeyIndex: null,
-  };
-}
-
-function makeSocialStyle(platform: "fb" | "threads") {
+function makeSocialStyle(platform: Platform) {
   const isThreads = platform === "threads";
 
   return {
@@ -139,7 +78,7 @@ function makeSocialStyle(platform: "fb" | "threads") {
       "用讓人意外的數字或事實開場",
       "用短短一句話製造懸念",
       "用生活中常見的誤解開場",
-      "用情境代入感開場（你是不是也…）",
+      "用情境代入感開場，例如「你是不是也……」",
       "用挑戰常識的說法開場",
     ]),
     angle: pick([
@@ -166,34 +105,94 @@ function makeSocialStyle(platform: "fb" | "threads") {
       "最後問大家同不同意這個觀點",
     ]),
     structure: pick([
-      "一段鉤子 + 兩三個重點 + 互動結尾",
-      "情境代入 + 核心資訊 + 呼籲互動",
-      "問題拋出 + 解答 + 延伸思考",
-      "短句堆疊製造節奏感",
+      "一段鉤子，加上兩至三個重點，再以互動問題結尾",
+      "情境代入，加上核心資訊，再呼籲互動",
+      "先拋出問題，再提供解答與延伸思考",
+      "使用短句堆疊，製造閱讀節奏",
     ]),
     emojiDensity: pick([
-      "適度使用 2～4 個 emoji 增加視覺節奏",
-      "每個重點前放一個 emoji",
+      "適度使用 2 至 4 個 emoji 增加視覺節奏",
+      "每個主要重點前放一個 emoji",
     ]),
-    hashtagCount: isThreads ? rand(2, 3) : rand(2, 3),
+    hashtagCount: rand(2, 3),
     maxWords: isThreads ? rand(120, 200) : rand(180, 280),
   };
 }
 
-function extractPostAndHashtags(text: string) {
-  if (!text) return null;
+function removeHashtagsFromPost(text: string) {
+  return text.replace(/#[\p{L}\p{N}_]+/gu, "").trim();
+}
 
-  const cleaned = text
+function normalizeHashtags(text: string, maxCount: number) {
+  const matches = text.match(/#[\p{L}\p{N}_]+/gu) || [];
+  const unique = [...new Set(matches)];
+
+  return unique.slice(0, maxCount).join(" ");
+}
+
+function extractMessageContent(message: any) {
+  const content = message?.content;
+
+  if (typeof content === "string") {
+    return content.trim();
+  }
+
+  if (Array.isArray(content)) {
+    return content
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (typeof item?.text === "string") return item.text;
+        return "";
+      })
+      .join("")
+      .trim();
+  }
+
+  return "";
+}
+
+function stripMarkdownCodeFence(text: string) {
+  return text
     .trim()
-    .replace(/^```[a-zA-Z]*\s*/m, "")
-    .replace(/```\s*$/m, "");
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+}
 
-  const postMatch = cleaned.match(/\[POST\]([\s\S]*?)(\[HASHTAGS\]|$)/i);
+function parseGeneratedPost(text: string): GeneratedPost | null {
+  if (!text?.trim()) return null;
+
+  const cleaned = stripMarkdownCodeFence(text);
+
+  // 主要解析方式：JSON
+  try {
+    const parsed = JSON.parse(cleaned);
+
+    if (
+      typeof parsed?.post === "string" &&
+      typeof parsed?.hashtags === "string" &&
+      parsed.post.trim()
+    ) {
+      return {
+        post: parsed.post.trim(),
+        hashtags: parsed.hashtags.trim(),
+      };
+    }
+  } catch {
+    // 繼續嘗試備援格式
+  }
+
+  // 備援解析方式：舊版 [POST] / [HASHTAGS] 格式
+  const postMatch = cleaned.match(
+    /\[POST\]\s*([\s\S]*?)(?=\[HASHTAGS\]|\[END\]|$)/i
+  );
   const hashtagsMatch = cleaned.match(
-    /\[HASHTAGS\]([\s\S]*?)(\[END\]|$)/i
+    /\[HASHTAGS\]\s*([\s\S]*?)(?=\[END\]|$)/i
   );
 
-  if (!postMatch) return null;
+  if (!postMatch?.[1]?.trim()) {
+    return null;
+  }
 
   return {
     post: postMatch[1].trim(),
@@ -201,111 +200,326 @@ function extractPostAndHashtags(text: string) {
   };
 }
 
-function removeHashtagsFromPost(text: string) {
-  return text.replace(/#[\p{L}0-9_]+/gu, "").trim();
+async function readGroqResponse(res: Response) {
+  const rawText = await res.text();
+
+  if (!rawText) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(rawText);
+  } catch {
+    return {
+      error: "Groq 回傳的內容不是有效 JSON",
+      rawResponse: rawText.slice(0, 2000),
+    };
+  }
+}
+
+async function callGroqWithRotation(body: Record<string, unknown>) {
+  const keys = getGroqApiKeys();
+
+  if (!keys.length) {
+    return {
+      ok: false,
+      status: 500,
+      data: {
+        error: "缺少 GROQ_API_KEYS 或 GROQ_API_KEY 環境變數",
+      },
+      usedKeyIndex: null,
+    } satisfies GroqCallResult;
+  }
+
+  const startIndex = Math.floor(Math.random() * keys.length);
+
+  let lastError: unknown = null;
+  let lastStatus = 500;
+  let lastUsedKeyIndex: number | null = null;
+
+  for (let i = 0; i < keys.length; i++) {
+    const keyIndex = (startIndex + i) % keys.length;
+    const apiKey = keys[keyIndex];
+
+    lastUsedKeyIndex = keyIndex + 1;
+
+    try {
+      const res = await fetch(GROQ_API_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify(body),
+        cache: "no-store",
+      });
+
+      const data = await readGroqResponse(res);
+
+      if (res.ok) {
+        return {
+          ok: true,
+          status: res.status,
+          data,
+          usedKeyIndex: keyIndex + 1,
+        } satisfies GroqCallResult;
+      }
+
+      lastError = data;
+      lastStatus = res.status;
+
+      // 這些狀態碼可換下一把 API Key 重試
+      if (
+        [400, 401, 403, 404, 408, 409, 429, 500, 502, 503, 504].includes(
+          res.status
+        )
+      ) {
+        continue;
+      }
+
+      return {
+        ok: false,
+        status: res.status,
+        data,
+        usedKeyIndex: keyIndex + 1,
+      } satisfies GroqCallResult;
+    } catch (error) {
+      lastError =
+        error instanceof Error
+          ? {
+              name: error.name,
+              message: error.message,
+            }
+          : String(error);
+
+      lastStatus = 500;
+    }
+  }
+
+  return {
+    ok: false,
+    status: lastStatus,
+    data: {
+      error: "所有 Groq API Key 都失敗",
+      lastError,
+    },
+    usedKeyIndex: lastUsedKeyIndex,
+  } satisfies GroqCallResult;
 }
 
 export async function POST(req: Request) {
   try {
-    const {
-      keyword,
-      sourceText,
-      platform = "fb",
-      officialUrl,
-    } = await req.json();
+    const requestBody = await req.json().catch(() => null);
 
-    if (!keyword || !sourceText) {
+    if (!requestBody || typeof requestBody !== "object") {
       return NextResponse.json(
-        { ok: false, error: "缺少參數" },
+        {
+          ok: false,
+          error: "請求內容不是有效 JSON",
+        },
         { status: 400 }
       );
     }
 
-    const safeSourceText = limitText(sourceText, 1800);
-    const finalPlatform = platform === "threads" ? "threads" : "fb";
+    const keyword =
+      typeof requestBody.keyword === "string"
+        ? requestBody.keyword.trim()
+        : "";
 
-    let parsed: any = null;
+    const sourceText =
+      typeof requestBody.sourceText === "string"
+        ? requestBody.sourceText.trim()
+        : "";
+
+    const officialUrl =
+      typeof requestBody.officialUrl === "string"
+        ? requestBody.officialUrl.trim()
+        : "";
+
+    const finalPlatform = normalizePlatform(requestBody.platform);
+
+    if (!keyword || !sourceText) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "缺少 keyword 或 sourceText",
+        },
+        { status: 400 }
+      );
+    }
+
+    const safeSourceText = limitText(sourceText);
+
+    let parsed: GeneratedPost | null = null;
     let lastRaw = "";
-    let lastFailReason: any = null;
+    let lastFailReason: unknown = null;
     let lastUsedKeyIndex: number | null = null;
-    let lastUsedModel = "";
+    let lastUsedModel = GROQ_MODEL;
 
-    const MAX_ATTEMPTS = 5;
-
-    for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
       const style = makeSocialStyle(finalPlatform);
-      const model = pickModel();
+      const model = GROQ_MODEL;
+
       lastUsedModel = model;
 
       const prompt = `
-你是社群小編（Facebook / Threads）。
+請根據以下資料，撰寫一篇適合 ${
+        finalPlatform === "threads" ? "Threads" : "Facebook"
+      } 的台灣繁體中文社群貼文。
 
 【關鍵字】
 ${keyword}
 
-【資料】
+【參考資料】
 ${safeSourceText}
 
-【規則】
-- 繁體中文（台灣）
-- 不可簡體
-- POST 與 HASHTAGS 必須分開
-- hashtag 只能在 HASHTAGS
-- 不可亂碼
+【寫作要求】
+- 使用台灣繁體中文。
+- 禁止使用簡體中文。
+- 不可出現亂碼。
+- 不可捏造參考資料中沒有的重要事實。
+- 貼文正文不可包含 hashtag。
+- hashtags 欄位只能放 hashtag。
+- 不要加入網址。
+- 不要輸出 Markdown 程式碼區塊。
+- 不要輸出 JSON 以外的說明文字。
 
-【風格】
-hook：${style.hook}
-angle：${style.angle}
-tone：${style.tone}
-cta：${style.cta}
-structure：${style.structure}
-emoji：${style.emojiDensity}
-字數：${style.maxWords}
+【文章風格】
+- 開場方式：${style.hook}
+- 內容角度：${style.angle}
+- 語氣：${style.tone}
+- 結尾方式：${style.cta}
+- 結構：${style.structure}
+- Emoji：${style.emojiDensity}
+- 目標字數：約 ${style.maxWords} 字
+- Hashtag 數量：${style.hashtagCount} 個
 
-【輸出格式】
-[POST]
-...
-[HASHTAGS]
-#aaa #bbb
-[END]
+請輸出以下 JSON 結構：
+{
+  "post": "完整社群貼文正文",
+  "hashtags": "#標籤一 #標籤二"
+}
 `;
 
-      const res = await callGroqWithRotation({
+      const groqResult = await callGroqWithRotation({
         model,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 1.1,
-        top_p: 0.95,
-        max_tokens: 1200,
+        messages: [
+          {
+            role: "system",
+            content:
+              "你是台灣社群內容編輯。請嚴格輸出符合指定 Schema 的 JSON，不要加入其他文字。",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "social_post",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                post: {
+                  type: "string",
+                  description: "社群貼文正文，不可包含 hashtag",
+                },
+                hashtags: {
+                  type: "string",
+                  description: "以空格分隔的 hashtag",
+                },
+              },
+              required: ["post", "hashtags"],
+              additionalProperties: false,
+            },
+          },
+        },
+        reasoning_effort: "low",
+        include_reasoning: false,
+        temperature: 0.8,
+        max_completion_tokens: MAX_COMPLETION_TOKENS,
       });
 
-      if (!res.ok) {
-        lastFailReason = res.data;
+      lastUsedKeyIndex = groqResult.usedKeyIndex;
+
+      if (!groqResult.ok) {
+        lastFailReason = {
+          attempt,
+          reason: "Groq API 呼叫失敗",
+          status: groqResult.status,
+          response: groqResult.data,
+        };
         continue;
       }
 
-      lastUsedKeyIndex = res.usedKeyIndex || null;
+      const choice = groqResult.data?.choices?.[0];
+      const message = choice?.message;
+      const answer = extractMessageContent(message);
 
-      const answer = res.data?.choices?.[0]?.message?.content || "";
       lastRaw = answer;
 
-      const result = extractPostAndHashtags(answer);
+      if (!answer) {
+        lastFailReason = {
+          attempt,
+          reason: "模型回傳空 content",
+          finishReason: choice?.finish_reason || null,
+          reasoningLength:
+            typeof message?.reasoning === "string"
+              ? message.reasoning.length
+              : 0,
+          usage: groqResult.data?.usage || null,
+          responseKeys:
+            groqResult.data && typeof groqResult.data === "object"
+              ? Object.keys(groqResult.data)
+              : [],
+        };
+        continue;
+      }
+
+      const result = parseGeneratedPost(answer);
 
       if (!result) {
-        lastFailReason = "格式解析失敗";
+        lastFailReason = {
+          attempt,
+          reason: "JSON 或標記格式解析失敗",
+          finishReason: choice?.finish_reason || null,
+          rawPreview: answer.slice(0, 1000),
+          usage: groqResult.data?.usage || null,
+        };
         continue;
       }
 
-      let post = toTaiwanTraditional(result.post);
-      let hashtags = toTaiwanTraditional(result.hashtags);
+      let post = toTaiwanTraditional(result.post).trim();
+      let hashtags = toTaiwanTraditional(result.hashtags).trim();
 
       post = removeHashtagsFromPost(post);
+      hashtags = normalizeHashtags(hashtags, style.hashtagCount);
 
-      if (hasBadText(post) || hasBadText(hashtags)) {
-        lastFailReason = "偵測到亂碼";
+      if (!post) {
+        lastFailReason = {
+          attempt,
+          reason: "解析後的貼文正文為空",
+          rawPreview: answer.slice(0, 1000),
+        };
         continue;
       }
 
-      parsed = { post, hashtags };
+      if (hasBadText(post) || hasBadText(hashtags)) {
+        lastFailReason = {
+          attempt,
+          reason: "偵測到亂碼",
+          rawPreview: answer.slice(0, 1000),
+        };
+        continue;
+      }
+
+      parsed = {
+        post,
+        hashtags,
+      };
+
       break;
     }
 
@@ -323,12 +537,19 @@ emoji：${style.emojiDensity}
       );
     }
 
-    const fullPost =
-      parsed.post +
-      (officialUrl ? `\n\n${officialUrl}` : "") +
-      (parsed.hashtags ? `\n\n${parsed.hashtags}` : "");
+    const fullPost = [
+      parsed.post,
+      officialUrl,
+      parsed.hashtags,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
-    await redis.set("latest_post", parsed.post);
+    try {
+      await redis.set("latest_post", parsed.post);
+    } catch (redisError) {
+      console.error("Redis 儲存失敗：", redisError);
+    }
 
     return NextResponse.json({
       ok: true,
@@ -341,9 +562,17 @@ emoji：${style.emojiDensity}
       hashtagsBase64: toBase64Utf8(parsed.hashtags),
       fullPostBase64: toBase64Utf8(fullPost),
     });
-  } catch (e) {
+  } catch (error) {
+    console.error("產文 API 發生錯誤：", error);
+
     return NextResponse.json(
-      { ok: false, error: String(e) },
+      {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      },
       { status: 500 }
     );
   }
