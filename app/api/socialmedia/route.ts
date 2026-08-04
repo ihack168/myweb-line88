@@ -1,3 +1,15 @@
+export async function POST() {
+  return Response.json(
+    {
+      success: false,
+      error: "This API has been disabled."
+    },
+    {
+      status: 403
+    }
+  );
+}
+
 import { NextResponse } from "next/server";
 import { Converter } from "opencc-js";
 import { Redis } from "@upstash/redis";
