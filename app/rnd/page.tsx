@@ -449,6 +449,9 @@ export default function Page() {
           color: #ffffff;
           line-height: 1.32;
           text-overflow: clip;
+          white-space: normal;
+          overflow-wrap: anywhere;
+          word-break: break-word;
         }
         .content { min-width: 0; flex: 1; display: grid; gap: 1px; }
         .label { color: #a3a3a3; font-size: 12px; font-weight: 700; }
@@ -464,7 +467,7 @@ export default function Page() {
         .account-value {
           padding-block: 2px 4px;
           font-family: "Geist Mono", Consolas, "Courier New", monospace;
-          font-size: clamp(16px, 5vw, 26px);
+          font-size: clamp(21px, 6vw, 30px);
           font-weight: 800;
           letter-spacing: -.035em;
         }
@@ -539,7 +542,7 @@ export default function Page() {
           .field { min-height: 51px; padding-block: 6px; }
           .id-field { min-height: 60px; }
           .value { font-size: 22px; }
-          .account-value { font-size: clamp(16px, 4.8vw, 22px); line-height: 1.35; }
+          .account-value { font-size: clamp(20px, 5.8vw, 26px); line-height: 1.35; }
           .copy { min-height: 38px; }
           .actions { margin-top: 9px; }
           .record, .refresh { min-height: 48px; font-size: 16px; }
