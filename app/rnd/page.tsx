@@ -115,6 +115,9 @@ export default function Page() {
     <main className="page">
       <section className="card" aria-labelledby="page-title">
         <header>
+          <p className="eyebrow">RANDOM PROFILE</p>
+          <h1 id="page-title">隨機個資產生器</h1>
+          <p className="hint">生日範圍 2001/01/01～2008/08/01</p>
         </header>
 
         <div className="fields" aria-live="polite">
@@ -159,9 +162,9 @@ export default function Page() {
         :global(*) { box-sizing: border-box; }
         :global(html), :global(body) { margin: 0; min-height: 100%; }
         :global(body) {
-          color: #17201d;
-          background: #edf3ef;
-          font-family: Inter, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+          color: #f5f5f5;
+          background: #0a0a0a;
+          font-family: "Noto Sans TC", Geist, "PingFang TC", "Microsoft JhengHei", sans-serif;
         }
         button { font: inherit; -webkit-tap-highlight-color: transparent; }
         .page {
@@ -170,23 +173,24 @@ export default function Page() {
           place-items: center;
           padding: clamp(12px, 3vw, 28px);
           background:
-            radial-gradient(circle at 12% 5%, rgba(255,255,255,.95), transparent 35%),
-            linear-gradient(145deg, #eef5f0 0%, #dce9e1 100%);
+            radial-gradient(circle at 15% 0%, rgba(232, 101, 10, .12), transparent 34%),
+            radial-gradient(circle at 88% 100%, rgba(249, 115, 22, .07), transparent 32%),
+            #0a0a0a;
         }
         .card {
           width: min(100%, 560px);
           max-height: calc(100svh - 24px);
           overflow: auto;
           padding: clamp(18px, 4vh, 34px);
-          border: 1px solid rgba(36, 86, 65, .13);
-          border-radius: 26px;
-          background: rgba(255, 255, 255, .92);
-          box-shadow: 0 24px 70px rgba(35, 71, 56, .14);
+          border: 1px solid #2a2a2a;
+          border-radius: 1.025rem;
+          background: rgba(20, 20, 20, .96);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, .48);
         }
         header { margin-bottom: clamp(14px, 2.7vh, 24px); }
         .eyebrow {
           margin: 0 0 5px;
-          color: #267251;
+          color: #e8650a;
           font-size: 11px;
           font-weight: 800;
           letter-spacing: .18em;
@@ -197,7 +201,7 @@ export default function Page() {
           line-height: 1.12;
           letter-spacing: -.04em;
         }
-        .hint { margin: 6px 0 0; color: #708079; font-size: 12px; }
+        .hint { margin: 6px 0 0; color: #a3a3a3; font-size: 12px; }
         .fields { display: grid; gap: clamp(7px, 1.2vh, 10px); }
         .field {
           min-height: clamp(58px, 9.2vh, 72px);
@@ -205,15 +209,15 @@ export default function Page() {
           align-items: center;
           gap: 12px;
           padding: 9px 9px 9px 15px;
-          border: 1px solid #dce7e1;
-          border-radius: 16px;
-          background: #f8fbf9;
+          border: 1px solid #2a2a2a;
+          border-radius: .625rem;
+          background: #1a1a1a;
         }
         .content { min-width: 0; flex: 1; display: grid; gap: 1px; }
-        .label { color: #708079; font-size: 12px; font-weight: 700; }
+        .label { color: #a3a3a3; font-size: 12px; font-weight: 700; }
         .value {
           overflow: hidden;
-          color: #17201d;
+          color: #f5f5f5;
           font-size: clamp(23px, 6.5vw, 32px);
           line-height: 1.08;
           text-overflow: ellipsis;
@@ -225,15 +229,17 @@ export default function Page() {
           min-width: 66px;
           min-height: 42px;
           border: 0;
-          border-radius: 12px;
-          color: #17603f;
-          background: #dff1e7;
+          border: 1px solid #3a3a3a;
+          border-radius: .625rem;
+          color: #f5f5f5;
+          background: #262626;
           font-size: 14px;
           font-weight: 800;
           cursor: pointer;
         }
         .copy:active { transform: scale(.96); }
-        .copy.copied { color: white; background: #247652; }
+        .copy:hover { border-color: #e8650a; color: #fb923c; }
+        .copy.copied { border-color: #e8650a; color: white; background: #e8650a; }
         .copy:disabled, .refresh:disabled { cursor: wait; opacity: .55; }
         .refresh {
           width: 100%;
@@ -244,15 +250,20 @@ export default function Page() {
           gap: 9px;
           margin-top: clamp(12px, 2.2vh, 20px);
           border: 0;
-          border-radius: 16px;
+          border-radius: .625rem;
           color: white;
-          background: #1f6b49;
-          box-shadow: 0 10px 24px rgba(31, 107, 73, .22);
+          background: #e8650a;
+          box-shadow: 0 10px 28px rgba(232, 101, 10, .25);
           font-size: clamp(17px, 4.6vw, 20px);
           font-weight: 900;
           cursor: pointer;
         }
         .refresh span { font-size: 26px; line-height: 1; }
+        .refresh:hover { background: #f97316; }
+        .refresh:focus-visible, .copy:focus-visible {
+          outline: 3px solid rgba(232, 101, 10, .42);
+          outline-offset: 2px;
+        }
         .refresh:active { transform: translateY(1px); box-shadow: none; }
 
         @media (max-height: 680px) {
