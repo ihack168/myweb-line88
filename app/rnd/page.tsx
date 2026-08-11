@@ -7,6 +7,7 @@ type Person = {
   chineseFirstName: string;
   englishLastName: string;
   englishFirstName: string;
+  id: string;
   birthday: string;
 };
 
@@ -62,11 +63,15 @@ function randomBirthday(): string {
 }
 
 function generatePerson(): Person {
+  const englishLastName = pick(englishLastNames);
+  const englishFirstName = pick(englishFirstNames);
+
   return {
     chineseLastName: pick(chineseLastNames),
     chineseFirstName: pick(chineseFirstNames),
-    englishLastName: pick(englishLastNames),
-    englishFirstName: pick(englishFirstNames),
+    englishLastName,
+    englishFirstName,
+    id: englishFirstName + englishLastName,
     birthday: randomBirthday(),
   };
 }
@@ -102,6 +107,7 @@ export default function Page() {
     { key: "chineseFirstName", label: "中文名" },
     { key: "englishLastName", label: "英文姓" },
     { key: "englishFirstName", label: "英文名" },
+    { key: "id", label: "id" },
     { key: "birthday", label: "生日" },
   ];
 
@@ -109,9 +115,6 @@ export default function Page() {
     <main className="page">
       <section className="card" aria-labelledby="page-title">
         <header>
-          <p className="eyebrow">RANDOM PROFILE</p>
-          <h1 id="page-title">隨機個資產生器</h1>
-          <p className="hint">生日範圍 2001/01/01～2008/08/01</p>
         </header>
 
         <div className="fields" aria-live="polite">
