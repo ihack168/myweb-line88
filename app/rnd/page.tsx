@@ -213,15 +213,15 @@ function generatePerson(): Person {
   if (accountTypeRandom < 0.34) {
     // 34%：ID + 手機號碼；生日欄仍維持原本西元70%、民國30%。
     birthday = randomBirthday();
-    accountValue = id + phone;
+    accountValue = (id + phone).toLowerCase();
   } else if (accountTypeRandom < 0.67) {
     // 33%：ID + 西元生日。
     birthday = randomWesternBirthday();
-    accountValue = id + birthday;
+    accountValue = (id + birthday).toLowerCase();
   } else {
     // 33%：ID + 民國生日。
     birthday = randomRocBirthday();
-    accountValue = id + birthday;
+    accountValue = (id + birthday).toLowerCase();
   }
 
   return {
@@ -303,6 +303,7 @@ export default function Page() {
     { key: "id", label: "id" },
     { key: "birthday", label: "生日" },
     { key: "phone", label: "電話" },
+    { key: "accountValue", label: "帳號組合" },
   ];
 
   return (
@@ -318,7 +319,13 @@ export default function Page() {
               <div className="field" key={key}>
                 <div className="content">
                   <span className="label">{label}</span>
-                  <strong className={key === "birthday" ? "value numeric" : "value"}>
+                  <strong
+                    className={[
+                      "value",
+                      key === "birthday" || key === "phone" ? "numeric" : "",
+                      key === "accountValue" ? "account-value" : "",
+                    ].filter(Boolean).join(" ")}
+                  >
                     {value}
                   </strong>
                 </div>
@@ -430,6 +437,10 @@ export default function Page() {
           white-space: nowrap;
         }
         .numeric { font-variant-numeric: tabular-nums; letter-spacing: .035em; }
+        .account-value {
+          font-size: clamp(17px, 4.8vw, 24px);
+          letter-spacing: -.02em;
+        }
         .copy {
           flex: 0 0 auto;
           min-width: 66px;
