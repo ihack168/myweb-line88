@@ -36,16 +36,13 @@ const chineseLastNameWeights: Record<string, number> = {
   梁: 0.33, 顏: 0.31, 柯: 0.30,
 };
 
-const chineseFirstNames = [
+const femaleChineseFirstNames = [
   "怡君", "雅婷", "欣怡", "佩君", "佳穎", "子涵", "語涵", "詩涵",
   "品妤", "宜婷", "如婷", "恩婷", "庭婷", "文婷", "安婷", "美婷",
   "雅雯", "佩雯", "佳婷", "子瑜", "語晴", "詩婷", "品涵", "思婷",
   "家婷", "心婷", "可婷", "佳雯", "怡婷", "欣妤", "雅君", "美君",
   "淑芬", "淑惠", "美玲", "麗華", "玉婷", "秀英", "秀美", "慧君",
   "佳慧", "雅惠", "惠君", "心怡", "佳怡", "思涵", "雨晴", "子晴",
-  "冠宇", "家豪", "俊傑", "志明", "建宏", "明哲", "文傑", "宗翰",
-  "宇翔", "柏翰", "承恩", "彥廷", "威廷", "家瑋", "志豪", "俊宏",
-  "建志", "文豪", "世傑", "明軒", "冠廷", "志偉", "家銘", "俊豪",
   "雅琪", "雅慧", "雅玲", "雅芳", "雅萍", "怡萱", "怡婷", "怡芳",
   "怡安", "怡如", "佳玲", "佳蓉", "佳琪", "佳欣", "佳恩", "佳芸",
   "欣妍", "欣慧", "欣蓉", "欣芳", "欣雅", "欣宜", "欣如", "欣安",
@@ -59,6 +56,12 @@ const chineseFirstNames = [
   "子怡", "子安", "子萱", "子瑜", "子晴", "子欣", "子芸", "子柔",
   "思怡", "思婷", "思妤", "思慧", "思晴", "思安", "思雅", "思潔",
   "文婷", "文君", "文慧", "文玲", "文欣", "文雅", "文芳", "文琪",
+];
+
+const maleChineseFirstNames = [
+  "冠宇", "家豪", "俊傑", "志明", "建宏", "明哲", "文傑", "宗翰",
+  "宇翔", "柏翰", "承恩", "彥廷", "威廷", "家瑋", "志豪", "俊宏",
+  "建志", "文豪", "世傑", "明軒", "冠廷", "志偉", "家銘", "俊豪",
   "家明", "家俊", "家宏", "家維", "家安", "家榮", "家偉", "家祥",
   "俊明", "俊宇", "俊廷", "俊安", "俊賢", "俊維", "俊翔", "俊銘",
   "志宏", "志偉", "志豪", "志傑", "志成", "志文", "志強", "志遠",
@@ -78,18 +81,21 @@ const englishLastNames = [
   "Chao", "Lu", "Liang", "Yen", "Ko", "Sun",
 ];
 
-const englishFirstNames = [
-  "Alex", "Alice", "Amy", "Andy", "Anna", "Brian", "Chloe", "Daniel",
-  "Emily", "Emma", "Eric", "Eva", "Grace", "Helen", "Ivy", "Jason",
-  "Jessica", "Julia", "Kevin", "Laura", "Leo", "Linda", "Lisa", "Maria",
-  "Mia", "Michelle", "Nina", "Nicole", "Olivia", "Rachel", "Ryan", "Sarah",
-  "Sophia", "Sophie", "Tina", "Wendy", "Zoe", "Aaron", "Adam", "Alan",
-  "Amanda", "Amber", "Angela", "Ben", "Betty", "Bruce", "Carol", "Cindy",
-  "Claire", "David", "Diana", "Edward", "Ella", "Ethan", "George", "Henry",
-  "Jack", "James", "Jane", "Jenny", "John", "Justin", "Kelly", "Ken",
-  "Linda", "Mark", "Mary", "Matt", "Megan", "Michael", "Nancy", "Peter",
-  "Rebecca", "Robert", "Sam", "Steven", "Susan", "Thomas", "Tony", "Vicky",
-  "Vincent", "William", "Wilson", "Yvonne",
+const femaleEnglishFirstNames = [
+  "Alice", "Amy", "Anna", "Chloe", "Emily", "Emma", "Eva", "Grace",
+  "Helen", "Ivy", "Jessica", "Julia", "Laura", "Linda", "Lisa", "Maria",
+  "Mia", "Michelle", "Nina", "Nicole", "Olivia", "Rachel", "Sarah", "Sophia",
+  "Sophie", "Tina", "Wendy", "Zoe", "Amanda", "Amber", "Angela", "Betty",
+  "Carol", "Cindy", "Claire", "Diana", "Ella", "Jane", "Jenny", "Kelly",
+  "Mary", "Megan", "Nancy", "Rebecca", "Susan", "Vicky", "Yvonne",
+];
+
+const maleEnglishFirstNames = [
+  "Alex", "Andy", "Brian", "Daniel", "Eric", "Jason", "Kevin", "Leo",
+  "Ryan", "Aaron", "Adam", "Alan", "Ben", "Bruce", "David", "Edward",
+  "Ethan", "George", "Henry", "Jack", "James", "John", "Justin", "Ken",
+  "Mark", "Matt", "Michael", "Peter", "Robert", "Sam", "Steven", "Thomas",
+  "Tony", "Vincent", "William", "Wilson",
 ];
 
 function pick<T>(items: T[]): T {
@@ -150,6 +156,13 @@ function randomBirthday(): string {
 }
 
 function generatePerson(): Person {
+  const gender = Math.random() < 0.5 ? "female" : "male";
+  const chineseFirstNames = gender === "female"
+    ? femaleChineseFirstNames
+    : maleChineseFirstNames;
+  const englishFirstNames = gender === "female"
+    ? femaleEnglishFirstNames
+    : maleEnglishFirstNames;
   const englishLastName = pick(englishLastNames);
   const englishFirstName = pick(englishFirstNames);
 
