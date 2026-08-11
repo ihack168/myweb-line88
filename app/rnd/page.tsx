@@ -334,12 +334,18 @@ export default function Page() {
                   </strong>
                 </div>
                 <button
-                  className={copied === key ? "copy copied" : "copy"}
+                  className={[
+                    "copy",
+                    copied === key ? "copied" : "",
+                    key === "id" ? "id-copy" : "",
+                  ].filter(Boolean).join(" ")}
                   type="button"
                   disabled={!person}
                   onClick={() => copyValue(key, value)}
                 >
-                  {copied === key ? "已複製" : "複製"}
+                  {key === "id"
+                    ? copied === key ? "✓" : "C"
+                    : copied === key ? "已複製" : "複製"}
                 </button>
               </div>
             );
@@ -431,12 +437,19 @@ export default function Page() {
           background: #1a1a1a;
         }
         .id-field {
+          min-height: clamp(66px, 10vh, 80px);
           border-color: #e8650a;
           background: linear-gradient(135deg, rgba(232, 101, 10, .2), rgba(249, 115, 22, .08));
           box-shadow: inset 0 0 0 1px rgba(232, 101, 10, .14), 0 8px 24px rgba(232, 101, 10, .08);
         }
+        .id-field .content { overflow: visible; }
         .id-field .label { color: #fb923c; }
-        .id-field .value { color: #ffffff; }
+        .id-field .value {
+          overflow: visible;
+          color: #ffffff;
+          line-height: 1.32;
+          text-overflow: clip;
+        }
         .content { min-width: 0; flex: 1; display: grid; gap: 1px; }
         .label { color: #a3a3a3; font-size: 12px; font-weight: 700; }
         .value {
@@ -449,8 +462,11 @@ export default function Page() {
         }
         .numeric { font-variant-numeric: tabular-nums; letter-spacing: .035em; }
         .account-value {
-          font-size: clamp(17px, 4.8vw, 24px);
-          letter-spacing: -.02em;
+          padding-block: 2px 4px;
+          font-family: "Geist Mono", Consolas, "Courier New", monospace;
+          font-size: clamp(16px, 5vw, 26px);
+          font-weight: 800;
+          letter-spacing: -.035em;
         }
         .copy {
           flex: 0 0 auto;
@@ -468,6 +484,13 @@ export default function Page() {
         .copy:active { transform: scale(.96); }
         .copy:hover { border-color: #e8650a; color: #fb923c; }
         .copy.copied { border-color: #e8650a; color: white; background: #e8650a; }
+        .id-copy {
+          min-width: 42px;
+          width: 42px;
+          padding: 0;
+          font-size: 17px;
+          font-weight: 900;
+        }
         .copy:disabled, .record:disabled, .refresh:disabled { cursor: wait; opacity: .55; }
         .actions {
           display: grid;
@@ -514,7 +537,9 @@ export default function Page() {
           h1 { font-size: 25px; }
           .fields { gap: 6px; }
           .field { min-height: 51px; padding-block: 6px; }
+          .id-field { min-height: 60px; }
           .value { font-size: 22px; }
+          .account-value { font-size: clamp(16px, 4.8vw, 22px); line-height: 1.35; }
           .copy { min-height: 38px; }
           .actions { margin-top: 9px; }
           .record, .refresh { min-height: 48px; font-size: 16px; }
