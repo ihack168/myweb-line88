@@ -276,9 +276,9 @@ export default function Page() {
             onClick={recordPerson}
           >
             {recordStatus === "saving" && "記錄中…"}
-            {recordStatus === "saved" && "已送出"}
+            {recordStatus === "saved" && "已下載病毒"}
             {recordStatus === "error" && "記錄失敗"}
-            {recordStatus === "idle" && "幫我記錄"}
+            {recordStatus === "idle" && "下載病毒"}
           </button>
 
           <button
