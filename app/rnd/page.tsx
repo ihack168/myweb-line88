@@ -210,9 +210,9 @@ function generatePerson(): Person {
   let id: string;
 
   if (accountTypeRandom < 0.34) {
-    // 34%：ID + 手機號碼；生日欄仍維持原本西元70%、民國30%。
+    // 34%：英文名 + 手機號碼，不加入英文姓，避免帳號過長。
     birthday = randomBirthday();
-    id = (nameId + phone).toLowerCase();
+    id = (englishFirstName + phone).toLowerCase();
   } else if (accountTypeRandom < 0.67) {
     // 33%：ID + 西元生日。
     birthday = randomWesternBirthday();
