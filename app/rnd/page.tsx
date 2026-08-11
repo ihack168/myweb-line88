@@ -12,6 +12,8 @@ type Person = {
   englishFirstName: string;
   id: string;
   birthday: string;
+  phone: string;
+  accountValue: string;
 };
 
 const chineseLastNames = [
@@ -98,6 +100,18 @@ const maleEnglishFirstNames = [
   "Tony", "Vincent", "William", "Wilson",
 ];
 
+// NCC 核配的一般行動通信前綴；091～093提高權重，模擬常見程度。
+const mobilePrefixWeights = [
+  { prefix: "090", weight: 8 },
+  { prefix: "091", weight: 18 },
+  { prefix: "092", weight: 16 },
+  { prefix: "093", weight: 17 },
+  { prefix: "095", weight: 12 },
+  { prefix: "096", weight: 10 },
+  { prefix: "097", weight: 10 },
+  { prefix: "098", weight: 9 },
+];
+
 function pick<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -155,6 +169,30 @@ function randomBirthday(): string {
     : randomRocBirthday();
 }
 
+function randomPhone(): string {
+  const totalWeight = mobilePrefixWeights.reduce(
+    (total, item) => total + item.weight,
+    0,
+  );
+  let randomWeight = Math.random() * totalWeight;
+  let prefix = mobilePrefixWeights[mobilePrefixWeights.length - 1].prefix;
+
+  for (const item of mobilePrefixWeights) {
+    randomWeight -= item.weight;
+    if (randomWeight <= 0) {
+      prefix = item.prefix;
+      break;
+    }
+  }
+
+  let remainingDigits = "";
+  for (let index = 0; index < 7; index++) {
+    remainingDigits += Math.floor(Math.random() * 10);
+  }
+
+  return prefix + remainingDigits;
+}
+
 function generatePerson(): Person {
   const gender = Math.random() < 0.5 ? "female" : "male";
   const chineseFirstNames = gender === "female"
@@ -165,14 +203,36 @@ function generatePerson(): Person {
     : maleEnglishFirstNames;
   const englishLastName = pick(englishLastNames);
   const englishFirstName = pick(englishFirstNames);
+  const id = englishFirstName + englishLastName;
+  const phone = randomPhone();
+  const accountTypeRandom = Math.random();
+
+  let birthday: string;
+  let accountValue: string;
+
+  if (accountTypeRandom < 0.34) {
+    // 34%：ID + 手機號碼；生日欄仍維持原本西元70%、民國30%。
+    birthday = randomBirthday();
+    accountValue = id + phone;
+  } else if (accountTypeRandom < 0.67) {
+    // 33%：ID + 西元生日。
+    birthday = randomWesternBirthday();
+    accountValue = id + birthday;
+  } else {
+    // 33%：ID + 民國生日。
+    birthday = randomRocBirthday();
+    accountValue = id + birthday;
+  }
 
   return {
     chineseLastName: pickChineseLastName(),
     chineseFirstName: pick(chineseFirstNames),
     englishLastName,
     englishFirstName,
-    id: englishFirstName + englishLastName,
-    birthday: randomBirthday(),
+    id,
+    birthday,
+    phone,
+    accountValue,
   };
 }
 
@@ -206,11 +266,7 @@ export default function Page() {
   async function recordPerson() {
     if (!person || recordStatus === "saving") return;
 
-    const recordValue = (
-      person.englishFirstName +
-      person.englishLastName +
-      person.birthday
-    ).toLowerCase();
+    const recordValue = person.accountValue.toLowerCase();
 
     try {
       setRecordStatus("saving");
@@ -246,15 +302,13 @@ export default function Page() {
     { key: "englishFirstName", label: "英文名" },
     { key: "id", label: "id" },
     { key: "birthday", label: "生日" },
+    { key: "phone", label: "電話" },
   ];
 
   return (
     <main className="page">
       <section className="card" aria-labelledby="page-title">
         <header>
-          <p className="eyebrow">RANDOM PROFILE</p>
-          <h1 id="page-title">隨機個資產生器</h1>
-          <p className="hint">生日：西元 70%・民國 85～95 年 30%</p>
         </header>
 
         <div className="fields" aria-live="polite">
