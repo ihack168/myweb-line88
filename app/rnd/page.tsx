@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 // 改成部署完成的 Google Apps Script Web App /exec 網址。
-const GAS_URL = "請在這裡貼上你的GAS網址";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxUlpXk1d0yb2BqOXkerNnuu8OxqeRCen68ZxR8e9pTfGxC9RqcCBbVc7bu8GbwYQQweA/exec";
 
 type Person = {
   chineseLastName: string;
@@ -21,6 +21,20 @@ const chineseLastNames = [
   "鍾", "彭", "游", "詹", "胡", "施", "沈", "余", "趙", "盧",
   "梁", "顏", "柯",
 ];
+
+// 依內政部戶政司姓氏人口統計設定相對權重。
+// 權重只需維持彼此比例，不必加總為 100。
+const chineseLastNameWeights: Record<string, number> = {
+  陳: 11.15, 林: 8.32, 黃: 6.05, 張: 5.27, 李: 5.13,
+  王: 4.10, 吳: 4.04, 劉: 3.15, 蔡: 2.91, 楊: 2.66,
+  許: 1.74, 鄭: 1.67, 謝: 1.55, 郭: 1.50, 洪: 1.35,
+  曾: 1.32, 邱: 1.22, 廖: 1.18, 賴: 1.10, 徐: 1.00,
+  周: 0.94, 葉: 0.91, 蘇: 0.87, 江: 0.77, 何: 0.75,
+  羅: 0.72, 高: 0.63, 潘: 0.60, 簡: 0.55, 朱: 0.54,
+  鍾: 0.53, 彭: 0.50, 游: 0.48, 詹: 0.45, 胡: 0.44,
+  施: 0.42, 沈: 0.39, 余: 0.37, 趙: 0.35, 盧: 0.34,
+  梁: 0.33, 顏: 0.31, 柯: 0.30,
+};
 
 const chineseFirstNames = [
   "怡君", "雅婷", "欣怡", "佩君", "佳穎", "子涵", "語涵", "詩涵",
@@ -82,13 +96,31 @@ function pick<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-function randomBirthday(): string {
-  // 直接從有效日期區間抽一天，不會產生 20058888 之類的無效日期。
-  const start = Date.UTC(2001, 0, 1);
-  const end = Date.UTC(2008, 7, 1);
+function pickChineseLastName(): string {
+  const totalWeight = chineseLastNames.reduce(
+    (total, lastName) => total + (chineseLastNameWeights[lastName] ?? 0),
+    0,
+  );
+  let randomWeight = Math.random() * totalWeight;
+
+  for (const lastName of chineseLastNames) {
+    randomWeight -= chineseLastNameWeights[lastName] ?? 0;
+    if (randomWeight <= 0) return lastName;
+  }
+
+  return chineseLastNames[chineseLastNames.length - 1];
+}
+
+function randomDateBetween(start: number, end: number): Date {
   const day = 24 * 60 * 60 * 1000;
   const totalDays = Math.floor((end - start) / day);
-  const date = new Date(start + Math.floor(Math.random() * (totalDays + 1)) * day);
+  return new Date(start + Math.floor(Math.random() * (totalDays + 1)) * day);
+}
+
+function randomWesternBirthday(): string {
+  const start = Date.UTC(2001, 0, 1);
+  const end = Date.UTC(2008, 7, 1);
+  const date = randomDateBetween(start, end);
 
   return [
     date.getUTCFullYear(),
@@ -97,12 +129,32 @@ function randomBirthday(): string {
   ].join("");
 }
 
+function randomRocBirthday(): string {
+  // 民國 85/01/01～95/12/31，即西元 1996/01/01～2006/12/31。
+  const start = Date.UTC(1996, 0, 1);
+  const end = Date.UTC(2006, 11, 31);
+  const date = randomDateBetween(start, end);
+
+  return [
+    String(date.getUTCFullYear() - 1911),
+    String(date.getUTCMonth() + 1).padStart(2, "0"),
+    String(date.getUTCDate()).padStart(2, "0"),
+  ].join("");
+}
+
+function randomBirthday(): string {
+  // 西元生日 70%，民國生日 30%。
+  return Math.random() < 0.7
+    ? randomWesternBirthday()
+    : randomRocBirthday();
+}
+
 function generatePerson(): Person {
   const englishLastName = pick(englishLastNames);
   const englishFirstName = pick(englishFirstNames);
 
   return {
-    chineseLastName: pick(chineseLastNames),
+    chineseLastName: pickChineseLastName(),
     chineseFirstName: pick(chineseFirstNames),
     englishLastName,
     englishFirstName,
@@ -189,7 +241,7 @@ export default function Page() {
         <header>
           <p className="eyebrow">RANDOM PROFILE</p>
           <h1 id="page-title">隨機個資產生器</h1>
-          <p className="hint">生日範圍 2001/01/01～2008/08/01</p>
+          <p className="hint">生日：西元 70%・民國 85～95 年 30%</p>
         </header>
 
         <div className="fields" aria-live="polite">
