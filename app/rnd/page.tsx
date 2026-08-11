@@ -200,8 +200,15 @@ function generatePerson(): Person {
   const englishFirstNames = gender === "female"
     ? femaleEnglishFirstNames
     : maleEnglishFirstNames;
-  const englishLastName = pick(englishLastNames);
-  const englishFirstName = pick(englishFirstNames);
+  let englishLastName = "";
+  let englishFirstName = "";
+
+  // 英文姓與名合計超過 10 個字元就重新抽取，直到長度不超過 10。
+  do {
+    englishLastName = pick(englishLastNames);
+    englishFirstName = pick(englishFirstNames);
+  } while ((englishFirstName + englishLastName).length > 10);
+
   const nameId = englishFirstName + englishLastName;
   const phone = randomPhone();
   const accountTypeRandom = Math.random();
