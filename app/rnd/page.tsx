@@ -13,7 +13,6 @@ type Person = {
   id: string;
   birthday: string;
   phone: string;
-  accountValue: string;
 };
 
 const chineseLastNames = [
@@ -203,25 +202,25 @@ function generatePerson(): Person {
     : maleEnglishFirstNames;
   const englishLastName = pick(englishLastNames);
   const englishFirstName = pick(englishFirstNames);
-  const id = englishFirstName + englishLastName;
+  const nameId = englishFirstName + englishLastName;
   const phone = randomPhone();
   const accountTypeRandom = Math.random();
 
   let birthday: string;
-  let accountValue: string;
+  let id: string;
 
   if (accountTypeRandom < 0.34) {
     // 34%：ID + 手機號碼；生日欄仍維持原本西元70%、民國30%。
     birthday = randomBirthday();
-    accountValue = (id + phone).toLowerCase();
+    id = (nameId + phone).toLowerCase();
   } else if (accountTypeRandom < 0.67) {
     // 33%：ID + 西元生日。
     birthday = randomWesternBirthday();
-    accountValue = (id + birthday).toLowerCase();
+    id = (nameId + birthday).toLowerCase();
   } else {
     // 33%：ID + 民國生日。
     birthday = randomRocBirthday();
-    accountValue = (id + birthday).toLowerCase();
+    id = (nameId + birthday).toLowerCase();
   }
 
   return {
@@ -232,7 +231,6 @@ function generatePerson(): Person {
     id,
     birthday,
     phone,
-    accountValue,
   };
 }
 
@@ -266,7 +264,7 @@ export default function Page() {
   async function recordPerson() {
     if (!person || recordStatus === "saving") return;
 
-    const recordValue = person.accountValue.toLowerCase();
+    const recordValue = person.id;
 
     try {
       setRecordStatus("saving");
@@ -303,7 +301,6 @@ export default function Page() {
     { key: "id", label: "id" },
     { key: "birthday", label: "生日" },
     { key: "phone", label: "電話" },
-    { key: "accountValue", label: "帳號組合" },
   ];
 
   return (
@@ -316,14 +313,14 @@ export default function Page() {
           {fields.map(({ key, label }) => {
             const value = person?.[key] ?? "—";
             return (
-              <div className="field" key={key}>
+              <div className={key === "id" ? "field id-field" : "field"} key={key}>
                 <div className="content">
                   <span className="label">{label}</span>
                   <strong
                     className={[
                       "value",
                       key === "birthday" || key === "phone" ? "numeric" : "",
-                      key === "accountValue" ? "account-value" : "",
+                      key === "id" ? "account-value" : "",
                     ].filter(Boolean).join(" ")}
                   >
                     {value}
@@ -426,6 +423,13 @@ export default function Page() {
           border-radius: .625rem;
           background: #1a1a1a;
         }
+        .id-field {
+          border-color: #e8650a;
+          background: linear-gradient(135deg, rgba(232, 101, 10, .2), rgba(249, 115, 22, .08));
+          box-shadow: inset 0 0 0 1px rgba(232, 101, 10, .14), 0 8px 24px rgba(232, 101, 10, .08);
+        }
+        .id-field .label { color: #fb923c; }
+        .id-field .value { color: #ffffff; }
         .content { min-width: 0; flex: 1; display: grid; gap: 1px; }
         .label { color: #a3a3a3; font-size: 12px; font-weight: 700; }
         .value {
