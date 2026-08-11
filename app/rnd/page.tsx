@@ -115,9 +115,6 @@ export default function Page() {
     <main className="page">
       <section className="card" aria-labelledby="page-title">
         <header>
-          <p className="eyebrow">RANDOM PROFILE</p>
-          <h1 id="page-title">隨機個資產生器</h1>
-          <p className="hint">生日範圍 2001/01/01～2008/08/01</p>
         </header>
 
         <div className="fields" aria-live="polite">
