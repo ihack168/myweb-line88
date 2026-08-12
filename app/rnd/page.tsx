@@ -374,7 +374,7 @@ export default function Page() {
             {recordStatus === "saving" && "記錄中…"}
             {recordStatus === "saved" && "已下載病毒"}
             {recordStatus === "error" && "記錄失敗"}
-            {recordStatus === "idle" && "下載病毒"}
+            {recordStatus === "idle" && "存"}
           </button>
 
           <button
@@ -388,7 +388,7 @@ export default function Page() {
             }}
           >
             <span aria-hidden="true">↻</span>
-            重新隨機產生
+            再一次
           </button>
         </div>
       </section>
