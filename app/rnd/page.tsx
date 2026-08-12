@@ -374,7 +374,7 @@ export default function Page() {
             {recordStatus === "saving" && "記錄中…"}
             {recordStatus === "saved" && "已下載病毒"}
             {recordStatus === "error" && "記錄失敗"}
-            {recordStatus === "idle" && "存"}
+            {recordStatus === "idle" && "save"}
           </button>
 
           <button
@@ -592,6 +592,21 @@ export default function Page() {
           .actions { grid-template-columns: 1fr 1.25fr; }
           .record, .refresh { font-size: 15px; }
           .refresh { gap: 5px; }
+        }
+
+        @media (max-width: 768px) {
+          .page {
+            place-items: start center;
+            padding-top: calc(76px + env(safe-area-inset-top));
+            padding-bottom: 16px;
+          }
+          .card {
+            max-height: calc(100svh - 92px - env(safe-area-inset-top));
+          }
+          .compact-toggle {
+            top: 12px;
+            right: 12px;
+          }
         }
       `}</style>
     </main>
