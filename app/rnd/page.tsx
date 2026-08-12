@@ -434,7 +434,7 @@ export default function Page() {
             }}
           >
             <span aria-hidden="true">↻</span>
-            再一次
+            換一個
           </button>
         </div>
       </section>
@@ -502,9 +502,11 @@ export default function Page() {
         .compact-card .id-field .content { justify-content: center; }
         .compact-card .account-value {
           width: 100%;
+          font-family: Arial, Helvetica, sans-serif;
           font-size: clamp(48px, 14vw, 76px);
-          line-height: .88;
-          letter-spacing: -.06em;
+          font-weight: 700;
+          line-height: 1.05;
+          letter-spacing: .04em;
         }
         .compact-card .id-field .value {
           text-align: center;
@@ -594,10 +596,10 @@ export default function Page() {
         .numeric { font-variant-numeric: tabular-nums; letter-spacing: .035em; }
         .account-value {
           padding-block: 2px 4px;
-          font-family: "Geist Mono", Consolas, "Courier New", monospace;
+          font-family: Arial, Helvetica, sans-serif;
           font-size: clamp(21px, 6vw, 30px);
-          font-weight: 800;
-          letter-spacing: -.035em;
+          font-weight: 700;
+          letter-spacing: .03em;
         }
         .copy {
           flex: 0 0 auto;
