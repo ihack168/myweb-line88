@@ -88,6 +88,18 @@ const femaleEnglishFirstNames = [
   "Sophie", "Tina", "Wendy", "Zoe", "Amanda", "Amber", "Angela", "Betty",
   "Carol", "Cindy", "Claire", "Diana", "Ella", "Jane", "Jenny", "Kelly",
   "Mary", "Megan", "Nancy", "Rebecca", "Susan", "Vicky", "Yvonne",
+  "Abby", "Ada", "Adele", "Aileen", "Alina", "Alison", "Alma", "Anita",
+  "April", "Ashley", "Audrey", "Bella", "Bonnie", "Brenda", "Cathy", "Celia",
+  "Connie", "Daisy", "Daphne", "Debbie", "Denise", "Dora", "Edith", "Elaine",
+  "Ellen", "Elsa", "Erica", "Esther", "Fiona", "Flora", "Gina", "Gloria",
+  "Hannah", "Hazel", "Heidi", "Irene", "Janet", "Jasmine", "Jean", "Jill",
+  "Joan", "Joy", "Joyce", "Judy", "Karen", "Kate", "Katie", "Kim",
+  "Lana", "Lena", "Lily", "Lucy", "Lydia", "Mabel", "Maggie", "Mandy",
+  "May", "Melody", "Molly", "Nadia", "Naomi", "Nora", "Pamela", "Paula",
+  "Peggy", "Penny", "Rita", "Rose", "Ruby", "Sally", "Sandra", "Selina",
+  "Sharon", "Stella", "Tammy", "Tanya", "Teresa", "Tracy", "Valerie", "Vera",
+  "Verna", "Viola", "Violet", "Vivian", "Whitney", "Winona", "Agnes", "Ariel",
+  "Becky", "Camila", "Donna", "Elisa", "Faith", "Gwen",
 ];
 
 const maleEnglishFirstNames = [
@@ -96,6 +108,15 @@ const maleEnglishFirstNames = [
   "Ethan", "George", "Henry", "Jack", "James", "John", "Justin", "Ken",
   "Mark", "Matt", "Michael", "Peter", "Robert", "Sam", "Steven", "Thomas",
   "Tony", "Vincent", "William", "Wilson",
+  "Albert", "Alfred", "Allen", "Alvin", "Arthur", "Barry", "Benny", "Blake",
+  "Bob", "Bobby", "Caleb", "Calvin", "Carl", "Charles", "Chris", "Clark",
+  "Colin", "Dale", "Dean", "Dennis", "Derek", "Dylan", "Edgar", "Edwin",
+  "Eli", "Evan", "Felix", "Frank", "Fred", "Gary", "Gavin", "Gordon",
+  "Harry", "Howard", "Hugh", "Ian", "Ivan", "Jake", "Jay", "Jeff",
+  "Jerry", "Jesse", "Joel", "Johnny", "Joseph", "Keith", "Kyle", "Leon",
+  "Louis", "Lucas", "Luke", "Martin", "Mason", "Max", "Nathan", "Neil",
+  "Nick", "Noah", "Oscar", "Owen", "Paul", "Philip", "Randy", "Ray",
+  "Roger", "Ron", "Roy", "Scott", "Sean", "Shawn", "Simon", "Tim",
 ];
 
 // NCC 核配的一般行動通信前綴；091～093提高權重，模擬常見程度。
@@ -242,11 +263,12 @@ function generatePerson(): Person {
 
 function getCompactIdLines(person: Person): string[] {
   const id = person.id.toLowerCase();
+  const firstName = person.englishFirstName.toLowerCase();
+  const lastName = person.englishLastName.toLowerCase();
 
   if (id.endsWith(person.phone)) {
-    const englishId = id.slice(0, -person.phone.length);
     return [
-      englishId,
+      firstName,
       person.phone.slice(0, 4),
       person.phone.slice(4, 7),
       person.phone.slice(7, 10),
@@ -254,13 +276,12 @@ function getCompactIdLines(person: Person): string[] {
   }
 
   const birthday = person.birthday;
-  const englishId = id.slice(0, -birthday.length);
 
   if (birthday.length === 8) {
-    return [englishId, birthday.slice(0, 4), birthday.slice(4, 8)];
+    return [firstName, lastName, birthday.slice(0, 4), birthday.slice(4, 8)];
   }
 
-  return [englishId, birthday.slice(0, 2), birthday.slice(2, 6)];
+  return [firstName, lastName, birthday.slice(0, 2), birthday.slice(2, 6)];
 }
 
 export default function Page() {
@@ -481,9 +502,9 @@ export default function Page() {
         .compact-card .id-field .content { justify-content: center; }
         .compact-card .account-value {
           width: 100%;
-          font-size: clamp(40px, 11.5vw, 64px);
-          line-height: .95;
-          letter-spacing: -.055em;
+          font-size: clamp(48px, 14vw, 76px);
+          line-height: .88;
+          letter-spacing: -.06em;
         }
         .compact-card .id-field .value {
           text-align: center;
@@ -497,6 +518,26 @@ export default function Page() {
           width: 36px;
           min-height: 36px;
         }
+        .compact-card .actions {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          justify-content: center;
+          gap: 16px;
+        }
+        .compact-card .record,
+        .compact-card .refresh {
+          width: min(100%, 150px);
+          aspect-ratio: 1 / 1;
+          min-height: 0;
+          justify-self: center;
+          border-radius: 18px;
+          font-size: clamp(24px, 7vw, 34px);
+          line-height: 1.05;
+        }
+        .compact-card .refresh {
+          flex-direction: column;
+          gap: 2px;
+        }
+        .compact-card .refresh span { font-size: 38px; }
         header { margin-bottom: clamp(14px, 2.7vh, 24px); }
         .eyebrow {
           margin: 0 0 5px;
