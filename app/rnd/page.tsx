@@ -245,6 +245,7 @@ export default function Page() {
   const [person, setPerson] = useState<Person | null>(null);
   const [copied, setCopied] = useState<keyof Person | null>(null);
   const [recordStatus, setRecordStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [compactMode, setCompactMode] = useState(false);
 
   useEffect(() => {
     setPerson(generatePerson());
@@ -312,12 +313,23 @@ export default function Page() {
 
   return (
     <main className="page">
-      <section className="card" aria-labelledby="page-title">
-        <header>
-        </header>
+      <section className={compactMode ? "card compact-card" : "card"} aria-labelledby="page-title">
+        <button
+          className="compact-toggle"
+          type="button"
+          onClick={() => setCompactMode((current) => !current)}
+          aria-label={compactMode ? "展開完整資料" : "只顯示 ID 和操作按鈕"}
+          title={compactMode ? "展開" : "精簡"}
+        >
+          {compactMode ? "□" : "−"}
+        </button>
+
+        {!compactMode && <header>
+        </header>}
 
         <div className="fields" aria-live="polite">
           {fields.map(({ key, label }) => {
+            if (compactMode && key !== "id") return null;
             const value = person?.[key] ?? "—";
             return (
               <div className={key === "id" ? "field id-field" : "field"} key={key}>
@@ -401,6 +413,7 @@ export default function Page() {
             #0a0a0a;
         }
         .card {
+          position: relative;
           width: min(100%, 560px);
           max-height: calc(100svh - 24px);
           overflow: auto;
@@ -410,6 +423,33 @@ export default function Page() {
           background: rgba(20, 20, 20, .96);
           box-shadow: 0 24px 70px rgba(0, 0, 0, .48);
         }
+        .compact-card {
+          width: min(100%, 560px);
+          padding: 18px;
+        }
+        .compact-toggle {
+          position: absolute;
+          z-index: 2;
+          top: 8px;
+          right: 8px;
+          width: 30px;
+          height: 30px;
+          display: grid;
+          place-items: center;
+          padding: 0;
+          border: 1px solid #3a3a3a;
+          border-radius: 8px;
+          color: #fb923c;
+          background: #202020;
+          font-size: 19px;
+          font-weight: 900;
+          line-height: 1;
+          cursor: pointer;
+        }
+        .compact-toggle:hover { border-color: #e8650a; background: #2a1b12; }
+        .compact-card .fields { margin-top: 22px; }
+        .compact-card .id-field { min-height: 82px; }
+        .compact-card .account-value { font-size: clamp(22px, 6.2vw, 32px); }
         header { margin-bottom: clamp(14px, 2.7vh, 24px); }
         .eyebrow {
           margin: 0 0 5px;
