@@ -640,6 +640,21 @@ export default function Page() {
           .record, .refresh { font-size: 15px; }
           .refresh { gap: 5px; }
         }
+
+        @media (max-width: 768px) {
+          .page {
+            place-items: start center;
+            padding-top: calc(76px + env(safe-area-inset-top));
+            padding-bottom: 16px;
+          }
+          .card {
+            max-height: calc(100svh - 92px - env(safe-area-inset-top));
+          }
+          .compact-toggle {
+            top: 12px;
+            right: 12px;
+          }
+        }
       `}</style>
     </main>
   );
