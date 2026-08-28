@@ -213,21 +213,23 @@ function randomPhone(): string {
 }
 
 function generatePerson(): Person {
-  const gender = Math.random() < 0.5 ? "female" : "male";
+  // 男女清單數量不同，因此依清單長度選擇分組，
+  // 再於該組均勻抽取，才能讓每一個英文名字的中選率完全相同。
+  const totalEnglishFirstNameCount =
+    femaleEnglishFirstNames.length + maleEnglishFirstNames.length;
+  const gender = Math.random() <
+    femaleEnglishFirstNames.length / totalEnglishFirstNameCount
+    ? "female"
+    : "male";
   const chineseFirstNames = gender === "female"
     ? femaleChineseFirstNames
     : maleChineseFirstNames;
   const englishFirstNames = gender === "female"
     ? femaleEnglishFirstNames
     : maleEnglishFirstNames;
-  let englishLastName = "";
-  let englishFirstName = "";
-
-  // 英文姓與名合計超過 10 個字元就重新抽取，直到長度不超過 10。
-  do {
-    englishLastName = pick(englishLastNames);
-    englishFirstName = pick(englishFirstNames);
-  } while ((englishFirstName + englishLastName).length > 10);
+  // 英文姓、英文名都只均勻抽取一次，不再因字數而重抽。
+  const englishLastName = pick(englishLastNames);
+  const englishFirstName = pick(englishFirstNames);
 
   const nameId = englishFirstName + englishLastName;
   const phone = randomPhone();
@@ -328,19 +330,46 @@ export default function Page() {
       url.searchParams.set("action", "recordPersonalData");
       url.searchParams.set("value", recordValue);
 
-      // GAS Web App 是跨網域服務；no-cors 可避免瀏覽器擋下送出請求。
-      await fetch(url.toString(), {
+      // 必須讀到 GAS 的成功回應後，按鈕才可以顯示「已存」。
+      // 請勿使用 no-cors，否則瀏覽器只會得到 opaque response，
+      // 無法確認遠端是否真的已經儲存完成。
+      const response = await fetch(url.toString(), {
         method: "GET",
-        mode: "no-cors",
         cache: "no-store",
       });
 
+      if (!response.ok) {
+        throw new Error(`GAS 儲存失敗：HTTP ${response.status}`);
+      }
+
+      const responseText = (await response.text()).trim();
+      let remoteConfirmed = false;
+
+      try {
+        const result = JSON.parse(responseText) as {
+          success?: boolean;
+          saved?: boolean;
+          status?: string;
+          message?: string;
+        };
+        const statusText = `${result.status ?? ""} ${result.message ?? ""}`.toLowerCase();
+
+        remoteConfirmed =
+          result.success === true ||
+          result.saved === true ||
+          /success|saved|recorded|已存|儲存完成/.test(statusText);
+      } catch {
+        remoteConfirmed = /success|saved|recorded|已存|儲存完成/i.test(responseText);
+      }
+
+      if (!remoteConfirmed) {
+        throw new Error(`GAS 未回覆儲存成功：${responseText || "空白回應"}`);
+      }
+
       setRecordStatus("saved");
-      window.setTimeout(() => setRecordStatus("idle"), 1600);
     } catch (error) {
       console.error(error);
       setRecordStatus("error");
-      window.setTimeout(() => setRecordStatus("idle"), 2200);
     }
   }
 
@@ -412,15 +441,12 @@ export default function Page() {
 
         <div className="actions">
           <button
-            className="record"
+            className={`record ${recordStatus}`}
             type="button"
             disabled={!person || recordStatus === "saving"}
             onClick={recordPerson}
           >
-            {recordStatus === "saving" && "記錄中…"}
-            {recordStatus === "saved" && "已下載病毒"}
-            {recordStatus === "error" && "記錄失敗"}
-            {recordStatus === "idle" && "存"}
+            {recordStatus === "saving" ? "儲存中…" : recordStatus === "saved" ? "已存" : "未存"}
           </button>
 
           <button
@@ -646,16 +672,27 @@ export default function Page() {
           cursor: pointer;
         }
         .record {
-          border: 1px solid #e8650a;
-          color: #fb923c;
-          background: #1a1a1a;
+          border: 1px solid #ef4444;
+          color: #ffffff;
+          background: #dc2626;
+          box-shadow: 0 10px 28px rgba(220, 38, 38, .22);
+        }
+        .record.saved {
+          border-color: #22c55e;
+          background: #16a34a;
+          box-shadow: 0 10px 28px rgba(22, 163, 74, .25);
+        }
+        .record.saving {
+          border-color: #f87171;
+          background: #b91c1c;
         }
         .refresh {
           background: #e8650a;
           box-shadow: 0 10px 28px rgba(232, 101, 10, .25);
         }
         .refresh span { font-size: 26px; line-height: 1; }
-        .record:hover { color: white; background: #c65308; }
+        .record:hover { color: white; background: #b91c1c; }
+        .record.saved:hover { background: #15803d; }
         .refresh:hover { background: #f97316; }
         .refresh:focus-visible, .record:focus-visible, .copy:focus-visible {
           outline: 3px solid rgba(232, 101, 10, .42);
