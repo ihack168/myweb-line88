@@ -213,14 +213,13 @@ export default function Home() {
                 </span>
 
                 <span className="mt-4 block text-xl font-black not-italic leading-relaxed tracking-normal text-white md:text-3xl">
-                  網路投票協助、AEO、GEO、SEO、LINE AI 串接與社群行銷優化
+                  網路投票協助、幫你投票、買票、灌票、AEO、GEO、SEO與社群行銷優化
                 </span>
               </h1>
 
               <p className="mx-auto mt-6 max-w-4xl text-sm leading-7 text-gray-400 md:text-lg md:leading-8">
                 提供各類網路票選活動協助、AEO 答案引擎優化、GEO
-                生成式引擎優化、SEO 搜尋引擎優化、LINE 官方帳號 AI
-                客服串接，以及 Facebook、Instagram、Threads
+                生成式引擎優化、SEO 搜尋引擎優化，以及 Facebook、Instagram、Threads
                 社群行銷與流量優化服務。
               </p>
 
@@ -289,16 +288,6 @@ export default function Home() {
                 </p>
               </article>
 
-              <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
-                <h3 className="text-lg font-black text-[#ff8800]">
-                  LINE 官方帳號 AI 串接
-                </h3>
-
-                <p className="mt-3 text-sm leading-7 text-gray-400 md:text-base">
-                  協助 LINE 官方帳號串接 ChatGPT、Gemini、企業資料與 RAG
-                  知識庫，建立自動回覆、問題解答與客服輔助系統。
-                </p>
-              </article>
 
               <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
                 <h3 className="text-lg font-black text-[#ff8800]">
