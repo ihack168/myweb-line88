@@ -64,12 +64,6 @@ const services: ServiceItem[] = [
     description: "AEO、GEO、SEO AI優化",
     icon: <Bot size={28} />,
   },
-  {
-    title: "Line@官方帳號AI客服串接",
-    description: "Line串接AI（Gemini、ChatGPT）",
-    link: "/content/line-ai-services",
-    icon: <Sparkles size={28} />,
-  },
 ];
 
 export function ServicesSection() {
