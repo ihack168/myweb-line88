@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 
 import { ServicesSection } from "@/components/services-section";
 import { LatestPostsSection } from "@/components/latest-posts-section";
@@ -8,10 +7,10 @@ import { ContactSection } from "@/components/contact-section";
 const SITE_URL = "https://www.line88.tw";
 
 const PAGE_TITLE =
-  "洛克希德黑克斯｜網路投票協助、AEO GEO SEO、LINE AI 串接與社群行銷";
+  "洛克希德黑克斯｜Google投票、LINE投票、Facebook投票協助與AEO、GEO、SEO等社群行銷";
 
 const PAGE_DESCRIPTION =
-  "洛克希德黑克斯提供網路投票協助、AEO、GEO、SEO 網路行銷優化、LINE 官方帳號 AI 串接，以及 Facebook、Instagram、Threads 社群行銷優化服務。";
+  "洛克希德黑克斯提供 Google投票、LINE投票、Facebook投票、買票、灌票、投票協助與幫你投票服務，並提供AEO、GEO、SEO等社群行銷服務。。";
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,
@@ -30,8 +29,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/images/logo.png",
+        url: "/images/hero-desktop.png",
         alt: "洛克希德黑克斯 Lockhead Hex",
+        width: 2560,
+        height: 1080,
       },
     ],
   },
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: PAGE_TITLE,
     description: PAGE_DESCRIPTION,
-    images: ["/images/logo.png"],
+    images: ["/images/hero-desktop.png"],
   },
 };
 
@@ -184,60 +185,81 @@ export default function Home() {
       />
 
       <main className="relative bg-[radial-gradient(circle_at_top,rgba(255,136,0,0.14),transparent_26%),linear-gradient(to_bottom,#0a0a0a,#080808_45%,#0a0a0a)]">
-        {/* 首頁主視覺與唯一 H1 */}
-        <section className="px-5 pb-12 pt-28 md:px-6 md:pb-16 md:pt-32">
-          <div className="mx-auto flex max-w-6xl flex-col items-center text-center">
-            <div className="group relative">
-              <div className="absolute -inset-10 rounded-full bg-[#ff8800]/10 blur-[80px] transition-all duration-1000 group-hover:bg-[#ff8800]/20" />
 
-              <div className="absolute inset-0 rounded-full bg-[#ff8800]/5 opacity-0 blur-[40px] transition-opacity duration-700 group-hover:opacity-100" />
+        {/* =========================================
+            首頁 Hero
+            Desktop: 2560 × 1080
+            Mobile: 1080 × 1440
+            ========================================= */}
+        <section className="relative h-[650px] overflow-hidden sm:h-[680px] lg:h-[600px]">
 
-              <div className="relative z-10">
-                <Image
-                  src="/images/logo.png"
-                  alt="洛克希德黑克斯 Lockhead Hex"
-                  width={500}
-                  height={500}
-                  priority
-                  className="h-auto w-64 drop-shadow-[0_0_15px_rgba(255,136,0,0.2)] transition-all duration-700 group-hover:scale-105 group-hover:drop-shadow-[0_0_35px_rgba(255,136,0,0.6)] md:w-[400px]"
-                />
-              </div>
+          {/* Hero 背景圖片 */}
+          <picture className="absolute inset-0 block h-full w-full">
+            {/* 手機版 */}
+            <source
+              media="(max-width: 767px)"
+              srcSet="/images/hero-mobile.png"
+            />
 
-              <div className="mx-auto mt-4 h-[3px] w-20 bg-gradient-to-r from-transparent via-[#ff8800] to-transparent shadow-[0_0_15px_#ff8800] transition-all duration-700 group-hover:w-40" />
-            </div>
+            {/* 桌機版 */}
+            <img
+              src="/images/hero-desktop.png"
+              alt="洛克希德黑克斯網路投票協助與數位行銷服務"
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              width={2560}
+              height={1080}
+              fetchPriority="high"
+            />
+          </picture>
 
-            <div className="mt-7">
-              <h1 className="max-w-5xl text-3xl font-black leading-tight tracking-tight text-white md:text-5xl">
-                <span className="block italic">
-                  LOCKHEAD <span className="text-[#ff8800]">HEX</span>
-                </span>
+          {/* 左側黑色漸層，讓 Hero 文字更清楚 */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
 
-                <span className="mt-4 block text-xl font-black not-italic leading-relaxed tracking-normal text-white md:text-3xl">
-                  網路投票協助、幫你投票、買票、灌票、AEO、GEO、SEO與社群行銷優化
+          {/* 下方漸層，讓畫面銜接網站內容 */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/10" />
+
+          {/* Hero 內容 */}
+          <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6 lg:px-8">
+            <div className="max-w-2xl">
+
+              {/* 品牌英文 */}
+              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#ff8800] drop-shadow-lg md:text-base">
+                LOCKHEAD HEX
+              </p>
+
+              {/* 唯一 H1 */}
+              <h1 className="mt-3 text-4xl font-black leading-tight tracking-tight text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.8)] sm:text-5xl lg:text-6xl">
+                網路投票協助
+                <br />
+                <span className="text-[#ff8800]">
+                  數位行銷與 AI 解決方案
                 </span>
               </h1>
 
-              <p className="mx-auto mt-6 max-w-4xl text-sm leading-7 text-gray-400 md:text-lg md:leading-8">
+              {/* Hero 說明 */}
+              <p className="mt-5 max-w-xl text-base leading-7 text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] sm:text-lg sm:leading-8">
                 提供各類網路票選活動協助、AEO 答案引擎優化、GEO
-                生成式引擎優化、SEO 搜尋引擎優化，以及 Facebook、Instagram、Threads
-                社群行銷與流量優化服務。
+                生成式引擎優化、SEO 搜尋引擎優化，以及 Facebook、Instagram、
+                Threads 社群行銷與流量優化服務。
               </p>
 
-              <div className="mt-8 flex flex-wrap justify-center gap-3">
+              {/* Hero 按鈕 */}
+              <div className="mt-7 flex flex-wrap gap-3">
                 <a
                   href="#services"
-                  className="rounded-full bg-[#ff8800] px-6 py-3 text-sm font-black text-black transition duration-300 hover:-translate-y-0.5 hover:bg-[#ff9d2e]"
+                  className="rounded-full bg-[#ff8800] px-6 py-3 text-sm font-black text-black shadow-[0_8px_30px_rgba(255,136,0,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#ff9d2e] hover:shadow-[0_12px_35px_rgba(255,136,0,0.45)]"
                 >
                   查看服務項目
                 </a>
 
                 <a
                   href="/contact"
-                  className="rounded-full border border-[#ff8800]/40 bg-white/5 px-6 py-3 text-sm font-black text-[#ff8800] backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-[#ff8800] hover:bg-[#ff8800]/10"
+                  className="rounded-full border border-white/40 bg-black/20 px-6 py-3 text-sm font-black text-white backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/15"
                 >
                   聯絡我們
                 </a>
               </div>
+
             </div>
           </div>
         </section>
@@ -264,6 +286,7 @@ export default function Home() {
             </div>
 
             <div className="mt-8 grid gap-5 md:grid-cols-2">
+
               <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
                 <h3 className="text-lg font-black text-[#ff8800]">
                   網路投票協助
@@ -288,7 +311,6 @@ export default function Home() {
                 </p>
               </article>
 
-
               <article className="rounded-2xl border border-white/10 bg-black/20 p-5">
                 <h3 className="text-lg font-black text-[#ff8800]">
                   社群行銷優化
@@ -299,6 +321,7 @@ export default function Home() {
                   等平台的社群內容、曝光、互動與流量策略，強化品牌在不同社群渠道的觸及表現。
                 </p>
               </article>
+
             </div>
           </div>
         </section>
@@ -306,6 +329,7 @@ export default function Home() {
         <LatestPostsSection />
 
         <ContactSection />
+
       </main>
     </div>
   );
