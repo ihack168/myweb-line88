@@ -4,7 +4,7 @@ const SITE_URL = "https://www.line88.tw"
 const PAGE_URL = `${SITE_URL}/jp`
 
 const SITE_NAME = "ネット投票イベントの票購入・票数増加をサポート｜各種SNSの大量アカウントに対応"
-const SITE_NAME_EN = "Lockhead Hex"
+const SITE_NAME_EN = "A76"
 
 const PAGE_TITLE =
   "ネット投票イベントの票購入・票数増加をサポート｜各種SNSの大量アカウントに対応"
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
         url: "/images/hero-desktop.png",
         width: 2560,
         height: 1080,
-        alt: "ネット投票活動をサポートする洛克希德黑克斯",
+        alt: "A20",
       },
     ],
   },
@@ -119,11 +119,11 @@ export default function JapanPage() {
     areaServed: [
       {
         "@type": "Country",
-        name: "Japan",
+        name: "A78",
       },
       {
         "@type": "Country",
-        name: "Taiwan",
+        name: "A80",
       },
     ],
 
@@ -155,11 +155,11 @@ export default function JapanPage() {
           areaServed: [
             {
               "@type": "Country",
-              name: "Japan",
+              name: "A79",
             },
             {
               "@type": "Country",
-              name: "Taiwan",
+              name: "A81",
             },
           ],
 
@@ -491,7 +491,7 @@ export default function JapanPage() {
 
             <img
               src="/images/hero-desktop.png"
-              alt="ネット投票活動をサポートする洛克希德黑克斯"
+              alt="A62"
               className="absolute inset-0 h-full w-full object-cover object-center"
               width={2560}
               height={1080}
@@ -573,6 +573,10 @@ export default function JapanPage() {
             <div className="mt-10 grid gap-5 md:grid-cols-2">
 
               {/* Google */}
+              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
+                  GOOGLE
+                </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
                   大量のGoogleアカウントで投票をサポート
@@ -584,17 +588,25 @@ export default function JapanPage() {
               </article>
 
               {/* LINE */}
+              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
+                  LINE
+                </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
                   大量のLINEアカウントを使って投票
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  大量のFacebookアカウントを保有しており、さまざまなネット投票をサポートできます。
+                  大量のLINEアカウントを保有しており、さまざまなネット投票をサポートできます。
                 </p>
               </article>
 
               {/* Facebook */}
+              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
+                  FACEBOOK
+                </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
                   大量のFacebookアカウントを使って投票
@@ -664,7 +676,7 @@ export default function JapanPage() {
 
                 <p className="mt-3 text-sm leading-7 text-gray-400">
                   投票イベントの内容や条件を確認し、
-                  スムーズに参加できるようサポートします。
+                  スムーズに参加できるようA73。
                 </p>
               </article>
 
