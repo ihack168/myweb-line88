@@ -3,14 +3,14 @@ import type { Metadata } from "next"
 const SITE_URL = "https://www.line88.tw"
 const PAGE_URL = `${SITE_URL}/jp`
 
-const SITE_NAME = "洛克希德黑克斯"
-const SITE_NAME_EN = "Lockhead Hex"
+const SITE_NAME = "A1"
+const SITE_NAME_EN = "A76"
 
 const PAGE_TITLE =
-  "ネット投票サポート｜Google・LINE・Facebook投票｜洛克希德黑克ス"
+  "A2"
 
 const PAGE_DESCRIPTION =
-  "Google、LINE、Facebookなどを利用したネット投票活動をサポート。投票方法の確認、参加手順、投票イベントの運用など、各種オンライン投票をサポートします。"
+  "A3"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -20,23 +20,23 @@ export const metadata: Metadata = {
   description: PAGE_DESCRIPTION,
 
   keywords: [
-    "ネット投票",
-    "ネット投票サポート",
-    "ネット投票活動",
-    "オンライン投票",
-    "投票イベント",
-    "投票キャンペーン",
-    "Google投票",
-    "Googleフォーム投票",
-    "Google投票サポート",
-    "LINE投票",
-    "LINE投票サポート",
-    "Facebook投票",
-    "Facebook投票サポート",
-    "投票活動サポート",
-    "投票イベントサポート",
-    "洛克希德黑克斯",
-    "Lockhead Hex",
+    "A4",
+    "A5",
+    "A6",
+    "A7",
+    "A8",
+    "A9",
+    "A10",
+    "A11",
+    "A12",
+    "A13",
+    "A14",
+    "A15",
+    "A16",
+    "A17",
+    "A18",
+    "A19",
+    "A77",
   ],
 
   alternates: {
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
         url: "/images/hero-desktop.png",
         width: 2560,
         height: 1080,
-        alt: "ネット投票サポート｜洛克希德黑克ス",
+        alt: "A20",
       },
     ],
   },
@@ -119,26 +119,26 @@ export default function JapanPage() {
     areaServed: [
       {
         "@type": "Country",
-        name: "Japan",
+        name: "A78",
       },
       {
         "@type": "Country",
-        name: "Taiwan",
+        name: "A80",
       },
     ],
 
     knowsAbout: [
-      "ネット投票",
-      "オンライン投票",
-      "投票イベント",
-      "投票キャンペーン",
-      "Google投票",
-      "Googleフォーム投票",
-      "LINE投票",
-      "Facebook投票",
-      "投票活動サポート",
-      "デジタルマーケティング",
-      "ソーシャルメディアマーケティング",
+      "A21",
+      "A22",
+      "A23",
+      "A24",
+      "A25",
+      "A26",
+      "A27",
+      "A28",
+      "A29",
+      "A30",
+      "A31",
     ],
 
     makesOffer: [
@@ -148,23 +148,23 @@ export default function JapanPage() {
         itemOffered: {
           "@type": "Service",
 
-          name: "ネット投票活動サポート",
+          name: "A32",
 
-          serviceType: "ネット投票活動サポート",
+          serviceType: "A33",
 
           areaServed: [
             {
               "@type": "Country",
-              name: "Japan",
+              name: "A79",
             },
             {
               "@type": "Country",
-              name: "Taiwan",
+              name: "A81",
             },
           ],
 
           description:
-            "Google、LINE、Facebookなどを利用したネット投票活動について、投票方法の確認、参加手順、投票イベントの運用などをサポートします。",
+            "A34",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -178,14 +178,14 @@ export default function JapanPage() {
         itemOffered: {
           "@type": "Service",
 
-          name: "Google投票サポート",
+          name: "A35",
 
-          serviceType: "Google投票サポート",
+          serviceType: "A36",
 
           areaServed: "JP",
 
           description:
-            "Googleフォームなどを利用したネット投票について、投票ページの確認、参加方法、投票手順などをサポートします。",
+            "A37",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -199,14 +199,14 @@ export default function JapanPage() {
         itemOffered: {
           "@type": "Service",
 
-          name: "LINE投票サポート",
+          name: "A38",
 
-          serviceType: "LINE投票サポート",
+          serviceType: "A39",
 
           areaServed: "JP",
 
           description:
-            "LINEを利用した投票キャンペーンについて、参加方法、投票手順、イベント運用などをサポートします。",
+            "A40",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -220,14 +220,14 @@ export default function JapanPage() {
         itemOffered: {
           "@type": "Service",
 
-          name: "Facebook投票サポート",
+          name: "A41",
 
-          serviceType: "Facebook投票サポート",
+          serviceType: "A42",
 
           areaServed: "JP",
 
           description:
-            "Facebook上で実施される投票イベントについて、投票方法、参加手順、イベント運用などをサポートします。",
+            "A43",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -295,10 +295,10 @@ export default function JapanPage() {
 
     "@id": `${PAGE_URL}/#services`,
 
-    name: "ネット投票サービス",
+    name: "A44",
 
     description:
-      "Google、LINE、Facebookなどのネット投票活動をサポートするサービス",
+      "A45",
 
     itemListElement: [
       {
@@ -308,10 +308,10 @@ export default function JapanPage() {
         item: {
           "@type": "Service",
 
-          name: "Google投票サポート",
+          name: "A46",
 
           description:
-            "Googleフォームなどを利用したネット投票について、投票方法や参加手順をサポートします。",
+            "A47",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -326,10 +326,10 @@ export default function JapanPage() {
         item: {
           "@type": "Service",
 
-          name: "LINE投票サポート",
+          name: "A48",
 
           description:
-            "LINEを利用した投票イベントについて、参加方法や投票手順をサポートします。",
+            "A49",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -344,10 +344,10 @@ export default function JapanPage() {
         item: {
           "@type": "Service",
 
-          name: "Facebook投票サポート",
+          name: "A50",
 
           description:
-            "Facebook上で実施される投票イベントについて、投票方法や参加手順をサポートします。",
+            "A51",
 
           provider: {
             "@id": `${SITE_URL}/#organization`,
@@ -368,65 +368,65 @@ export default function JapanPage() {
       {
         "@type": "Question",
 
-        name: "ネット投票のサポートには対応していますか？",
+        name: "A52",
 
         acceptedAnswer: {
           "@type": "Answer",
 
           text:
-            "はい。Google、LINE、Facebookなどを利用したネット投票活動について、投票方法の確認、参加手順、投票イベントの運用などをサポートしています。",
+            "A53",
         },
       },
 
       {
         "@type": "Question",
 
-        name: "Googleフォームを利用した投票にも対応していますか？",
+        name: "A54",
 
         acceptedAnswer: {
           "@type": "Answer",
 
           text:
-            "はい。Googleフォームなどを利用したネット投票について、投票ページの確認、参加方法、投票手順などをサポートしています。",
+            "A55",
         },
       },
 
       {
         "@type": "Question",
 
-        name: "LINEを利用した投票イベントにも対応していますか？",
+        name: "A56",
 
         acceptedAnswer: {
           "@type": "Answer",
 
           text:
-            "はい。LINEを利用した投票キャンペーンについて、参加方法や投票手順などをサポートしています。",
+            "A57",
         },
       },
 
       {
         "@type": "Question",
 
-        name: "Facebookの投票イベントにも対応していますか？",
+        name: "A58",
 
         acceptedAnswer: {
           "@type": "Answer",
 
           text:
-            "はい。Facebook上で実施される投票イベントについて、投票方法や参加手順などをサポートしています。",
+            "A59",
         },
       },
 
       {
         "@type": "Question",
 
-        name: "日本から問い合わせできますか？",
+        name: "A60",
 
         acceptedAnswer: {
           "@type": "Answer",
 
           text:
-            "はい。日本からのお問い合わせにも対応しています。サービス内容や投票イベントについて、お気軽にお問い合わせください。",
+            "A61",
         },
       },
     ],
@@ -491,7 +491,7 @@ export default function JapanPage() {
 
             <img
               src="/images/hero-desktop.png"
-              alt="ネット投票活動をサポートする洛克希德黑克斯"
+              alt="A62"
               className="absolute inset-0 h-full w-full object-cover object-center"
               width={2560}
               height={1080}
@@ -507,7 +507,7 @@ export default function JapanPage() {
             <div className="max-w-2xl">
 
               <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#ff8800] drop-shadow-lg md:text-base">
-                LOCKHEAD HEX
+                A65
               </p>
 
               <h1
@@ -517,7 +517,7 @@ export default function JapanPage() {
                 ネット投票活動を
                 <br />
                 <span className="text-[#ff8800]">
-                  サポートします
+                  A73
                 </span>
               </h1>
 
@@ -525,7 +525,7 @@ export default function JapanPage() {
                 Google、LINE、Facebookなどを利用した
                 ネット投票イベントについて、
                 投票方法の確認、参加手順、
-                投票イベントの運用などをサポートします。
+                投票イベントの運用などをA73。
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -533,14 +533,14 @@ export default function JapanPage() {
                   href="#services"
                   className="rounded-full bg-[#ff8800] px-6 py-3 text-sm font-black text-black shadow-[0_8px_30px_rgba(255,136,0,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#ff9d2e] hover:shadow-[0_12px_35px_rgba(255,136,0,0.45)]"
                 >
-                  サービスを見る
+                  A74
                 </a>
 
                 <a
                   href="/jp/contact"
                   className="rounded-full border border-white/40 bg-black/20 px-6 py-3 text-sm font-black text-white backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/15"
                 >
-                  お問い合わせ
+                  A75
                 </a>
               </div>
 
@@ -561,7 +561,7 @@ export default function JapanPage() {
 
             <div className="text-center">
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800] md:text-sm">
-                NET VOTING SUPPORT
+                A63
               </p>
 
               <h2
@@ -574,7 +574,7 @@ export default function JapanPage() {
               <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-gray-400 md:text-base md:leading-8">
                 各種オンライン投票・投票キャンペーンについて、
                 プラットフォームごとの投票方法や参加手順を確認し、
-                スムーズな投票活動をサポートします。
+                スムーズな投票活動をA73。
               </p>
             </div>
 
@@ -584,7 +584,7 @@ export default function JapanPage() {
 
               <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  GOOGLE
+                  A69
                 </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
@@ -593,7 +593,7 @@ export default function JapanPage() {
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
                   Googleフォームなどを利用したネット投票について、
-                  投票ページの確認、参加方法、投票手順などをサポートします。
+                  投票ページの確認、参加方法、投票手順などをA73。
                 </p>
               </article>
 
@@ -601,7 +601,7 @@ export default function JapanPage() {
 
               <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  LINE
+                  A70
                 </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
@@ -619,7 +619,7 @@ export default function JapanPage() {
 
               <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  FACEBOOK
+                  A66
                 </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
@@ -629,7 +629,7 @@ export default function JapanPage() {
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
                   Facebook上で実施される投票イベントについて、
                   投票方法や参加手順を確認し、
-                  投票活動をサポートします。
+                  投票活動をA73。
                 </p>
               </article>
 
@@ -637,7 +637,7 @@ export default function JapanPage() {
 
               <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  ONLINE VOTING
+                  A64
                 </p>
 
                 <h3 className="mt-2 text-xl font-black text-white">
@@ -668,7 +668,7 @@ export default function JapanPage() {
 
             <div className="text-center">
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800]">
-                SUPPORT
+                A67
               </p>
 
               <h2
@@ -711,7 +711,7 @@ export default function JapanPage() {
 
                 <p className="mt-3 text-sm leading-7 text-gray-400">
                   投票イベントの内容や条件を確認し、
-                  スムーズに参加できるようサポートします。
+                  スムーズに参加できるようA73。
                 </p>
               </article>
 
@@ -720,7 +720,7 @@ export default function JapanPage() {
         </section>
 
         {/* ============================================================
-            FAQ
+            A71
         ============================================================ */}
 
         <section
@@ -731,7 +731,7 @@ export default function JapanPage() {
 
             <div className="text-center">
               <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800]">
-                FAQ
+                A72
               </p>
 
               <h2
@@ -795,9 +795,9 @@ export default function JapanPage() {
                 </summary>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。日本からのお問い合わせにも対応しています。
+                  はい。日本からのA75にも対応しています。
                   サービス内容や投票イベントについて、
-                  お気軽にお問い合わせください。
+                  お気軽にA75ください。
                 </p>
               </details>
 
@@ -813,7 +813,7 @@ export default function JapanPage() {
           <div className="mx-auto max-w-5xl rounded-3xl border border-[#ff8800]/20 bg-[#ff8800]/[0.06] p-8 text-center md:p-12">
 
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800]">
-              CONTACT
+              A68
             </p>
 
             <h2 className="mt-3 text-2xl font-black text-white md:text-4xl">
@@ -829,7 +829,7 @@ export default function JapanPage() {
               href="/jp/contact"
               className="mt-7 inline-flex rounded-full bg-[#ff8800] px-7 py-3 text-sm font-black text-black shadow-[0_8px_30px_rgba(255,136,0,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#ff9d2e]"
             >
-              お問い合わせ
+              A75
             </a>
 
           </div>
