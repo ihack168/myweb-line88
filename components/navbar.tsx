@@ -4,11 +4,17 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-const navLinks = [
+const zhNavLinks = [
   { label: "首頁", href: "/" },
   { label: "服務介紹", href: "/#services" },
   { label: "最新文章", href: "/blog" },
   { label: "聯絡我們", href: "/contact" },
+];
+
+const jpNavLinks = [
+  { label: "ホーム", href: "/jp" },
+  { label: "サービス", href: "/jp#services" },
+  { label: "お問い合わせ", href: "/jp/contact" },
 ];
 
 export function Navbar() {
@@ -16,13 +22,27 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
+  // 判斷目前是否為日文網站
+  const isJapanese = pathname === "/jp" || pathname.startsWith("/jp/");
+
+  const navLinks = isJapanese ? jpNavLinks : zhNavLinks;
+
+  // Logo 連結
+  const homeHref = isJapanese ? "/jp" : "/";
+
+  // 語言切換
+  const languageHref = isJapanese ? "/" : "/jp";
+  const languageLabel = isJapanese ? "繁體中文" : "日本語";
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
+
     window.addEventListener("scroll", handleScroll);
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🔥 強制防 freeze：確保每次 route 都解鎖 body
+  // Route 改變時自動關閉手機選單
   useEffect(() => {
     setMobileOpen(false);
     document.body.style.overflow = "unset";
@@ -36,7 +56,9 @@ export function Navbar() {
   const toggleMenu = () => {
     setMobileOpen((prev) => {
       const next = !prev;
+
       document.body.style.overflow = next ? "hidden" : "unset";
+
       return next;
     });
   };
@@ -55,34 +77,47 @@ export function Navbar() {
           `}
         >
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link
+            href={homeHref}
+            className="flex items-center gap-3"
+          >
             <img
               src="/images/logo.png"
-              alt="Logo"
+              alt="Lockhead Hex"
               className="w-10 h-10 rounded-full border border-[#ff8800]/30"
             />
+
             <span className="text-lg md:text-2xl font-black italic tracking-tighter text-[#ff8800]">
-              洛克希德黑克斯
+              {isJapanese ? "LOCKHEAD HEX" : "洛克希德黑克斯"}
             </span>
           </Link>
 
           {/* Desktop */}
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden md:flex items-center gap-8 lg:gap-10">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-2xl lg:text-2xl font-black tracking-wider text-gray-200 hover:text-[#ff8800] transition"
+                className="text-xl lg:text-2xl font-black tracking-wider text-gray-200 hover:text-[#ff8800] transition"
               >
                 {link.label}
               </Link>
             ))}
+
+            {/* Language Switch */}
+            <Link
+              href={languageHref}
+              className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-bold text-white hover:border-[#ff8800] hover:text-[#ff8800] transition"
+            >
+              {languageLabel}
+            </Link>
           </div>
 
           {/* Mobile button */}
           <button
             onClick={toggleMenu}
-            aria-label="menu"
+            aria-label={isJapanese ? "メニュー" : "選單"}
+            aria-expanded={mobileOpen}
             className="md:hidden w-12 h-12 rounded-full border border-white/10 bg-white/5 flex flex-col items-center justify-center gap-1.5"
           >
             <span className="h-0.5 w-6 bg-[#ff8800]" />
@@ -95,19 +130,24 @@ export function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[100] md:hidden">
-          {/* backdrop */}
+          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/70"
             onClick={closeMenu}
           />
 
-          {/* panel */}
+          {/* Panel */}
           <div className="absolute left-3 right-3 bottom-3 rounded-2xl bg-[#111] border border-white/10 p-6">
             <div className="flex justify-between items-center mb-6">
               <div className="text-[#ff8800] font-black text-xl">
-                MENU
+                {isJapanese ? "MENU" : "選單"}
               </div>
-              <button onClick={closeMenu} className="text-2xl text-white">
+
+              <button
+                onClick={closeMenu}
+                className="text-2xl text-white"
+                aria-label={isJapanese ? "閉じる" : "關閉"}
+              >
                 ×
               </button>
             </div>
@@ -123,6 +163,15 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Mobile Language Switch */}
+              <Link
+                href={languageHref}
+                onClick={closeMenu}
+                className="mt-2 border-t border-white/10 pt-4 text-xl font-black text-[#ff8800]"
+              >
+                {isJapanese ? "繁體中文" : "日本語"}
+              </Link>
             </div>
           </div>
         </div>
