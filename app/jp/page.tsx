@@ -506,10 +506,6 @@ export default function JapanPage() {
           <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6 lg:px-8">
             <div className="max-w-2xl">
 
-              <p className="text-sm font-bold uppercase tracking-[0.22em] text-[#ff8800] drop-shadow-lg md:text-base">
-                A65
-              </p>
-
               <h1
                 id="jp-page-title"
                 className="mt-3 text-4xl font-black leading-tight tracking-tight text-white drop-shadow-[0_3px_10px_rgba(0,0,0,0.8)] sm:text-5xl lg:text-6xl"
@@ -522,10 +518,7 @@ export default function JapanPage() {
               </h1>
 
               <p className="mt-5 max-w-xl text-base leading-7 text-white/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)] sm:text-lg sm:leading-8">
-                Google、LINE、Facebookなどを利用した
-                ネット投票イベントについて、
-                投票方法の確認、参加手順、
-                投票イベントの運用などをサポートします。
+                Google、LINE、Facebookを含む、さまざまなSNSアカウントを多数保有しており、各種投票活動をサポートします。
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
