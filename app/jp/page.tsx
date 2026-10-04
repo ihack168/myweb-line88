@@ -4,7 +4,7 @@ const SITE_URL = "https://www.line88.tw"
 const PAGE_URL = `${SITE_URL}/jp`
 
 const SITE_NAME = "ネット投票イベントの票購入・票数増加をサポート｜各種SNSの大量アカウントに対応"
-const SITE_NAME_EN = "A76"
+const SITE_NAME_EN = "Lockhead Hex"
 
 const PAGE_TITLE =
   "ネット投票イベントの票購入・票数増加をサポート｜各種SNSの大量アカウントに対応"
@@ -76,7 +76,7 @@ export const metadata: Metadata = {
         url: "/images/hero-desktop.png",
         width: 2560,
         height: 1080,
-        alt: "A20",
+        alt: "ネット投票活動をサポートする洛克希德黑克斯",
       },
     ],
   },
@@ -119,11 +119,11 @@ export default function JapanPage() {
     areaServed: [
       {
         "@type": "Country",
-        name: "A78",
+        name: "Japan",
       },
       {
         "@type": "Country",
-        name: "A80",
+        name: "Taiwan",
       },
     ],
 
@@ -155,11 +155,11 @@ export default function JapanPage() {
           areaServed: [
             {
               "@type": "Country",
-              name: "A79",
+              name: "Japan",
             },
             {
               "@type": "Country",
-              name: "A81",
+              name: "Taiwan",
             },
           ],
 
@@ -491,7 +491,7 @@ export default function JapanPage() {
 
             <img
               src="/images/hero-desktop.png"
-              alt="A62"
+              alt="ネット投票活動をサポートする洛克希德黑克斯"
               className="absolute inset-0 h-full w-full object-cover object-center"
               width={2560}
               height={1080}
@@ -517,7 +517,7 @@ export default function JapanPage() {
                 ネット投票活動を
                 <br />
                 <span className="text-[#ff8800]">
-                  A73
+                  サポートします
                 </span>
               </h1>
 
@@ -525,7 +525,7 @@ export default function JapanPage() {
                 Google、LINE、Facebookなどを利用した
                 ネット投票イベントについて、
                 投票方法の確認、参加手順、
-                投票イベントの運用などをA73。
+                投票イベントの運用などをサポートします。
               </p>
 
               <div className="mt-7 flex flex-wrap gap-3">
@@ -590,7 +590,7 @@ export default function JapanPage() {
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  大量のLINEアカウントを保有しており、さまざまなネット投票をサポートできます。
+                  大量のFacebookアカウントを保有しており、さまざまなネット投票をサポートできます。
                 </p>
               </article>
 
@@ -601,7 +601,7 @@ export default function JapanPage() {
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  我們擁有大量facebook帳號可以協助您各種網路投票   翻成日文    
+                  大量のFacebookアカウントを保有しており、さまざまなネット投票をサポートできます。
                 </p>
               </article>
 
@@ -664,7 +664,7 @@ export default function JapanPage() {
 
                 <p className="mt-3 text-sm leading-7 text-gray-400">
                   投票イベントの内容や条件を確認し、
-                  スムーズに参加できるようA73。
+                  スムーズに参加できるようサポートします。
                 </p>
               </article>
 
@@ -748,9 +748,9 @@ export default function JapanPage() {
                 </summary>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。日本からのA75にも対応しています。
+                  はい。日本からのお問い合わせにも対応しています。
                   サービス内容や投票イベントについて、
-                  お気軽にA75ください。
+                  お気軽にお問い合わせください。
                 </p>
               </details>
 
