@@ -3,14 +3,14 @@ import type { Metadata } from "next"
 const SITE_URL = "https://www.line88.tw"
 const PAGE_URL = `${SITE_URL}/jp`
 
-const SITE_NAME = "A1"
+const SITE_NAME = "ネット投票イベントの票購入・票数増加をサポート｜各種SNSの大量アカウントに対応"
 const SITE_NAME_EN = "A76"
 
 const PAGE_TITLE =
-  "A2"
+  "ネット投票イベントの票購入・票数増加をサポート｜各種SNSの大量アカウントに対応"
 
 const PAGE_DESCRIPTION =
-  "A3"
+  "Google、LINE、Facebookの大量のアカウントを保有しており、ネット投票イベントの票購入・票数増加をサポートします。"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -560,95 +560,48 @@ export default function JapanPage() {
           <div className="mx-auto max-w-6xl">
 
             <div className="text-center">
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800] md:text-sm">
-                A63
-              </p>
 
               <h2
                 id="service-heading"
                 className="text-3xl font-black leading-tight text-white md:text-4xl"
               >
-                ネット投票サービス
+                各種SNSネット投票活動サポート
               </h2>
 
-              <p className="mx-auto mt-5 max-w-3xl text-sm leading-7 text-gray-400 md:text-base md:leading-8">
-                各種オンライン投票・投票キャンペーンについて、
-                プラットフォームごとの投票方法や参加手順を確認し、
-                スムーズな投票活動をA73。
-              </p>
             </div>
 
             <div className="mt-10 grid gap-5 md:grid-cols-2">
 
               {/* Google */}
 
-              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  A69
-                </p>
-
                 <h3 className="mt-2 text-xl font-black text-white">
-                  Google投票サポート
+                  大量のGoogleアカウントで投票をサポート
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  Googleフォームなどを利用したネット投票について、
-                  投票ページの確認、参加方法、投票手順などをA73。
+                  大量のGoogleアカウントを保有しており、さまざまなネット投票をサポートできます。
                 </p>
               </article>
 
               {/* LINE */}
 
-              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  A70
-                </p>
-
                 <h3 className="mt-2 text-xl font-black text-white">
-                  LINE投票サポート
+                  大量のLINEアカウントを使って投票
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  LINEを利用した投票キャンペーンについて、
-                  参加方法や投票手順などを確認し、
-                  投票活動をスムーズに進めるためのサポートを行います。
+                  大量のLINEアカウントを保有しており、さまざまなネット投票をサポートできます。
                 </p>
               </article>
 
               {/* Facebook */}
 
-              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  A66
-                </p>
-
                 <h3 className="mt-2 text-xl font-black text-white">
-                  Facebook投票サポート
+                  大量のFacebookアカウントを使って投票
                 </h3>
 
                 <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  Facebook上で実施される投票イベントについて、
-                  投票方法や参加手順を確認し、
-                  投票活動をA73。
-                </p>
-              </article>
-
-              {/* Online */}
-
-              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
-                  A64
-                </p>
-
-                <h3 className="mt-2 text-xl font-black text-white">
-                  オンライン投票・投票イベント
-                </h3>
-
-                <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
-                  各種ウェブサイトやオンラインサービスで開催される
-                  投票イベントについて、
-                  投票方法や参加手順などを確認し、
-                  必要なサポートを提供します。
+                  我們擁有大量facebook帳號可以協助您各種網路投票   翻成日文    
                 </p>
               </article>
 
