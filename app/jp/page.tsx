@@ -625,51 +625,50 @@ export default function JapanPage() {
           <div className="mx-auto max-w-5xl">
 
             <div className="text-center">
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800]">
-                A67
-              </p>
 
-              <h2
+             <h2
                 id="support-heading"
                 className="text-2xl font-black text-white md:text-4xl"
               >
-                ネット投票をスムーズに
+                買票・大量投票の流れ
               </h2>
             </div>
 
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
+            <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
 
               <article className="rounded-2xl border border-white/10 bg-black/20 p-6">
                 <h3 className="text-lg font-black text-[#ff8800]">
-                  投票方法の確認
+                  1. 対象サイトURLのご提供
                 </h3>
-
                 <p className="mt-3 text-sm leading-7 text-gray-400">
-                  投票ページや投票システムを確認し、
-                  必要な参加手順をわかりやすく整理します。
+                  大量投票対象のサイトURLを当方までご提供ください。
                 </p>
               </article>
 
               <article className="rounded-2xl border border-white/10 bg-black/20 p-6">
                 <h3 className="text-lg font-black text-[#ff8800]">
-                  各プラットフォーム対応
+                  2. 検証とお見積もり
                 </h3>
-
                 <p className="mt-3 text-sm leading-7 text-gray-400">
-                  Google、LINE、Facebookなど、
-                  利用するプラットフォームに合わせて
-                  投票方法を確認します。
+                  当方でテストと評価を行った後、お見積もりをご提示いたします。
                 </p>
               </article>
 
               <article className="rounded-2xl border border-white/10 bg-black/20 p-6">
                 <h3 className="text-lg font-black text-[#ff8800]">
-                  投票活動サポート
+                  3. ご入金とスケジュール調整
                 </h3>
-
                 <p className="mt-3 text-sm leading-7 text-gray-400">
-                  投票イベントの内容や条件を確認し、
-                  スムーズに参加できるようA73。
+                  ご入金確認後、投票のスケジュールを調整し、実行に移ります。
+                </p>
+              </article>
+
+              <article className="rounded-2xl border border-white/10 bg-black/20 p-6">
+                <h3 className="text-lg font-black text-[#ff8800]">
+                  4. 投票開始前のご連絡
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-gray-400">
+                  投票を開始する前に、必ず事前にご連絡いたします。
                 </p>
               </article>
 
@@ -688,9 +687,6 @@ export default function JapanPage() {
           <div className="mx-auto max-w-4xl">
 
             <div className="text-center">
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800]">
-                A72
-              </p>
 
               <h2
                 id="faq-heading"
