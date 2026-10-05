@@ -704,58 +704,78 @@ export default function JapanPage() {
 
               <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
                 <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
-                  ネット投票のサポートには対応していますか？
+                  投票や買票、大量投票は、一瞬でまとめて行うのですか？
                 </summary>
-
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。Google、LINE、Facebookなどを利用した
-                  ネット投票活動について、投票方法の確認、
-                  参加手順、投票イベントの運用などをサポートしています。
+                  いいえ、私たちは投票の際、端末を一台ずつ起動し、アカウントに一つずつログインして、一票ずつ投票していきます。
                 </p>
               </details>
-
               <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
                 <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
-                  Googleフォームを利用した投票にも対応していますか？
+                  投票にはどのくらいの時間がかかりますか？
                 </summary>
-
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。Googleフォームなどを利用したネット投票について、
-                  投票ページの確認や参加方法、投票手順などをサポートしています。
+                  一概には言えません。投票サイトごとに手順が異なり、手間がかかるサイトの場合は、一票あたりの投票時間が長くなります。
                 </p>
               </details>
-
               <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
                 <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
-                  LINEを利用した投票イベントにも対応していますか？
+                  投票する時間を指定することはできますか？
                 </summary>
-
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。LINEを利用した投票キャンペーンについて、
-                  参加方法や投票手順などをサポートしています。
+                  通常の指定はできません。私たちの空き時間やスケジュールに合わせていただく必要があります。もしどうしても時間を指定したい場合（例えば夜8時など）、一票あたりの料金は状況に応じて倍増します。例えば、深夜3時の投票を指定された場合は、一票あたりの料金が5倍になります。
                 </p>
               </details>
-
               <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
                 <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
-                  Facebookの投票イベントにも対応していますか？
+                  買票や大量投票はバレることはありませんか？
                 </summary>
-
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。Facebook上で実施される投票イベントについて、
-                  投票方法や参加手順などをサポートしています。
+                  発覚する確率は極めて低いです。9割以上のサイトには不正投票を検知する能力がありません。また、私たちはすべて実際のモバイル端末と異なるIPアドレスを使用して投票するため、過度に心配する必要はありません。プラットフォーム側も不正対策のコストが高いため、大半の場合は見逃すしかありません。ただし、ごく稀に本気で調査して発覚するケースもないとは限らないため、100%バレないという保証はいたしかねます。
                 </p>
               </details>
-
               <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
                 <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
-                  日本から問い合わせできますか？
+                  投票キャンペーンのサイトには「不正行為を取り締まる」といった告知が出ていますが、本当ですか？
                 </summary>
-
                 <p className="mt-4 text-sm leading-7 text-gray-400">
-                  はい。日本からのお問い合わせにも対応しています。
-                  サービス内容や投票イベントについて、
-                  お気軽にお問い合わせください。
+                  嘘です。あの告知は人を威嚇するためだけのものです。善良な人を牽制するだけで、私たちのような者には何の効力もありません。
+                </p>
+              </details>
+              <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
+                  先に支払いをしますか、それとも投票完了後に支払いをしますか？
+                </summary>
+                <p className="mt-4 text-sm leading-7 text-gray-400">
+                  当方では一律、先にお支払いをいただいてから、スケジュールを組んで実行いたします。
+                </p>
+              </details>
+                <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
+                  同時に複数の業者に大量投票を頼んでいる場合、そちらで何票入れたのかどうやって分かりますか？
+                </summary>
+                <p className="mt-4 text-sm leading-7 text-gray-400">
+                  それについては当方では関知いたしません。お客様が購入された票数分のみを投票し、同時に進行している他の投票については把握できません。特定の条件下では、投票ごとの画面を別途スクリーンショットでお渡しすることも可能ですが、その場合は一票あたりの料金がさらに上乗せされます。
+                </p>
+              </details>
+                            <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
+                  キャンペーンの最終ギリギリになってから買票・大量投票を頼むことはできますか？
+                </summary>
+                <p className="mt-4 text-sm leading-7 text-gray-400">
+                  当方ではそのようなお客様を最も苦手としております。わざと最終ギリギリになってから大量投票を依頼される場合、一票あたりの料金は倍増します。また、通常はスケジュールの都合上、お受けすることができません。
+                </p>
+              </details>
+                                <details className="group rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+                <summary className="cursor-pointer list-none pr-8 text-base font-bold text-white">
+                  投票の際、検出を回避するためにどのような方法を用いていますか？
+                </summary>
+                <p className="mt-4 text-sm leading-7 text-gray-400">
+                  1. 異なるモバイル端末（例：1000台のスマホ、各端末に1つのアカウントを紐付け）<br />
+                  2. 異なるIPアドレス<br />
+                  3. 異なるブラウザの閲覧履歴<br />
+                  4. 異なるブラウザフィンガープリント<br />
+                  5. 異なる登録メールアドレス（Gmail）
                 </p>
               </details>
 
