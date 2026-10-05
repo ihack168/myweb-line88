@@ -610,6 +610,21 @@ export default function JapanPage() {
                 </p>
               </article>
 
+              {/* email */}
+              <article className="rounded-2xl border border-white/10 bg-white/[0.035] p-6 transition duration-300 hover:-translate-y-1 hover:border-[#ff8800]/40">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#ff8800]">
+                  Email
+                </p>
+
+                <h3 className="mt-2 text-xl font-black text-white">
+                  大量のEmailアカウントを使って投票
+                </h3>
+
+                <p className="mt-4 text-sm leading-7 text-gray-400 md:text-base">
+                  大量のEmailアカウントを保有しており、さまざまなネット投票をサポートできます。
+                </p>
+              </article>
+
             </div>
           </div>
         </section>
