@@ -6,6 +6,7 @@ export async function GET() {
   return NextResponse.json({
     ok: true,
     message: "api works",
+    mode: "debug-no-labels-draft",
   });
 }
 
@@ -25,10 +26,12 @@ async function getAccessToken(refreshToken: string) {
 
   const data = await res.json();
 
-  console.log("OAuth 回傳：", data);
-
   if (!res.ok) {
     throw new Error(JSON.stringify(data));
+  }
+
+  if (typeof data.access_token !== "string" || !data.access_token) {
+    throw new Error("Google 沒有回傳 access_token");
   }
 
   return data.access_token;
@@ -37,23 +40,20 @@ async function getAccessToken(refreshToken: string) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
-    console.log("收到資料:", body);
-
-    const { blogId, title, content, labels, account } = body;
+    const { blogId, title, content, account } = body;
 
     if (!blogId || !title || !content || !account) {
       return NextResponse.json(
         {
           ok: false,
           error: "缺少參數",
-          received: body,
         },
         { status: 400 }
       );
     }
 
-    const refreshToken = process.env[`GOOGLE_REFRESH_TOKEN_${account}`];
+    const refreshToken =
+      process.env[`GOOGLE_REFRESH_TOKEN_${account}`];
 
     if (!refreshToken) {
       return NextResponse.json(
@@ -67,8 +67,9 @@ export async function POST(req: NextRequest) {
 
     const accessToken = await getAccessToken(refreshToken);
 
+    // 暫時測試：不帶標籤，只建立草稿。
     const bloggerRes = await fetch(
-      `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts?isDraft=false`,
+      `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts?isDraft=true`,
       {
         method: "POST",
         headers: {
@@ -79,13 +80,14 @@ export async function POST(req: NextRequest) {
           kind: "blogger#post",
           title,
           content,
-          labels: Array.isArray(labels) ? labels : [],
+          labels: [],
         }),
       }
     );
 
     const text = await bloggerRes.text();
 
+    console.log("Blogger HTTP Status:", bloggerRes.status);
     console.log("Blogger Response:", text);
 
     let data;
@@ -96,10 +98,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
+          stage: "blogger",
           error: "Google 回傳非 JSON",
+          upstreamStatus: bloggerRes.status,
           response: text.substring(0, 1000),
         },
-        { status: 500 }
+        { status: 502 }
       );
     }
 
@@ -107,14 +111,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
+          stage: "blogger",
+          mode: "debug-no-labels-draft",
+          upstreamStatus: bloggerRes.status,
           error: data,
         },
-        { status: 500 }
+        { status: bloggerRes.status }
       );
     }
 
     return NextResponse.json({
       ok: true,
+      mode: "debug-no-labels-draft",
       postId: data.id,
       url: data.url,
       title: data.title,
