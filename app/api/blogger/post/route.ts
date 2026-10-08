@@ -2,12 +2,42 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const MODE = "publish-random-3-labels";
+
 export async function GET() {
   return NextResponse.json({
     ok: true,
     message: "api works",
-    mode: "debug-no-labels-draft",
+    mode: MODE,
   });
+}
+
+function selectLabels(input: unknown): string[] {
+  if (!Array.isArray(input)) {
+    return [];
+  }
+
+  const labels = Array.from(
+    new Set(
+      input
+        .filter((label): label is string => typeof label === "string")
+        .map((label) => label.trim())
+        .filter((label) => label.length > 0)
+    )
+  );
+
+  if (labels.length <= 3) {
+    return labels;
+  }
+
+  // Fisher–Yates 隨機洗牌，再取 3 個不重複標籤。
+  for (let i = labels.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+
+    [labels[i], labels[j]] = [labels[j], labels[i]];
+  }
+
+  return labels.slice(0, 3);
 }
 
 async function getAccessToken(refreshToken: string) {
@@ -40,7 +70,7 @@ async function getAccessToken(refreshToken: string) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { blogId, title, content, account } = body;
+    const { blogId, title, content, labels, account } = body;
 
     if (!blogId || !title || !content || !account) {
       return NextResponse.json(
@@ -65,9 +95,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const selectedLabels = selectLabels(labels);
     const accessToken = await getAccessToken(refreshToken);
 
-    // 暫時測試：不帶標籤，只建立草稿。
+    // 直接公開發文，最多使用 3 個標籤。
     const bloggerRes = await fetch(
       `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts?isDraft=false`,
       {
@@ -80,7 +111,7 @@ export async function POST(req: NextRequest) {
           kind: "blogger#post",
           title,
           content,
-          labels: ["オンライン投票サポート"],
+          labels: selectedLabels,
         }),
       }
     );
@@ -88,7 +119,7 @@ export async function POST(req: NextRequest) {
     const text = await bloggerRes.text();
 
     console.log("Blogger HTTP Status:", bloggerRes.status);
-    console.log("Blogger Response:", text);
+    console.log("Blogger selected labels:", selectedLabels);
 
     let data;
 
@@ -99,6 +130,7 @@ export async function POST(req: NextRequest) {
         {
           ok: false,
           stage: "blogger",
+          mode: MODE,
           error: "Google 回傳非 JSON",
           upstreamStatus: bloggerRes.status,
           response: text.substring(0, 1000),
@@ -112,8 +144,9 @@ export async function POST(req: NextRequest) {
         {
           ok: false,
           stage: "blogger",
-          mode: "debug-no-labels-draft",
+          mode: MODE,
           upstreamStatus: bloggerRes.status,
+          selectedLabels,
           error: data,
         },
         { status: bloggerRes.status }
@@ -122,7 +155,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ok: true,
-      mode: "debug-no-labels-draft",
+      mode: MODE,
+      selectedLabels,
       postId: data.id,
       url: data.url,
       title: data.title,
