@@ -522,14 +522,14 @@ export default function JapanPage() {
                   href="#services"
                   className="rounded-full bg-[#ff8800] px-6 py-3 text-sm font-black text-black shadow-[0_8px_30px_rgba(255,136,0,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#ff9d2e] hover:shadow-[0_12px_35px_rgba(255,136,0,0.45)]"
                 >
-                  A74
+                  サービス内容
                 </a>
 
                 <a
                   href="/jp/contact"
                   className="rounded-full border border-white/40 bg-black/20 px-6 py-3 text-sm font-black text-white backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/15"
                 >
-                  A75
+                  お問い合わせ
                 </a>
               </div>
 
@@ -797,10 +797,6 @@ export default function JapanPage() {
         <section className="px-5 pb-20 pt-6">
           <div className="mx-auto max-w-5xl rounded-3xl border border-[#ff8800]/20 bg-[#ff8800]/[0.06] p-8 text-center md:p-12">
 
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#ff8800]">
-              A68
-            </p>
-
             <h2 className="mt-3 text-2xl font-black text-white md:text-4xl">
               投票イベントについてご相談ください
             </h2>
@@ -814,7 +810,7 @@ export default function JapanPage() {
               href="/jp/contact"
               className="mt-7 inline-flex rounded-full bg-[#ff8800] px-7 py-3 text-sm font-black text-black shadow-[0_8px_30px_rgba(255,136,0,0.3)] transition duration-300 hover:-translate-y-0.5 hover:bg-[#ff9d2e]"
             >
-              A75
+              お問い合わせ
             </a>
 
           </div>
