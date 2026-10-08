@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
           kind: "blogger#post",
           title,
           content,
-          labels: [],
+          labels: ["オンライン投票サポート"],
         }),
       }
     );
