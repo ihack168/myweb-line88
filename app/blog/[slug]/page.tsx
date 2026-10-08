@@ -1,11 +1,14 @@
+import { cache } from "react";
 import { client } from "@/lib/sanity";
 import { createImageUrlBuilder } from "@sanity/image-url";
 import { ShareBar } from "@/components/share-bar";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+// Allow newly published slugs to be generated on their first visit.
+export const dynamicParams = true;
+export const runtime = "nodejs";
 
 const SITE_URL = "https://www.line88.tw";
 const AUTHOR_NAME = "Lockhead Hex";
@@ -160,6 +163,30 @@ type PageProps = {
   }>;
 };
 
+/**
+ * React cache shares this query between metadata and the page in one render.
+ * next.revalidate persists the query result across requests.
+ */
+const getPost = cache(async (slug: string) => {
+  return client.fetch(
+    `*[_type == "post" && slug.current == $slug][0]{
+      title,
+      description,
+      publishedAt,
+      _updatedAt,
+      mainImage,
+      livingRoomImage,
+      diningRoomImage,
+      masterBedroomImage,
+      secondBedroomImage,
+      htmlContent,
+      "tags": categories[]->title
+    }`,
+    { slug },
+    { next: { revalidate: 3600 } }
+  );
+});
+
 /* ================= SEO ================= */
 
 export async function generateMetadata({
@@ -167,19 +194,9 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
 
-  const post = await client.fetch(
-    `*[_type == "post" && slug.current == $slug][0]{
-      title,
-      description,
-      publishedAt,
-      _updatedAt,
-      mainImage,
-      htmlContent
-    }`,
-    { slug }
-  );
+  const post = await getPost(slug);
 
-  if (!post) return {};
+  if (!post) notFound();
 
   const firstImage = extractFirstImage(post?.htmlContent);
   let ogImage: string | null = null;
@@ -191,7 +208,7 @@ export async function generateMetadata({
           ?.height(630)
           ?.fit("crop")
           ?.auto("format")
-          ?.url()
+          ?.url() ?? null
       : firstImage;
   } catch {
     ogImage = firstImage;
@@ -246,23 +263,7 @@ export async function generateMetadata({
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
 
-  const post = await client.fetch(
-    `*[_type == "post" && slug.current == $slug][0]{
-      title,
-      description,
-      publishedAt,
-      _updatedAt,
-      mainImage,
-      livingRoomImage,
-      diningRoomImage,
-      masterBedroomImage,
-      secondBedroomImage,
-      htmlContent,
-      "tags": categories[]->title
-    }`,
-    { slug },
-    { cache: "no-store" }
-  );
+  const post = await getPost(slug);
 
   if (!post) notFound();
 
@@ -477,7 +478,9 @@ export async function generateStaticParams() {
   const posts = await client.fetch(
     `*[_type == "post" && defined(slug.current)]{
       "slug": slug.current
-    }`
+    }`,
+    {},
+    { next: { revalidate: 3600 } }
   );
 
   return (
