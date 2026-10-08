@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
 
     // 暫時測試：不帶標籤，只建立草稿。
     const bloggerRes = await fetch(
-      `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts?isDraft=true`,
+      `https://www.googleapis.com/blogger/v3/blogs/${blogId}/posts?isDraft=false`,
       {
         method: "POST",
         headers: {
