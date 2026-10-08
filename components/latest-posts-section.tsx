@@ -95,7 +95,7 @@ async function getLatestPosts(): Promise<LatestPost[]> {
       {},
       {
         next: {
-          revalidate: 300,
+          revalidate: 3600,
         },
       }
     );
