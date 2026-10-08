@@ -167,9 +167,23 @@ type PageProps = {
  * React cache shares this query between metadata and the page in one render.
  * next.revalidate persists the query result across requests.
  */
+// Sanity may store URL-encoded slugs; Next.js route params are decoded.
+function decodeSlug(slug: string): string {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+}
+
+function slugCandidates(slug: string): string[] {
+  const decoded = decodeSlug(slug);
+  return [...new Set([slug, decoded, encodeURIComponent(decoded)])];
+}
+
 const getPost = cache(async (slug: string) => {
   return client.fetch(
-    `*[_type == "post" && slug.current == $slug][0]{
+    `*[_type == "post" && slug.current in $slugCandidates][0]{
       title,
       description,
       publishedAt,
@@ -182,7 +196,7 @@ const getPost = cache(async (slug: string) => {
       htmlContent,
       "tags": categories[]->title
     }`,
-    { slug },
+    { slugCandidates: slugCandidates(slug) },
     { next: { revalidate: 3600 } }
   );
 });
@@ -219,7 +233,7 @@ export async function generateMetadata({
     description: post.description || post.title,
 
     alternates: {
-      canonical: `/blog/${slug}`,
+      canonical: `/blog/${encodeURIComponent(decodeSlug(slug))}`,
     },
 
     authors: [
@@ -232,7 +246,7 @@ export async function generateMetadata({
     openGraph: {
       title: post.title,
       description: post.description || post.title,
-      url: `${SITE_URL}/blog/${slug}`,
+      url: `${SITE_URL}/blog/${encodeURIComponent(decodeSlug(slug))}`,
       siteName: "洛克希德黑克斯",
       images: ogImage
         ? [
@@ -326,7 +340,7 @@ export default async function PostPage({ params }: PageProps) {
     post.secondBedroomImage?.alt || `${post.title}-次臥`
   );
 
-  const articleUrl = `${SITE_URL}/blog/${slug}`;
+  const articleUrl = `${SITE_URL}/blog/${encodeURIComponent(decodeSlug(slug))}`;
 
   const mainImageUrl = post.mainImage
     ? urlFor(post.mainImage)?.width(1200)?.auto("format")?.url()
@@ -475,19 +489,17 @@ export default async function PostPage({ params }: PageProps) {
 /* ================= STATIC PARAMS ================= */
 
 export async function generateStaticParams() {
-  const posts = await client.fetch(
-    `*[_type == "post" && defined(slug.current)]{
+  const posts = await client.fetch<{ slug: string }[]>(
+    `*[_type == "post" && defined(slug.current) && slug.current != ""]{
       "slug": slug.current
     }`,
     {},
     { next: { revalidate: 3600 } }
   );
 
-  return (
-    posts
-      ?.filter((post: any) => Boolean(post.slug))
-      .map((post: any) => ({
-        slug: post.slug,
-      })) || []
-  );
+  const slugs = posts
+    .filter((post) => typeof post.slug === "string" && Boolean(post.slug))
+    .map((post) => decodeSlug(post.slug));
+
+  return [...new Set(slugs)].map((slug) => ({ slug }));
 }
